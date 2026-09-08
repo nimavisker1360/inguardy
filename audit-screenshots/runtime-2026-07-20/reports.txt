@@ -1,0 +1,479 @@
+URL: http://127.0.0.1:3002/dashboard/reports
+READY: complete
+
+VISIBLE TEXT:
+Tradivix
+ژورنال معاملاتی
+داشبورد
+آخرین سیگنال‌ها
+حساب‌ها
+ژورنال معاملات
+تقویم
+تقویم اقتصادی
+دستیار هوش مصنوعی
+تحلیل‌ها
+ژورنال روزانه
+پلی‌بوک‌ها
+چک‌لیست‌ها
+پراپ فرم‌ها
+گزارش ها
+سایت عمومی
+تنظیمات
+خروج
+فضای کاری ژورنال
+داشبورد عملیات معاملاتی
+دانلود پکیج MT5
+آموزش
+فارسی
+روشن
+تیره
+پلی‌بوک
+/
+چک‌لیست پیش از معامله
+/
+ژورنال معاملات
+/
+ژورنال روزانه
+/
+تحلیل‌ها
+/
+گزارش ها
+شما روی پلن Pro Monthly هستید. 21 روز باقی مانده است.
+تمدید
+گزارش عملکرد معاملاتی
+گزارش ژورنال
+خلاصه آماده ارائه بر اساس معاملات ژورنال، آنالیتیکس، پلی‌بوک‌ها، چک‌لیست‌ها و یادداشت‌های روزانه.
+چاپ / ذخیره PDF
+دانلود CSV
+بازه زمانی
+امروز
+این هفته
+این ماه
+امسال
+همه
+دلخواه
+از تاریخ
+تا تاریخ
+حساب
+همه حساب‌ها
+7852214
+7852214
+7852214
+7852214
+MT5 Auto Connect
+نماد
+جهت
+همه
+خرید
+فروش
+پلی‌بوک
+همه پلی‌بوک‌ها
+حمایت و مقاومت بر اساس FVG
+استراتژی
+سشن
+نتیجه
+همه
+برد
+باخت
+سر به سر
+بررسی AI
+همه
+انجام شده
+ثبت نشده
+بررسی دستی
+همه
+انجام شده
+ثبت نشده
+اسکرین‌شات
+همه
+دارای اسکرین‌شات
+بدون اسکرین‌شات
+منبع
+همه
+دستی
+ورود از MT5
+حداقل امتیاز AI
+حداکثر امتیاز AI
+ساخت گزارش
+پاک کردن
+سود/زیان خالص
+$740.96
+نرخ برد
+57.3%
+فاکتور سود
+1.76
+امید ریاضی
+$8.33
+کل معاملات
+92
+بسته / باز
+89 / 3
+میانگین RR
+0.03
+خلاصه مدیریتی
+تولید شده در ۲۹ تیر ۱۴۰۵
+نقاط قوت
+سود/زیان خالص در این بازه مثبت است: 740.96.
+XAUUSD قوی‌ترین نماد بوده و 745.51 سود/زیان خالص داشته است.
+New York Session قوی‌ترین سشن بوده و سود/زیان خالص آن 751.73 است.
+ریسک‌ها
+با بیشتر شدن تعداد معاملات، فاکتور سود را همچنان زیر نظر بگیر.
+EURUSD ضعیف‌ترین نماد بوده و -4.55 سود/زیان خالص داشته است.
+Entered Early پرهزینه‌ترین اشتباه تکراری بوده است.
+برنامه اقدام
+حجم معاملات را ثابت نگه دار و رفتارهایی را که نتیجه داده‌اند حفظ کن.
+معاملات حوالی 14:00 را بازبینی کن؛ این بازه زمانی -230.81 سود/زیان خالص ساخته است.
+باید صبرم را در گرفتن تی پی بیشتر کنم
+فایل‌های گزارش هر معامله
+هر معامله گزارش‌های مربوط به خودش را جداگانه نگه می‌دارد.
+۲۶ تیر ۱۴۰۵
+33 گزارش
+$614.15
+XAUUSD فروش
+بسته
+۲۶ تیر ۱۴۰۵
+7852214
+RR 0
+MT5 Import
+$127.40
+دانلود
+باز کردن معامله
+AI ثبت نشده
+کیفیت داده ضعیف
+استراتژی ثبت نشده
+چک‌لیست‌ها 0
+
+BUTTONS:
+[
+  "خروج",
+  "آموزش",
+  "فارسی",
+  "روشن",
+  "تیره",
+  "چاپ / ذخیره PDF",
+  "ساخت گزارش"
+]
+
+LINKS:
+[
+  {
+    "text": "آخرین سیگنال‌ها",
+    "href": "http://127.0.0.1:3002/dashboard/latest-signals"
+  },
+  {
+    "text": "حساب‌ها",
+    "href": "http://127.0.0.1:3002/dashboard/accounts"
+  },
+  {
+    "text": "تقویم",
+    "href": "http://127.0.0.1:3002/journal/calendar"
+  },
+  {
+    "text": "دستیار هوش مصنوعی",
+    "href": "http://127.0.0.1:3002/dashboard/ai-reader"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3002/journal/analytics"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3002/dashboard/daily-journal"
+  },
+  {
+    "text": "پلی‌بوک‌ها",
+    "href": "http://127.0.0.1:3002/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست‌ها",
+    "href": "http://127.0.0.1:3002/journal/checklists"
+  },
+  {
+    "text": "پراپ فرم‌ها",
+    "href": "http://127.0.0.1:3002/dashboard/prop-firms"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3002/dashboard/reports"
+  },
+  {
+    "text": "تنظیمات",
+    "href": "http://127.0.0.1:3002/dashboard/settings"
+  },
+  {
+    "text": "پلی‌بوک",
+    "href": "http://127.0.0.1:3002/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست پیش از معامله",
+    "href": "http://127.0.0.1:3002/journal/checklists"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3002/dashboard/daily-journal"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3002/journal/analytics"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3002/dashboard/reports"
+  },
+  {
+    "text": "پاک کردن",
+    "href": "http://127.0.0.1:3002/dashboard/reports"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5ofmn007dtfnk38lm5usm"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5ofwc007htfnketdzxbbe"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5og32007ltfnkp3r7np5h"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5og92007ptfnk2s2usky9"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5j78e006dtfnkn2y30imz"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jafq006htfnkdcjyupil"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5r25w007ttfnkeqoj2ol0"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jvtk006ntfnkq524wreo"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jyii006rtfnka3co2v8f"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5je6f006ltfnkxuhmyma7"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5mu8b006xtfnkcv8eq63m"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5mxb70071tfnkhocdisxi"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5n0du0075tfnkzgoo4x7r"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5n42i0079tfnk4j6vt6en"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp5i7ty0069tfnk53bmtlmf"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp4w3kj005xtfnkpoobkc1g"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp3pxj8005ptfnkx7htfmfk"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp3hcsd005dtfnk73ltnf6j"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp2jkrk0059tfnkloytxvhp"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrp0cre4004vtfnkg8ckcxae"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmroy4yg9003stfnkvj2kc9jr"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmroxv38s003itfnku0qih29i"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmroxhtzx003ctfnkzj3o961o"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrox9z9k002ytfnk580e3djk"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrox6yz5002stfnkdd63o5ez"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmrorcc09002gtfnk193au6a7"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmror5v5h0026tfnkcpw0z9dk"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmror3uex001ytfnky73x0135"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmror366b001qtfnk2oso7w7s"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmroqtooz000otfnklm5yby5g"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmroqtoog000mtfnkhzcisdv7"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmroqt7an0008tfnkdq55a74r"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3002/journal/cmroqt7an0007tfnkoz67ihnr"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnupc8z0015tfl4l6wd35od"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnupb33000ztfl41ixut8lu"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrntst4v003ftf8sswex1aup"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrntst1o003dtf8skaaeqty7"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnta7cj002dtf8s734mfe8b"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnta7bm002btf8spep2jwwb"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnt9qx7001xtf8s9t5reomp"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnt9qwg001vtf8sisd7lk76"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnsz04n0019tf8ssmht707q"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnsz0310017tf8snh2t88l8"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnswxgp000ttf8sqg73jc4o"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnswx5g000rtf8sv1s60961"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnsqph1000dtf8s3cded7t9"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnprs7c0007tf8s94yp7umo"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrnpisre0001tf8szr33k9aw"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrmt1so20001tf9001o8hasg"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrm8r5b20015tfy0fxstth6h"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrm7c1ra000ttfy0flywci5s"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrm79m9c000dtfy0nn57gnmr"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrm5dpdi0001tfy0tjgbcdf0"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrm2tvpn0003tfdgop1y6rcc"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrl02lg1000ztfe0rfh319ee"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrkzutvb000ttfe0qseplajq"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrku8x9t000ntfe070ddwbo9"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrkh53ft0007tfe0turvpa6a"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrjftrzp0001tfck5dtwxtcd"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrjb9s0o0011tfd8snff1qmx"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrjaqgy5000vtfd89bf9qc9g"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrj72o4r000ptfd84k53r00f"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3002/journal/cmrj4upya000dtfd849jfz6p3"
+  }
+]

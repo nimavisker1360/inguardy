@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 630 360">
+  <rect width="630" height="120" fill="#239f40"/>
+  <rect width="630" height="120" y="120" fill="#ffffff"/>
+  <rect width="630" height="120" y="240" fill="#da0000"/>
+  <g transform="translate(315,180) scale(6)">
+    <g fill="#ffffff">
+      <g id="tb">
+        <path d="M-2,-3 h4 v1 h-4z"/>
+        <path d="M-2,3 h4 v-1 h-4z"/>
+      </g>
+      <use href="#tb" transform="rotate(90)"/>
+    </g>
+    <circle r="2" fill="#da0000"/>
+  </g>
+</svg> 

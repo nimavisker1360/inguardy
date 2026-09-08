@@ -1,0 +1,304 @@
+URL: http://127.0.0.1:3013/dashboard/daily-journal
+TITLE: Tradivix - AI Trading Journal
+
+TEXT:
+Tradivix
+ژورنال معاملاتی
+داشبورد
+آخرین سیگنال‌ها
+حساب‌ها
+ژورنال معاملات
+تقویم
+تقویم اقتصادی
+دستیار هوش مصنوعی
+تحلیل‌ها
+ژورنال روزانه
+پلی‌بوک‌ها
+چک‌لیست‌ها
+پراپ فرم‌ها
+گزارش ها
+سایت عمومی
+تنظیمات
+خروج
+فضای کاری ژورنال
+داشبورد عملیات معاملاتی
+دانلود پکیج MT5
+آموزش
+فارسی
+روشن
+تیره
+پلی‌بوک
+/
+چک‌لیست پیش از معامله
+/
+ژورنال معاملات
+/
+ژورنال روزانه
+/
+تحلیل‌ها
+/
+گزارش ها
+شما روی پلن Pro Monthly هستید. 21 روز باقی مانده است.
+تمدید
+ژورنال روزانه
+برنامه روز را بنویس، ذهنیتت را ثبت کن و مرور کن فردا چه چیزی باید بهتر شود.
+ذخیره
+تاریخ
+حساب
+همه حساب‌ها
+7852214
+7852214
+7852214
+7852214
+MT5 Auto Connect
+روز قبل
+امروز
+روز بعد
+سود و زیان خالص
+$0.00
+تعداد معاملات
+0
+نرخ برد
+0%
+میانگین R:R
+0
+بهترین معامله
+$0.00
+بدترین معامله
+$0.00
+CHECKLIST COMPLETION
+0%
+REPEATED MISTAKE
+-
+معاملات مرتبط
+برای این تاریخ معامله‌ای پیدا نشد. همچنان می‌توانی برنامه و مرور روزت را بنویسی.
+برنامه روزانه
+جهت بازار
+انتخاب جهت
+صعودی
+نزولی
+خنثی
+رنج
+منتظر
+تمرکز امروز
+حداکثر تعداد معاملات
+حداکثر ضرر روزانه
+پلی‌بوک اصلی
+پلی‌بوکی انتخاب نشده
+حمایت و مقاومت بر اساس FVG
+چک‌لیست انضباط روزانه
+ریسک خودم را رعایت کردم
+برای تایید صبر کردم
+از معامله انتقامی دوری کردم
+طبق پلی‌بوک عمل کردم
+بعد از حد روزانه توقف کردم
+مرور پایان روز
+امروز چه چیزهایی خوب پیش رفت؟
+چه اشتباهاتی داشتم؟
+آیا طبق برنامه عمل کردم؟
+فردا چه چیزی را بهتر کنم؟
+برنامه فردا
+
+BUTTONS:
+[
+  "خروج",
+  "آموزش",
+  "فارسی",
+  "روشن",
+  "تیره",
+  "ذخیره",
+  "روز قبل",
+  "امروز",
+  "روز بعد"
+]
+
+FIELDS:
+[
+  {
+    "tag": "INPUT",
+    "type": "date",
+    "name": "",
+    "placeholder": "",
+    "label": "تاریخ"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "",
+    "placeholder": "",
+    "label": "حساب\nهمه حساب‌ها\n7852214\n7852214\n7852214\n7852214\nMT5 Auto Connect"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "",
+    "placeholder": "",
+    "label": "جهت بازار\nانتخاب جهت\nصعودی\nنزولی\nخنثی\nرنج\nمنتظر"
+  },
+  {
+    "tag": "INPUT",
+    "type": "text",
+    "name": "",
+    "placeholder": "",
+    "label": "تمرکز امروز"
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "",
+    "placeholder": "",
+    "label": "حداکثر تعداد معاملات"
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "",
+    "placeholder": "",
+    "label": "حداکثر ضرر روزانه"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "",
+    "placeholder": "",
+    "label": "پلی‌بوک اصلی\nپلی‌بوکی انتخاب نشده\nحمایت و مقاومت بر اساس FVG"
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "",
+    "placeholder": "",
+    "label": "ریسک خودم را رعایت کردم"
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "",
+    "placeholder": "",
+    "label": "برای تایید صبر کردم"
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "",
+    "placeholder": "",
+    "label": "از معامله انتقامی دوری کردم"
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "",
+    "placeholder": "",
+    "label": "طبق پلی‌بوک عمل کردم"
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "",
+    "placeholder": "",
+    "label": "بعد از حد روزانه توقف کردم"
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": "textarea",
+    "name": "",
+    "placeholder": "",
+    "label": "امروز چه چیزهایی خوب پیش رفت؟"
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": "textarea",
+    "name": "",
+    "placeholder": "",
+    "label": "چه اشتباهاتی داشتم؟"
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": "textarea",
+    "name": "",
+    "placeholder": "",
+    "label": "آیا طبق برنامه عمل کردم؟"
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": "textarea",
+    "name": "",
+    "placeholder": "",
+    "label": "فردا چه چیزی را بهتر کنم؟"
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": "textarea",
+    "name": "",
+    "placeholder": "",
+    "label": "برنامه فردا"
+  }
+]
+
+LINKS:
+[
+  {
+    "text": "آخرین سیگنال‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/latest-signals"
+  },
+  {
+    "text": "حساب‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/accounts"
+  },
+  {
+    "text": "تقویم",
+    "href": "http://127.0.0.1:3013/journal/calendar"
+  },
+  {
+    "text": "دستیار هوش مصنوعی",
+    "href": "http://127.0.0.1:3013/dashboard/ai-reader"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3013/journal/analytics"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3013/dashboard/daily-journal"
+  },
+  {
+    "text": "پلی‌بوک‌ها",
+    "href": "http://127.0.0.1:3013/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست‌ها",
+    "href": "http://127.0.0.1:3013/journal/checklists"
+  },
+  {
+    "text": "پراپ فرم‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/prop-firms"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3013/dashboard/reports"
+  },
+  {
+    "text": "تنظیمات",
+    "href": "http://127.0.0.1:3013/dashboard/settings"
+  },
+  {
+    "text": "پلی‌بوک",
+    "href": "http://127.0.0.1:3013/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست پیش از معامله",
+    "href": "http://127.0.0.1:3013/journal/checklists"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3013/dashboard/daily-journal"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3013/journal/analytics"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3013/dashboard/reports"
+  }
+]

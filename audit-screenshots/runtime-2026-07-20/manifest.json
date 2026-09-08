@@ -1,0 +1,392 @@
+[
+  {
+    "page": "dashboard",
+    "route": "/dashboard",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\dashboard-1440.png"
+  },
+  {
+    "page": "dashboard",
+    "route": "/dashboard",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\dashboard-1024.png"
+  },
+  {
+    "page": "dashboard",
+    "route": "/dashboard",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\dashboard-768.png"
+  },
+  {
+    "page": "dashboard",
+    "route": "/dashboard",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\dashboard-430.png"
+  },
+  {
+    "page": "dashboard",
+    "route": "/dashboard",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\dashboard-390.png"
+  },
+  {
+    "page": "accounts-mt5",
+    "route": "/dashboard/accounts",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\accounts-mt5-1440.png"
+  },
+  {
+    "page": "accounts-mt5",
+    "route": "/dashboard/accounts",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\accounts-mt5-1024.png"
+  },
+  {
+    "page": "accounts-mt5",
+    "route": "/dashboard/accounts",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\accounts-mt5-768.png"
+  },
+  {
+    "page": "accounts-mt5",
+    "route": "/dashboard/accounts",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\accounts-mt5-430.png"
+  },
+  {
+    "page": "accounts-mt5",
+    "route": "/dashboard/accounts",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\accounts-mt5-390.png"
+  },
+  {
+    "page": "journal-trades",
+    "route": "/journal",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\journal-trades-1440.png"
+  },
+  {
+    "page": "journal-trades",
+    "route": "/journal",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\journal-trades-1024.png"
+  },
+  {
+    "page": "journal-trades",
+    "route": "/journal",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\journal-trades-768.png"
+  },
+  {
+    "page": "journal-trades",
+    "route": "/journal",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\journal-trades-430.png"
+  },
+  {
+    "page": "journal-trades",
+    "route": "/journal",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\journal-trades-390.png"
+  },
+  {
+    "page": "daily-journal",
+    "route": "/dashboard/daily-journal",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\daily-journal-1440.png"
+  },
+  {
+    "page": "daily-journal",
+    "route": "/dashboard/daily-journal",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\daily-journal-1024.png"
+  },
+  {
+    "page": "daily-journal",
+    "route": "/dashboard/daily-journal",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\daily-journal-768.png"
+  },
+  {
+    "page": "daily-journal",
+    "route": "/dashboard/daily-journal",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\daily-journal-430.png"
+  },
+  {
+    "page": "daily-journal",
+    "route": "/dashboard/daily-journal",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\daily-journal-390.png"
+  },
+  {
+    "page": "calendar",
+    "route": "/journal/calendar",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\calendar-1440.png"
+  },
+  {
+    "page": "calendar",
+    "route": "/journal/calendar",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\calendar-1024.png"
+  },
+  {
+    "page": "calendar",
+    "route": "/journal/calendar",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\calendar-768.png"
+  },
+  {
+    "page": "calendar",
+    "route": "/journal/calendar",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\calendar-430.png"
+  },
+  {
+    "page": "calendar",
+    "route": "/journal/calendar",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\calendar-390.png"
+  },
+  {
+    "page": "playbooks",
+    "route": "/journal/playbooks",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\playbooks-1440.png"
+  },
+  {
+    "page": "playbooks",
+    "route": "/journal/playbooks",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\playbooks-1024.png"
+  },
+  {
+    "page": "playbooks",
+    "route": "/journal/playbooks",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\playbooks-768.png"
+  },
+  {
+    "page": "playbooks",
+    "route": "/journal/playbooks",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\playbooks-430.png"
+  },
+  {
+    "page": "playbooks",
+    "route": "/journal/playbooks",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\playbooks-390.png"
+  },
+  {
+    "page": "checklists",
+    "route": "/journal/checklists",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\checklists-1440.png"
+  },
+  {
+    "page": "checklists",
+    "route": "/journal/checklists",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\checklists-1024.png"
+  },
+  {
+    "page": "checklists",
+    "route": "/journal/checklists",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\checklists-768.png"
+  },
+  {
+    "page": "checklists",
+    "route": "/journal/checklists",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\checklists-430.png"
+  },
+  {
+    "page": "checklists",
+    "route": "/journal/checklists",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\checklists-390.png"
+  },
+  {
+    "page": "analytics",
+    "route": "/journal/analytics",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\analytics-1440.png"
+  },
+  {
+    "page": "analytics",
+    "route": "/journal/analytics",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\analytics-1024.png"
+  },
+  {
+    "page": "analytics",
+    "route": "/journal/analytics",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\analytics-768.png"
+  },
+  {
+    "page": "analytics",
+    "route": "/journal/analytics",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\analytics-430.png"
+  },
+  {
+    "page": "analytics",
+    "route": "/journal/analytics",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\analytics-390.png"
+  },
+  {
+    "page": "reports",
+    "route": "/dashboard/reports",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\reports-1440.png"
+  },
+  {
+    "page": "reports",
+    "route": "/dashboard/reports",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\reports-1024.png"
+  },
+  {
+    "page": "reports",
+    "route": "/dashboard/reports",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\reports-768.png"
+  },
+  {
+    "page": "reports",
+    "route": "/dashboard/reports",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\reports-430.png"
+  },
+  {
+    "page": "reports",
+    "route": "/dashboard/reports",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\reports-390.png"
+  },
+  {
+    "page": "market-radar",
+    "route": "/dashboard/market-radar",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\market-radar-1440.png"
+  },
+  {
+    "page": "market-radar",
+    "route": "/dashboard/market-radar",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\market-radar-1024.png"
+  },
+  {
+    "page": "market-radar",
+    "route": "/dashboard/market-radar",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\market-radar-768.png"
+  },
+  {
+    "page": "market-radar",
+    "route": "/dashboard/market-radar",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\market-radar-430.png"
+  },
+  {
+    "page": "market-radar",
+    "route": "/dashboard/market-radar",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\market-radar-390.png"
+  },
+  {
+    "page": "latest-signals",
+    "route": "/dashboard/latest-signals",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\latest-signals-1440.png"
+  },
+  {
+    "page": "latest-signals",
+    "route": "/dashboard/latest-signals",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\latest-signals-1024.png"
+  },
+  {
+    "page": "latest-signals",
+    "route": "/dashboard/latest-signals",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\latest-signals-768.png"
+  },
+  {
+    "page": "latest-signals",
+    "route": "/dashboard/latest-signals",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\latest-signals-430.png"
+  },
+  {
+    "page": "latest-signals",
+    "route": "/dashboard/latest-signals",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\latest-signals-390.png"
+  },
+  {
+    "page": "settings",
+    "route": "/dashboard/settings",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\settings-1440.png"
+  },
+  {
+    "page": "settings",
+    "route": "/dashboard/settings",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\settings-1024.png"
+  },
+  {
+    "page": "settings",
+    "route": "/dashboard/settings",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\settings-768.png"
+  },
+  {
+    "page": "settings",
+    "route": "/dashboard/settings",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\settings-430.png"
+  },
+  {
+    "page": "settings",
+    "route": "/dashboard/settings",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\settings-390.png"
+  },
+  {
+    "page": "premium",
+    "route": "/premium",
+    "width": 1440,
+    "file": "audit-screenshots\\runtime-2026-07-20\\premium-1440.png"
+  },
+  {
+    "page": "premium",
+    "route": "/premium",
+    "width": 1024,
+    "file": "audit-screenshots\\runtime-2026-07-20\\premium-1024.png"
+  },
+  {
+    "page": "premium",
+    "route": "/premium",
+    "width": 768,
+    "file": "audit-screenshots\\runtime-2026-07-20\\premium-768.png"
+  },
+  {
+    "page": "premium",
+    "route": "/premium",
+    "width": 430,
+    "file": "audit-screenshots\\runtime-2026-07-20\\premium-430.png"
+  },
+  {
+    "page": "premium",
+    "route": "/premium",
+    "width": 390,
+    "file": "audit-screenshots\\runtime-2026-07-20\\premium-390.png"
+  }
+]

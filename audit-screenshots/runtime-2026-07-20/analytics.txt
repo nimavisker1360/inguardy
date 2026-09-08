@@ -1,0 +1,11 @@
+URL: http://127.0.0.1:3002/journal/analytics
+READY: complete
+
+VISIBLE TEXT:
+Application error: a client-side exception has occurred while loading 127.0.0.1 (see the browser console for more information).
+
+BUTTONS:
+[]
+
+LINKS:
+[]

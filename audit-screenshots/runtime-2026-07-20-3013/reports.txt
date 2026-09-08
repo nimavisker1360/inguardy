@@ -1,0 +1,535 @@
+URL: http://127.0.0.1:3013/dashboard/reports
+TITLE: Tradivix - AI Trading Journal
+
+TEXT:
+Tradivix
+ژورنال معاملاتی
+داشبورد
+آخرین سیگنال‌ها
+حساب‌ها
+ژورنال معاملات
+تقویم
+تقویم اقتصادی
+دستیار هوش مصنوعی
+تحلیل‌ها
+ژورنال روزانه
+پلی‌بوک‌ها
+چک‌لیست‌ها
+پراپ فرم‌ها
+گزارش ها
+سایت عمومی
+تنظیمات
+خروج
+فضای کاری ژورنال
+داشبورد عملیات معاملاتی
+دانلود پکیج MT5
+آموزش
+فارسی
+روشن
+تیره
+پلی‌بوک
+/
+چک‌لیست پیش از معامله
+/
+ژورنال معاملات
+/
+ژورنال روزانه
+/
+تحلیل‌ها
+/
+گزارش ها
+شما روی پلن Pro Monthly هستید. 21 روز باقی مانده است.
+تمدید
+گزارش عملکرد معاملاتی
+گزارش ژورنال
+خلاصه آماده ارائه بر اساس معاملات ژورنال، آنالیتیکس، پلی‌بوک‌ها، چک‌لیست‌ها و یادداشت‌های روزانه.
+چاپ / ذخیره PDF
+دانلود CSV
+بازه زمانی
+امروز
+این هفته
+این ماه
+امسال
+همه
+دلخواه
+از تاریخ
+تا تاریخ
+حساب
+همه حساب‌ها
+7852214
+7852214
+7852214
+7852214
+MT5 Auto Connect
+نماد
+جهت
+همه
+خرید
+فروش
+پلی‌بوک
+همه پلی‌بوک‌ها
+حمایت و مقاومت بر اساس FVG
+استراتژی
+سشن
+نتیجه
+همه
+برد
+باخت
+سر به سر
+بررسی AI
+همه
+انجام شده
+ثبت نشده
+بررسی دستی
+همه
+انجام شده
+ثبت نشده
+اسکرین‌شات
+همه
+دارای اسکرین‌شات
+بدون اسکرین‌شات
+منبع
+همه
+دستی
+ورود از MT5
+حداقل امتیاز AI
+حداکثر امتیاز AI
+ساخت گزارش
+پاک کردن
+سود/زیان خالص
+$740.96
+نرخ برد
+57.3%
+فاکتور سود
+1.76
+امید ریاضی
+$8.33
+کل معاملات
+92
+بسته / باز
+89 / 3
+میانگین RR
+0.03
+خلاصه مدیریتی
+تولید شده در ۲۹ تیر ۱۴۰۵
+نقاط قوت
+سود/زیان خالص در این بازه مثبت است: 740.96.
+XAUUSD قوی‌ترین نماد بوده و 745.51 سود/زیان خالص داشته است.
+New York Session قوی‌ترین سشن بوده و سود/زیان خالص آن 751.73 است.
+ریسک‌ها
+با بیشتر شدن تعداد معاملات، فاکتور سود را همچنان زیر نظر بگیر.
+EURUSD ضعیف‌ترین نماد بوده و -4.55 سود/زیان خالص داشته است.
+Entered Early پرهزینه‌ترین اشتباه تکراری بوده است.
+برنامه اقدام
+حجم معاملات را ثابت نگه دار و رفتارهایی را که نتیجه داده‌اند حفظ کن.
+معاملات حوالی 14:00 را بازبینی کن؛ این بازه زمانی -230.81 سود/زیان خالص ساخته است.
+باید صبرم را در گرفتن تی پی بیشتر کنم
+فایل‌های گزارش هر معامله
+هر معامله گزارش‌های مربوط به خودش را جداگانه نگه می‌دارد.
+۲۶ تیر ۱۴۰۵
+33 گزارش
+$614.15
+XAUUSD فروش
+بسته
+۲۶ تیر ۱۴۰۵
+7852214
+RR 0
+MT5 Import
+$127.40
+دانلود
+باز کردن معامله
+AI ثبت نشده
+کیفیت داده ضعیف
+استراتژی ثبت نشده
+چک‌لیست‌ها 0
+ژورنال ثبت نشده
+اسکرین‌شات‌ها 2
+No AI analysis saved for this trade.
+Data quality: Mostly execution/import data. Missing strategy/playbook, checklist, journal.
+اجرای معامله
+ورود
+۲۶ تیر ۱۴۰۵
+خروج
+۲۶ تیر ۱۴۰۵
+PnL
+$127.40
+RR
+0
+گزارش‌های معامله
+استراتژی: -
+پلن: -
+چک‌لیست‌ها: -
+ژورنال: Imported from MT5 EA
+رسانه: 2
+جزئیات ژورنال، استراتژی و رسانه
+
+BUTTONS:
+[
+  "خروج",
+  "آموزش",
+  "فارسی",
+  "روشن",
+  "تیره",
+  "چاپ / ذخیره PDF",
+  "ساخت گزارش"
+]
+
+FIELDS:
+[
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "dateRange",
+    "placeholder": "",
+    "label": "بازه زمانی\nامروز\nاین هفته\nاین ماه\nامسال\nهمه\nدلخواه"
+  },
+  {
+    "tag": "INPUT",
+    "type": "date",
+    "name": "dateFrom",
+    "placeholder": "",
+    "label": "از تاریخ"
+  },
+  {
+    "tag": "INPUT",
+    "type": "date",
+    "name": "dateTo",
+    "placeholder": "",
+    "label": "تا تاریخ"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "accountId",
+    "placeholder": "",
+    "label": "حساب\nهمه حساب‌ها\n7852214\n7852214\n7852214\n7852214\nMT5 Auto Connect"
+  },
+  {
+    "tag": "INPUT",
+    "type": "text",
+    "name": "symbol",
+    "placeholder": "EURUSD",
+    "label": "نماد"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "direction",
+    "placeholder": "",
+    "label": "جهت\nهمه\nخرید\nفروش"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "playbookId",
+    "placeholder": "",
+    "label": "پلی‌بوک\nهمه پلی‌بوک‌ها\nحمایت و مقاومت بر اساس FVG"
+  },
+  {
+    "tag": "INPUT",
+    "type": "text",
+    "name": "strategy",
+    "placeholder": "نام ستاپ",
+    "label": "استراتژی"
+  },
+  {
+    "tag": "INPUT",
+    "type": "text",
+    "name": "session",
+    "placeholder": "London",
+    "label": "سشن"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "result",
+    "placeholder": "",
+    "label": "نتیجه\nهمه\nبرد\nباخت\nسر به سر"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "aiReview",
+    "placeholder": "",
+    "label": "بررسی AI\nهمه\nانجام شده\nثبت نشده"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "humanReview",
+    "placeholder": "",
+    "label": "بررسی دستی\nهمه\nانجام شده\nثبت نشده"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "screenshots",
+    "placeholder": "",
+    "label": "اسکرین‌شات\nهمه\nدارای اسکرین‌شات\nبدون اسکرین‌شات"
+  },
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "source",
+    "placeholder": "",
+    "label": "منبع\nهمه\nدستی\nورود از MT5"
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "minAiScore",
+    "placeholder": "",
+    "label": "حداقل امتیاز AI"
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "maxAiScore",
+    "placeholder": "",
+    "label": "حداکثر امتیاز AI"
+  }
+]
+
+LINKS:
+[
+  {
+    "text": "آخرین سیگنال‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/latest-signals"
+  },
+  {
+    "text": "حساب‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/accounts"
+  },
+  {
+    "text": "تقویم",
+    "href": "http://127.0.0.1:3013/journal/calendar"
+  },
+  {
+    "text": "دستیار هوش مصنوعی",
+    "href": "http://127.0.0.1:3013/dashboard/ai-reader"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3013/journal/analytics"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3013/dashboard/daily-journal"
+  },
+  {
+    "text": "پلی‌بوک‌ها",
+    "href": "http://127.0.0.1:3013/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست‌ها",
+    "href": "http://127.0.0.1:3013/journal/checklists"
+  },
+  {
+    "text": "پراپ فرم‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/prop-firms"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3013/dashboard/reports"
+  },
+  {
+    "text": "تنظیمات",
+    "href": "http://127.0.0.1:3013/dashboard/settings"
+  },
+  {
+    "text": "پلی‌بوک",
+    "href": "http://127.0.0.1:3013/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست پیش از معامله",
+    "href": "http://127.0.0.1:3013/journal/checklists"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3013/dashboard/daily-journal"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3013/journal/analytics"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3013/dashboard/reports"
+  },
+  {
+    "text": "پاک کردن",
+    "href": "http://127.0.0.1:3013/dashboard/reports"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5ofmn007dtfnk38lm5usm"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5ofwc007htfnketdzxbbe"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5og32007ltfnkp3r7np5h"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5og92007ptfnk2s2usky9"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5j78e006dtfnkn2y30imz"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5jafq006htfnkdcjyupil"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5r25w007ttfnkeqoj2ol0"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5jvtk006ntfnkq524wreo"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5jyii006rtfnka3co2v8f"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5je6f006ltfnkxuhmyma7"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5mu8b006xtfnkcv8eq63m"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5mxb70071tfnkhocdisxi"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5n0du0075tfnkzgoo4x7r"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5n42i0079tfnk4j6vt6en"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp5i7ty0069tfnk53bmtlmf"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp4w3kj005xtfnkpoobkc1g"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp3pxj8005ptfnkx7htfmfk"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp3hcsd005dtfnk73ltnf6j"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp2jkrk0059tfnkloytxvhp"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrp0cre4004vtfnkg8ckcxae"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmroy4yg9003stfnkvj2kc9jr"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmroxv38s003itfnku0qih29i"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmroxhtzx003ctfnkzj3o961o"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrox9z9k002ytfnk580e3djk"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrox6yz5002stfnkdd63o5ez"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmrorcc09002gtfnk193au6a7"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmror5v5h0026tfnkcpw0z9dk"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmror3uex001ytfnky73x0135"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmror366b001qtfnk2oso7w7s"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmroqtooz000otfnklm5yby5g"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmroqtoog000mtfnkhzcisdv7"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmroqt7an0008tfnkdq55a74r"
+  },
+  {
+    "text": "باز کردن معامله",
+    "href": "http://127.0.0.1:3013/journal/cmroqt7an0007tfnkoz67ihnr"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrnupc8z0015tfl4l6wd35od"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrnupb33000ztfl41ixut8lu"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrntst4v003ftf8sswex1aup"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrntst1o003dtf8skaaeqty7"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrnta7cj002dtf8s734mfe8b"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrnta7bm002btf8spep2jwwb"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrnt9qx7001xtf8s9t5reomp"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrnt9qwg001vtf8sisd7lk76"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrnsz04n0019tf8ssmht707q"
+  },
+  {
+    "text": "",
+    "href": "http://127.0.0.1:3013/journal/cmrnsz0310017tf8snh2t88l8"
+  }
+]

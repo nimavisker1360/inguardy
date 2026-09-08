@@ -1,0 +1,12 @@
+{
+	# Ensure PM2 restarts do not leave an old proxy holding ports 80/443.
+	grace_period 10s
+}
+
+tradivix.com {
+	reverse_proxy 127.0.0.1:3002
+}
+
+www.tradivix.com {
+	redir https://tradivix.com{uri} permanent
+}

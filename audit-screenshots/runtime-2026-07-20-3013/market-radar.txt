@@ -1,0 +1,187 @@
+URL: http://127.0.0.1:3013/dashboard/market-radar
+TITLE: Tradivix - AI Trading Journal
+
+TEXT:
+Tradivix
+ژورنال معاملاتی
+داشبورد
+آخرین سیگنال‌ها
+حساب‌ها
+ژورنال معاملات
+تقویم
+تقویم اقتصادی
+دستیار هوش مصنوعی
+تحلیل‌ها
+ژورنال روزانه
+پلی‌بوک‌ها
+چک‌لیست‌ها
+پراپ فرم‌ها
+گزارش ها
+سایت عمومی
+تنظیمات
+خروج
+فضای کاری ژورنال
+داشبورد عملیات معاملاتی
+دانلود پکیج MT5
+آموزش
+فارسی
+روشن
+تیره
+پلی‌بوک
+/
+چک‌لیست پیش از معامله
+/
+ژورنال معاملات
+/
+ژورنال روزانه
+/
+تحلیل‌ها
+/
+گزارش ها
+شما روی پلن Pro Monthly هستید. 21 روز باقی مانده است.
+تمدید
+AI Chart Copilot
+نواحی الگوریتمی بازار با خلاصه کوتاه و قابل استفاده.
+XAUUSD / Gold - H1
+نماد
+XAUUSD / Gold
+EURUSD
+GBPUSD
+USDJPY
+AUDUSD
+USDCAD
+EURJPY
+GBPJPY
+BTCUSD / Bitcoin
+ETHUSD / Ethereum
+NAS100
+US30
+DXY
+تایم فریم
+M5
+M15
+H1
+H4
+D1
+چارت زنده بازار
+TradingView
+Smart AI Chart
+کوپایلوت چارت
+اسکن حمایت، مقاومت، عرضه، تقاضا و اوردر بلاک بدون تغییر چارت.
+نماد
+XAUUSD / Gold
+تایم فریم
+H1
+کاربران رایگان فقط ۱ تحلیل دارند. کاربران Pro تحلیل نامحدود دارند.
+تحلیل کامل
+حمایت و مقاومت
+زون های عرضه و تقاضا
+ریسک ورود
+سناریوی صعودی
+سناریوی نزولی
+سوال برای ژورنال
+آماده تحلیل
+این تحلیل آموزشی است و توصیه مالی یا سیگنال خرید و فروش نیست. چارت TradingView تغییر نمی کند و از آن داده خوانده نمی شود.
+این تحلیل آموزشی است و توصیه مالی یا سیگنال خرید و فروش نیست. چارت TradingView تغییر نمی کند و از آن داده خوانده نمی شود.
+
+BUTTONS:
+[
+  "خروج",
+  "آموزش",
+  "فارسی",
+  "روشن",
+  "تیره",
+  "M5",
+  "M15",
+  "H1",
+  "H4",
+  "D1",
+  "TradingView",
+  "Smart AI Chart",
+  "تحلیل کامل",
+  "حمایت و مقاومت",
+  "زون های عرضه و تقاضا",
+  "ریسک ورود",
+  "سناریوی صعودی",
+  "سناریوی نزولی",
+  "سوال برای ژورنال"
+]
+
+FIELDS:
+[
+  {
+    "tag": "SELECT",
+    "type": "select-one",
+    "name": "",
+    "placeholder": "",
+    "label": "نماد\nXAUUSD / Gold\nEURUSD\nGBPUSD\nUSDJPY\nAUDUSD\nUSDCAD\nEURJPY\nGBPJPY\nBTCUSD / Bitcoin\nETHUSD / Ethereum\nNAS100\nUS30\nDXY"
+  }
+]
+
+LINKS:
+[
+  {
+    "text": "آخرین سیگنال‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/latest-signals"
+  },
+  {
+    "text": "حساب‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/accounts"
+  },
+  {
+    "text": "تقویم",
+    "href": "http://127.0.0.1:3013/journal/calendar"
+  },
+  {
+    "text": "دستیار هوش مصنوعی",
+    "href": "http://127.0.0.1:3013/dashboard/ai-reader"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3013/journal/analytics"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3013/dashboard/daily-journal"
+  },
+  {
+    "text": "پلی‌بوک‌ها",
+    "href": "http://127.0.0.1:3013/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست‌ها",
+    "href": "http://127.0.0.1:3013/journal/checklists"
+  },
+  {
+    "text": "پراپ فرم‌ها",
+    "href": "http://127.0.0.1:3013/dashboard/prop-firms"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3013/dashboard/reports"
+  },
+  {
+    "text": "تنظیمات",
+    "href": "http://127.0.0.1:3013/dashboard/settings"
+  },
+  {
+    "text": "پلی‌بوک",
+    "href": "http://127.0.0.1:3013/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست پیش از معامله",
+    "href": "http://127.0.0.1:3013/journal/checklists"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3013/dashboard/daily-journal"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3013/journal/analytics"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3013/dashboard/reports"
+  }
+]

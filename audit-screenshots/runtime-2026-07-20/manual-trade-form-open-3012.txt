@@ -1,0 +1,9 @@
+{
+  "url": "chrome-error://chromewebdata/",
+  "hasSave": false,
+  "fields": [],
+  "buttons": [
+    "Reload",
+    "Details"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "url": "http://127.0.0.1:3013/journal",
+  "hasSave": false,
+  "fields": [
+    {
+      "name": "ticket",
+      "type": "text",
+      "placeholder": "253029751",
+      "label": "POSITION ID"
+    },
+    {
+      "name": "symbol",
+      "type": "text",
+      "placeholder": "EURUSD",
+      "label": "نماد"
+    },
+    {
+      "name": "status",
+      "type": "select-one",
+      "label": "وضعیت\nAll\nOpen\nClosed\nCancelled"
+    },
+    {
+      "name": "result",
+      "type": "select-one",
+      "label": "نتیجه\nAll\nOpen\nWin\nLoss\nBreakeven"
+    },
+    {
+      "name": "reviewStatus",
+      "type": "select-one",
+      "label": "REVIEW\nAll\nNot Reviewed\nReviewed"
+    },
+    {
+      "name": "source",
+      "type": "select-one",
+      "label": "SOURCE\nAll\nManual\nMT5\nEA Import\nMT5 EA"
+    },
+    {
+      "name": "tradeType",
+      "type": "select-one",
+      "label": "خرید/فروش\nAll\nBuy\nSell"
+    },
+    {
+      "name": "dateFrom",
+      "type": "date",
+      "placeholder": "",
+      "label": "از"
+    },
+    {
+      "name": "dateTo",
+      "type": "date",
+      "placeholder": "",
+      "label": "تا"
+    }
+  ],
+  "buttons": [
+    "خروج",
+    "آموزش",
+    "فارسی",
+    "روشن",
+    "تیره",
+    "معامله جدید",
+    "فیلتر",
+    "قبلی",
+    "رد کردن",
+    "بعدی"
+  ]
+}

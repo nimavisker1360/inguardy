@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>ساختار کلی برنامه SignalMax</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 16mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: #0f172a;
+      background: #ffffff;
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.85;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.45;
+      color: #020617;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      margin-top: 26px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #cbd5e1;
+      font-size: 19px;
+    }
+
+    h3 {
+      margin-top: 16px;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    p {
+      margin: 6px 0;
+    }
+
+    ul {
+      margin: 8px 0 8px 0;
+      padding-right: 22px;
+    }
+
+    li {
+      margin: 3px 0;
+    }
+
+    table {
+      width: 100%;
+      margin: 10px 0 16px;
+      border-collapse: collapse;
+      page-break-inside: avoid;
+    }
+
+    th,
+    td {
+      padding: 8px 9px;
+      border: 1px solid #cbd5e1;
+      vertical-align: top;
+      text-align: right;
+    }
+
+    th {
+      background: #eff6ff;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .cover {
+      padding: 20px 0 16px;
+      border-bottom: 3px solid #2563eb;
+      margin-bottom: 18px;
+    }
+
+    .subtitle {
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .meta {
+      margin-top: 12px;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .note {
+      margin: 12px 0;
+      padding: 12px;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      background: #eff6ff;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+
+    .step {
+      min-height: 72px;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #1d4ed8;
+    }
+
+    .ltr {
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: embed;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <h1>ساختار کلی برنامه SignalMax</h1>
+    <p class="subtitle">نمای شفاف از معماری محصول، مسیرهای کاربر، ماژول‌ها، APIها و مدل داده‌ها</p>
+    <p class="meta">نسخه سند: ۱.۰ | مسیر پروژه: <span class="ltr">C:\Users\NIMA\Desktop\signal-forex</span></p>
+  </section>
+
+  <section>
+    <h2>۱. خلاصه اجرایی</h2>
+    <p>
+      برنامه SignalMax یک پلتفرم ژورنال و مدیریت معاملات فارکس است که سه فضای اصلی دارد:
+      سایت عمومی برای معرفی و جذب کاربر، داشبورد کاربر برای مدیریت حساب و معاملات، و پنل ادمین برای مدیریت کاربران، پلن‌ها، پرداخت‌ها و اشتراک‌ها.
+    </p>
+    <p>
+      هسته محصول روی نظم معاملاتی ساخته شده است: کاربر حساب معاملاتی می‌سازد، معاملات را دستی یا از MT5 وارد می‌کند، سپس با ژورنال روزانه،
+      پلی‌بوک، چک‌لیست، روانشناسی معامله و گزارش‌ها کیفیت تصمیم‌گیری خود را بررسی می‌کند.
+    </p>
+    <div class="note">
+      تغییر جدید داشبورد این است که روانشناسی، پلی‌بوک و چک‌لیست در قالب «راهنمای معامله امروز» در ابتدای داشبورد جمع شده‌اند تا کاربر قبل از ورود به معامله، یک تصمیم ساده و قابل فهم بگیرد.
+    </div>
+  </section>
+
+  <section>
+    <h2>۲. معماری کلی محصول</h2>
+    <div class="flow">
+      <div class="step">
+        <strong>سایت عمومی</strong>
+        صفحه اصلی، معرفی، قیمت‌ها، سیگنال‌ها، بلاگ و تماس.
+      </div>
+      <div class="step">
+        <strong>احراز هویت و اشتراک</strong>
+        ورود، ثبت‌نام، trial، پلن‌ها، پرداخت USDT و کنترل دسترسی.
+      </div>
+      <div class="step">
+        <strong>داشبورد کاربر</strong>
+        حساب‌ها، معاملات، ژورنال روزانه، تحلیل، تقویم، پلی‌بوک و گزارش‌ها.
+      </div>
+      <div class="step">
+        <strong>پنل ادمین</strong>
+        مدیریت کاربران، پلن‌ها، پرداخت‌ها، اشتراک‌ها و تنظیمات.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>۳. مسیرهای اصلی کاربر</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>مرحله</th>
+          <th>کاربر چه کاری انجام می‌دهد؟</th>
+          <th>بخش مرتبط در برنامه</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ورود به سیستم</td>
+          <td>ثبت‌نام یا ورود با اکانت، سپس بررسی وضعیت اشتراک.</td>
+          <td class="ltr">/login, /sign-in, /sign-up, /api/auth</td>
+        </tr>
+        <tr>
+          <td>ساخت حساب معاملاتی</td>
+          <td>تعریف حساب، بروکر، پلتفرم، ارز و بالانس.</td>
+          <td class="ltr">/dashboard/accounts</td>
+        </tr>
+        <tr>
+          <td>ثبت یا دریافت معامله</td>
+          <td>معامله دستی وارد می‌شود یا از MT5 به سیستم sync می‌شود.</td>
+          <td class="ltr">/dashboard/trades, /api/mt5-event, /api/trades</td>
+        </tr>
+        <tr>
+          <td>تصمیم قبل از معامله</td>
+          <td>کاربر وضعیت ذهنی، سناریوی پلی‌بوک و چک‌لیست ورود را بررسی می‌کند.</td>
+          <td>راهنمای معامله امروز در داشبورد</td>
+        </tr>
+        <tr>
+          <td>مرور معامله</td>
+          <td>بررسی روانشناسی، اجرای پلن، چک‌لیست‌ها، عکس‌ها و یادداشت‌ها.</td>
+          <td class="ltr">/journal/[id]</td>
+        </tr>
+        <tr>
+          <td>تحلیل عملکرد</td>
+          <td>بررسی سود و زیان، نرخ برد، سشن، ساعت، نماد، پلی‌بوک و رفتار.</td>
+          <td class="ltr">/journal/analytics, /dashboard/reports</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>۴. منوی داشبورد و نقش هر بخش</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>بخش</th>
+          <th>مسیر</th>
+          <th>کارکرد</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>داشبورد</td>
+          <td class="ltr">/dashboard</td>
+          <td>نمای ساده وضعیت، راهنمای معامله امروز، آمار اصلی و خلاصه معاملات اخیر.</td>
+        </tr>
+        <tr>
+          <td>حساب‌ها</td>
+          <td class="ltr">/dashboard/accounts</td>
+          <td>مدیریت حساب‌های معاملاتی کاربر.</td>
+        </tr>
+        <tr>
+          <td>معاملات</td>
+          <td class="ltr">/dashboard/trades</td>
+          <td>لیست کامل معاملات، ساخت معامله جدید، ویرایش، بستن و حذف.</td>
+        </tr>
+        <tr>
+          <td>تقویم معاملاتی</td>
+          <td class="ltr">/journal/calendar</td>
+          <td>نمای ماهانه عملکرد و معاملات هر روز.</td>
+        </tr>
+        <tr>
+          <td>تقویم اقتصادی</td>
+          <td class="ltr">/economic-calendar</td>
+          <td>نمای رویدادهای اقتصادی و ریسک خبری.</td>
+        </tr>
+        <tr>
+          <td>تحلیل‌ها</td>
+          <td class="ltr">/journal/analytics</td>
+          <td>گزارش‌های رفتاری و آماری شبیه TradeZella.</td>
+        </tr>
+        <tr>
+          <td>ژورنال روزانه</td>
+          <td class="ltr">/dashboard/daily-journal</td>
+          <td>برنامه روز، انضباط، روانشناسی روزانه و مرور پایان روز.</td>
+        </tr>
+        <tr>
+          <td>پلی‌بوک‌ها</td>
+          <td class="ltr">/journal/playbooks</td>
+          <td>تعریف استراتژی‌ها، قوانین ورود/خروج/ریسک/روانشناسی و اتصال چک‌لیست‌ها.</td>
+        </tr>
+        <tr>
+          <td>گزارش‌ها</td>
+          <td class="ltr">/dashboard/reports</td>
+          <td>ساخت گزارش قابل خروجی از ژورنال و عملکرد.</td>
+        </tr>
+        <tr>
+          <td>تنظیمات</td>
+          <td class="ltr">/dashboard/settings</td>
+          <td>پروفایل و تنظیمات اتصال ژورنال.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>۵. ساختار تصمیم‌گیری معامله</h2>
+    <p>
+      بخش جدید «راهنمای معامله امروز» برای ساده‌سازی تجربه کاربر طراحی شده است. به جای اینکه روانشناسی، پلی‌بوک و چک‌لیست در صفحات جدا و سنگین دیده شوند،
+      کاربر در یک مسیر کوتاه وضعیت خود را بررسی می‌کند.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>لایه</th>
+          <th>هدف</th>
+          <th>خروجی برای کاربر</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>وضعیت ذهنی</td>
+          <td>کنترل عجله، انتقام از بازار، حواس‌پرتی و پذیرش ریسک.</td>
+          <td>آمادگی ذهنی قبل از ورود.</td>
+        </tr>
+        <tr>
+          <td>پلی‌بوک امروز</td>
+          <td>انتخاب یک سناریو: روندی، رنج، خبری یا بدون ستاپ واضح.</td>
+          <td>تمرکز روی یک نوع تصمیم، نه چند سناریوی همزمان.</td>
+        </tr>
+        <tr>
+          <td>چک‌لیست ورود</td>
+          <td>بررسی جهت، نقطه ورود، حد ضرر، حد سود، ریسک به ریوارد و خبر.</td>
+          <td>کاهش ورودهای احساسی و ناقص.</td>
+        </tr>
+        <tr>
+          <td>تصمیم نهایی</td>
+          <td>ترکیب امتیاز ذهنیت، چک‌لیست، سناریو و ریسک خبر.</td>
+          <td>ورود مجاز / با حجم کمتر / صبر کن.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>۶. ماژول‌های ژورنال معاملاتی</h2>
+    <h3>ژورنال معامله</h3>
+    <p>
+      هر معامله صفحه مرور جدا دارد. در این صفحه کاربر می‌تواند جزئیات معامله، تصویرها، وضعیت روانشناسی، متادیتا، چک‌لیست‌ها و بررسی پلی‌بوک را مدیریت کند.
+    </p>
+    <ul>
+      <li>مسیر اصلی: <span class="ltr">/journal/[id]</span></li>
+      <li>APIهای مرتبط: <span class="ltr">/api/journal/trades/[id]</span> و زیرمسیرهای psychology، checklists، strategy-review، screenshots و metadata</li>
+      <li>کامپوننت‌های مهم: <span class="ltr">TradeChecklistPanel</span>، <span class="ltr">TradeStrategyReviewPanel</span>، <span class="ltr">PsychologyReviewCard</span></li>
+    </ul>
+
+    <h3>ژورنال روزانه</h3>
+    <p>
+      ژورنال روزانه یک رکورد برای هر کاربر در هر روز است. در آن برنامه روز، جهت بازار، تمرکز، محدودیت تعداد معاملات، حداکثر ضرر، پلی‌بوک اصلی و چک‌لیست انضباط ثبت می‌شود.
+    </p>
+    <ul>
+      <li>مسیر: <span class="ltr">/dashboard/daily-journal</span></li>
+      <li>API: <span class="ltr">/api/daily-journal</span></li>
+      <li>مدل داده: <span class="ltr">DailyJournal</span></li>
+    </ul>
+
+    <h3>پلی‌بوک</h3>
+    <p>
+      پلی‌بوک‌ها استراتژی‌های قابل تکرار کاربر هستند. هر پلی‌بوک می‌تواند قوانین ستاپ، ورود، خروج، ریسک، مدیریت معامله و روانشناسی داشته باشد.
+    </p>
+    <ul>
+      <li>مسیرها: <span class="ltr">/journal/playbooks</span>، <span class="ltr">/journal/playbooks/new</span>، <span class="ltr">/journal/playbooks/[id]</span></li>
+      <li>API: <span class="ltr">/api/journal/playbooks</span></li>
+      <li>مدل‌ها: <span class="ltr">PlaybookStrategy</span>، <span class="ltr">PlaybookRule</span>، <span class="ltr">PlaybookChecklistLink</span></li>
+    </ul>
+
+    <h3>چک‌لیست‌ها</h3>
+    <p>
+      چک‌لیست‌ها قالب‌های قابل استفاده مجدد هستند که به معامله یا پلی‌بوک وصل می‌شوند. هنگام اتصال به معامله، snapshot گرفته می‌شود تا تاریخچه تغییر نکند.
+    </p>
+    <ul>
+      <li>مسیر: <span class="ltr">/journal/checklists</span></li>
+      <li>API: <span class="ltr">/api/journal/checklists</span></li>
+      <li>مدل‌ها: <span class="ltr">ChecklistTemplate</span>، <span class="ltr">ChecklistItem</span>، <span class="ltr">TradeChecklist</span>، <span class="ltr">TradeChecklistAnswer</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>۷. مدل داده‌های اصلی</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>مدل</th>
+          <th>نقش</th>
+          <th>رابطه‌های مهم</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="ltr">User</td>
+          <td>کاربر سیستم.</td>
+          <td>حساب‌ها، معاملات، ژورنال‌ها، پلی‌بوک‌ها، پرداخت‌ها و اشتراک‌ها.</td>
+        </tr>
+        <tr>
+          <td class="ltr">TradingAccount</td>
+          <td>حساب معاملاتی کاربر.</td>
+          <td>هر حساب چند معامله دارد.</td>
+        </tr>
+        <tr>
+          <td class="ltr">Trade</td>
+          <td>رکورد اصلی معامله.</td>
+          <td>به حساب، کاربر، عکس‌ها، تگ‌ها، چک‌لیست و بررسی پلی‌بوک وصل است.</td>
+        </tr>
+        <tr>
+          <td class="ltr">DailyJournal</td>
+          <td>برنامه و مرور روزانه.</td>
+          <td>برای هر کاربر و هر تاریخ یکتا است.</td>
+        </tr>
+        <tr>
+          <td class="ltr">PlaybookStrategy</td>
+          <td>استراتژی یا پلن معاملاتی.</td>
+          <td>قوانین، چک‌لیست‌های لینک‌شده و بررسی معامله‌ها.</td>
+        </tr>
+        <tr>
+          <td class="ltr">TradeStrategyReview</td>
+          <td>نتیجه اجرای پلی‌بوک روی یک معامله.</td>
+          <td>درصد پایبندی، قوانین رعایت‌شده و قوانین نقض‌شده.</td>
+        </tr>
+        <tr>
+          <td class="ltr">ChecklistTemplate</td>
+          <td>قالب چک‌لیست قابل استفاده مجدد.</td>
+          <td>آیتم‌ها، چک‌لیست‌های معامله و لینک به پلی‌بوک.</td>
+        </tr>
+        <tr>
+          <td class="ltr">Payment / Subscription / Plan</td>
+          <td>مدیریت فروش و دسترسی.</td>
+          <td>پلن، پرداخت، وضعیت اشتراک و محدودیت قابلیت‌ها.</td>
+        </tr>
+        <tr>
+          <td class="ltr">EconomicEvent</td>
+          <td>رویداد اقتصادی.</td>
+          <td>تقویم اقتصادی و هشدار ریسک خبر در داشبورد.</td>
+        </tr>
+        <tr>
+          <td class="ltr">WebsiteSignal</td>
+          <td>سیگنال‌های سایت عمومی.</td>
+          <td>نمایش سیگنال‌ها، وضعیت، نتیجه و بسته شدن با TP/SL.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>۸. لایه‌های فنی پروژه</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>لایه</th>
+          <th>فولدر / فایل</th>
+          <th>توضیح</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>صفحات و Routeها</td>
+          <td class="ltr">src/app</td>
+          <td>صفحات Next.js App Router و API routeها.</td>
+        </tr>
+        <tr>
+          <td>کامپوننت‌ها</td>
+          <td class="ltr">src/components</td>
+          <td>کامپوننت‌های داشبورد، ژورنال، UI، اشتراک، layout و سایت عمومی.</td>
+        </tr>
+        <tr>
+          <td>منطق سمت سرور</td>
+          <td class="ltr">src/lib</td>
+          <td>auth، Prisma، subscription، analytics، reports، journal services و helperها.</td>
+        </tr>
+        <tr>
+          <td>دیتابیس</td>
+          <td class="ltr">prisma/schema.prisma</td>
+          <td>مدل‌های PostgreSQL و روابط داده.</td>
+        </tr>
+        <tr>
+          <td>Migrationها</td>
+          <td class="ltr">prisma/migrations</td>
+          <td>تغییرات مرحله‌ای دیتابیس.</td>
+        </tr>
+        <tr>
+          <td>ترجمه‌ها</td>
+          <td class="ltr">public/locales/fa/common.json و public/locales/en/common.json</td>
+          <td>متن‌های فارسی و انگلیسی.</td>
+        </tr>
+        <tr>
+          <td>MT5 / EA</td>
+          <td class="ltr">ea و scripts/sync_mt5_signals.py</td>
+          <td>اتصال معاملات و سیگنال‌ها از MetaTrader 5.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>۹. APIهای مهم</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>گروه</th>
+          <th>مسیرهای اصلی</th>
+          <th>کارکرد</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>داشبورد</td>
+          <td class="ltr">/api/dashboard/overview</td>
+          <td>آمار حساب، معاملات اخیر، PnL، نرخ برد و وضعیت بررسی.</td>
+        </tr>
+        <tr>
+          <td>معاملات</td>
+          <td class="ltr">/api/trades, /api/journal/trades</td>
+          <td>CRUD معاملات و داده‌های ژورنال.</td>
+        </tr>
+        <tr>
+          <td>ژورنال روزانه</td>
+          <td class="ltr">/api/daily-journal</td>
+          <td>خواندن و ذخیره برنامه و مرور روزانه.</td>
+        </tr>
+        <tr>
+          <td>پلی‌بوک و چک‌لیست</td>
+          <td class="ltr">/api/journal/playbooks, /api/journal/checklists</td>
+          <td>مدیریت استراتژی‌ها، قوانین و قالب‌های چک‌لیست.</td>
+        </tr>
+        <tr>
+          <td>تحلیل و گزارش</td>
+          <td class="ltr">/api/journal/analytics, /api/reports/journal</td>
+          <td>گزارش عملکرد و خروجی گزارش ژورنال.</td>
+        </tr>
+        <tr>
+          <td>پرداخت و اشتراک</td>
+          <td class="ltr">/api/payments, /api/plans, /api/admin/subscriptions</td>
+          <td>پلن‌ها، پرداخت USDT، تایید ادمین و دسترسی کاربر.</td>
+        </tr>
+        <tr>
+          <td>تقویم اقتصادی</td>
+          <td class="ltr">/api/economic-calendar, /api/cron/fetch-economic-calendar</td>
+          <td>خواندن و به‌روزرسانی رویدادهای اقتصادی.</td>
+        </tr>
+        <tr>
+          <td>سیگنال‌ها</td>
+          <td class="ltr">/api/signals, /api/signals/daily, /api/signals/weekly, /api/signals/monthly</td>
+          <td>داده‌های سیگنال سایت عمومی و گزارش‌های زمانی.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>۱۰. کنترل دسترسی و اشتراک</h2>
+    <p>
+      داشبورد پشت login قرار دارد. در layout داشبورد ابتدا session بررسی می‌شود، سپس وضعیت اشتراک با <span class="ltr">requireActiveSubscription</span> کنترل می‌شود.
+      اگر اشتراک کاربر محدود یا در دوره آزمایشی باشد، banner وضعیت اشتراک نمایش داده می‌شود.
+    </p>
+    <ul>
+      <li>احراز هویت: <span class="ltr">better-auth</span></li>
+      <li>مدیریت نقش ادمین: فیلد <span class="ltr">role</span> در مدل <span class="ltr">User</span> و ایمیل‌های ادمین در env</li>
+      <li>مدیریت پلن: مدل‌های <span class="ltr">Plan</span>، <span class="ltr">Payment</span> و <span class="ltr">Subscription</span></li>
+      <li>پنل ادمین: <span class="ltr">/admin/dashboard</span> و زیرمسیرهای users، plans، payments، subscriptions و settings</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>۱۱. جمع‌بندی ساختار تجربه کاربر</h2>
+    <p>
+      ساختار پیشنهادی فعلی برای ساده‌بودن محصول این است:
+    </p>
+    <div class="flow">
+      <div class="step">
+        <strong>اول تصمیم</strong>
+        داشبورد ساده و راهنمای معامله امروز.
+      </div>
+      <div class="step">
+        <strong>بعد ثبت</strong>
+        ثبت معامله، عکس، توضیح و داده‌های اجرایی.
+      </div>
+      <div class="step">
+        <strong>بعد مرور</strong>
+        بررسی پلی‌بوک، چک‌لیست و روانشناسی معامله.
+      </div>
+      <div class="step">
+        <strong>بعد تحلیل</strong>
+        گزارش رفتاری، آماری، زمانی و استراتژیک.
+      </div>
+    </div>
+    <p>
+      این ساختار باعث می‌شود کاربر تازه‌کار با صفحه‌های پیچیده روبه‌رو نشود، ولی کاربر حرفه‌ای همچنان به جدول کامل، گزارش‌ها، پلی‌بوک‌ها و تنظیمات پیشرفته دسترسی داشته باشد.
+    </p>
+  </section>
+</body>
+</html>

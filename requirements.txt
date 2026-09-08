@@ -1,0 +1,8 @@
+MetaTrader5
+pandas
+matplotlib
+mplfinance
+pymongo
+psycopg2-binary
+python-dotenv
+requests

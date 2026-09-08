@@ -1,0 +1,382 @@
+URL: http://127.0.0.1:3002/journal/calendar
+READY: complete
+
+VISIBLE TEXT:
+Tradivix
+ژورنال معاملاتی
+داشبورد
+حساب‌ها
+ژورنال معاملات
+تقویم
+تقویم اقتصادی
+دستیار هوش مصنوعی
+تحلیل‌ها
+ژورنال روزانه
+پلی‌بوک‌ها
+چک‌لیست‌ها
+گزارش ها
+تنظیمات
+پراپ فرم‌ها
+سایت عمومی
+خروج
+فضای کاری ژورنال
+معاملات، اسکرین‌شات‌ها، روانشناسی و یادداشت‌های بررسی
+آموزش
+فارسی
+روشن
+تیره
+پلی‌بوک
+/
+چک‌لیست پیش از معامله
+/
+ژورنال معاملات
+/
+ژورنال روزانه
+/
+تحلیل‌ها
+/
+گزارش ها
+شما روی پلن Pro Monthly هستید. 21 روز باقی مانده است.
+تمدید
+تقویم معاملاتی
+عملکرد ماهانه بر اساس تاریخ ورود معاملات گروه‌بندی شده است.
+قبلی
+ماه جاری
+بعدی
+۱۴۰۵ تیر
+12 روز معاملاتی فعال
+همه حساب‌ها
+7852214
+7852214
+7852214
+7852214
+MT5 Auto Connect
+اعمال
+یکشنبه
+دوشنبه
+سه‌شنبه
+چهارشنبه
+پنجشنبه
+جمعه
+شنبه
+1
+$0.00
+بدون معامله
+2
+$113.55
+3 معامله
+نرخ برد 66.7٪
+Missing journal
+CL 0%
+3
+$14.38
+6 معامله
+نرخ برد 83.3٪
+Missing journal
+CL 83%
+Overtrading
+4
+$0.00
+بدون معامله
+5
+$0.00
+بدون معامله
+6
+$11.92
+2 معامله
+نرخ برد 100٪
+Missing journal
+CL 50%
+7
+-$107.61
+7 معامله
+نرخ برد 28.6٪
+Journal
+CL 0%
+Overtrading
+8
+-$83.48
+4 معامله
+نرخ برد 25٪
+Missing journal
+CL 0%
+9
+$0.29
+2 معامله
+نرخ برد 50٪
+Missing journal
+CL 0%
+10
+$59.04
+3 معامله
+نرخ برد 100٪
+Journal
+CL 33%
+11
+$0.00
+بدون معامله
+12
+$0.00
+بدون معامله
+13
+$65.46
+7 معامله
+نرخ برد 42.9٪
+Missing journal
+CL 0%
+Overtrading
+14
+$11.98
+4 معامله
+نرخ برد 50٪
+Missing journal
+CL 0%
+15
+-$48.98
+5 معامله
+نرخ برد 25٪
+Missing journal
+CL 0%
+Overtrading
+16
+$90.26
+16 معامله
+نرخ برد 56.3٪
+
+BUTTONS:
+[
+  "خروج",
+  "آموزش",
+  "فارسی",
+  "روشن",
+  "تیره",
+  "اعمال"
+]
+
+LINKS:
+[
+  {
+    "text": "حساب‌ها",
+    "href": "http://127.0.0.1:3002/dashboard/accounts"
+  },
+  {
+    "text": "تقویم",
+    "href": "http://127.0.0.1:3002/journal/calendar"
+  },
+  {
+    "text": "دستیار هوش مصنوعی",
+    "href": "http://127.0.0.1:3002/dashboard/ai-reader"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3002/journal/analytics"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3002/dashboard/daily-journal"
+  },
+  {
+    "text": "پلی‌بوک‌ها",
+    "href": "http://127.0.0.1:3002/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست‌ها",
+    "href": "http://127.0.0.1:3002/journal/checklists"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3002/dashboard/reports"
+  },
+  {
+    "text": "تنظیمات",
+    "href": "http://127.0.0.1:3002/dashboard/settings"
+  },
+  {
+    "text": "پراپ فرم‌ها",
+    "href": "http://127.0.0.1:3002/dashboard/prop-firms"
+  },
+  {
+    "text": "پلی‌بوک",
+    "href": "http://127.0.0.1:3002/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست پیش از معامله",
+    "href": "http://127.0.0.1:3002/journal/checklists"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3002/dashboard/daily-journal"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3002/journal/analytics"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3002/dashboard/reports"
+  },
+  {
+    "text": "قبلی",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=6&year=2026"
+  },
+  {
+    "text": "ماه جاری",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026"
+  },
+  {
+    "text": "بعدی",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=8&year=2026"
+  },
+  {
+    "text": "1\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-01"
+  },
+  {
+    "text": "2\n$113.55\n3 معامله\nنرخ برد 66.7٪\nMissing journal\nCL 0%",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-02"
+  },
+  {
+    "text": "3\n$14.38\n6 معامله\nنرخ برد 83.3٪\nMissing journal\nCL 83%\nOvertrading",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-03"
+  },
+  {
+    "text": "4\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-04"
+  },
+  {
+    "text": "5\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-05"
+  },
+  {
+    "text": "6\n$11.92\n2 معامله\nنرخ برد 100٪\nMissing journal\nCL 50%",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-06"
+  },
+  {
+    "text": "7\n-$107.61\n7 معامله\nنرخ برد 28.6٪\nJournal\nCL 0%\nOvertrading",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-07"
+  },
+  {
+    "text": "8\n-$83.48\n4 معامله\nنرخ برد 25٪\nMissing journal\nCL 0%",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-08"
+  },
+  {
+    "text": "9\n$0.29\n2 معامله\nنرخ برد 50٪\nMissing journal\nCL 0%",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-09"
+  },
+  {
+    "text": "10\n$59.04\n3 معامله\nنرخ برد 100٪\nJournal\nCL 33%",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-10"
+  },
+  {
+    "text": "11\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-11"
+  },
+  {
+    "text": "12\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-12"
+  },
+  {
+    "text": "13\n$65.46\n7 معامله\nنرخ برد 42.9٪\nMissing journal\nCL 0%\nOvertrading",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-13"
+  },
+  {
+    "text": "14\n$11.98\n4 معامله\nنرخ برد 50٪\nMissing journal\nCL 0%",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-14"
+  },
+  {
+    "text": "15\n-$48.98\n5 معامله\nنرخ برد 25٪\nMissing journal\nCL 0%\nOvertrading",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-15"
+  },
+  {
+    "text": "16\n$90.26\n16 معامله\nنرخ برد 56.3٪\nMissing journal\nCL 0%\nOvertrading",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-16"
+  },
+  {
+    "text": "17\n$614.15\n33 معامله\nنرخ برد 64.5٪\nMissing journal\nCL 3%\nOvertrading",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-17"
+  },
+  {
+    "text": "18\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-18"
+  },
+  {
+    "text": "19\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-19"
+  },
+  {
+    "text": "20\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-20"
+  },
+  {
+    "text": "21\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-21"
+  },
+  {
+    "text": "22\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-22"
+  },
+  {
+    "text": "23\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-23"
+  },
+  {
+    "text": "24\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-24"
+  },
+  {
+    "text": "25\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-25"
+  },
+  {
+    "text": "26\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-26"
+  },
+  {
+    "text": "27\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-27"
+  },
+  {
+    "text": "28\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-28"
+  },
+  {
+    "text": "29\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-29"
+  },
+  {
+    "text": "30\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-30"
+  },
+  {
+    "text": "31\n$0.00\nبدون معامله",
+    "href": "http://127.0.0.1:3002/journal/calendar?month=7&year=2026&selectedDate=2026-07-31"
+  },
+  {
+    "text": "باز کردن ژورنال روزانه",
+    "href": "http://127.0.0.1:3002/dashboard/daily-journal?date=2026-07-02"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmr3pjnl40005tf7k9pskioje"
+  },
+  {
+    "text": "بررسی",
+    "href": "http://127.0.0.1:3002/journal/cmr3pjnl40005tf7k9pskioje"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmr3j8ftk000dtfrsmb7s6dul"
+  },
+  {
+    "text": "بررسی",
+    "href": "http://127.0.0.1:3002/journal/cmr3j8ftk000dtfrsmb7s6dul"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmr3j1uxw0007tfrs5xy580wo"
+  },
+  {
+    "text": "بررسی",
+    "href": "http://127.0.0.1:3002/journal/cmr3j1uxw0007tfrs5xy580wo"
+  }
+]

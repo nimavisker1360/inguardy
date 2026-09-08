@@ -1,0 +1,479 @@
+URL: http://127.0.0.1:3002/journal
+READY: complete
+
+VISIBLE TEXT:
+Tradivix
+ژورنال معاملاتی
+داشبورد
+حساب‌ها
+ژورنال معاملات
+تقویم
+تقویم اقتصادی
+دستیار هوش مصنوعی
+تحلیل‌ها
+ژورنال روزانه
+پلی‌بوک‌ها
+چک‌لیست‌ها
+گزارش ها
+تنظیمات
+پراپ فرم‌ها
+سایت عمومی
+خروج
+فضای کاری ژورنال
+معاملات، اسکرین‌شات‌ها، روانشناسی و یادداشت‌های بررسی
+آموزش
+فارسی
+روشن
+تیره
+پلی‌بوک
+/
+چک‌لیست پیش از معامله
+/
+ژورنال معاملات
+/
+ژورنال روزانه
+/
+تحلیل‌ها
+/
+گزارش ها
+شما روی پلن Pro Monthly هستید. 21 روز باقی مانده است.
+تمدید
+ژورنال معاملات
+معاملات، اسکرین‌شات‌ها، یادداشت‌های روانشناسی و عملکرد را بررسی کنید.
+معامله جدید
+کل معاملات
+92
+نرخ برد
+57.3%
+کل سود و زیان خالص
+740.96
+فاکتور سود
+1.76
+فیلترها
+ژورنال را بر اساس نماد، وضعیت، نتیجه، جهت و تاریخ محدود کنید.
+POSITION ID
+نماد
+وضعیت
+All
+Open
+Closed
+Cancelled
+نتیجه
+All
+Open
+Win
+Loss
+Breakeven
+REVIEW
+All
+Not Reviewed
+Reviewed
+SOURCE
+All
+Manual
+MT5
+EA Import
+MT5 EA
+خرید/فروش
+All
+Buy
+Sell
+از
+تا
+فیلتر
+۲۶ تیر ۱۴۰۵
+33 معامله
+PnL: 614.15
+زمان ورود نماد POSITION ID جهت وضعیت حساب استراتژی REVIEW STATUS پایبندی ورود SL TP خروج PNL R:R عملیات
+۲۶ تیر ۱۴۰۵، ۱۸:۲۸ XAUUSD 264734098
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,020.27 - - 4,013.9 127.4 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۸ XAUUSD 264734060
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,020.06 - - 4,014.47 111.8 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۸ XAUUSD 264733998
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,019.73 - - 4,014.91 96.4 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۸ XAUUSD 264733955
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,019.14 - - 4,015.24 78 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۸ XAUUSD 264733899
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,018.43 - - 4,014.97 69.2 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۸ XAUUSD 264733891
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,018.24 - - 4,015.11 62.6 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733741
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,018.42 - - 4,014.98 68.8 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733687
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,018.47 - - 4,015.73 54.8 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733634
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,018.52 - - 4,015.92 52 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733631
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,018.42 - - 4,015.91 50.2 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733622
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,018.36 - - 4,015.66 54 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733616
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,018.3 - - 4,015.83 49.4 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733600
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,017.55 - - 4,015.86 33.8 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733566
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,017.36 - - 4,015.83 30.6 0
+۲۶ تیر ۱۴۰۵، ۱۸:۲۷ XAUUSD 264733485
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,016.98 - - 4,015.7 25.6 0
+۲۶ تیر ۱۴۰۵، ۱۸:۱۰ XAUUSD 264726168
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,017.62 4,023.96 4,003.07 4,023.98 -127.2 -1
+۲۶ تیر ۱۴۰۵، ۱۷:۳۷ XAUUSD 264706765
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,013.68 4,024.09 4,003.07 4,024.09 -208.2 -1
+۲۶ تیر ۱۴۰۵، ۱۷:۳۰ XAUUSD 264703963
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,014.67 4,014.19 4,003.35 4,014.2 9.4 0
+۲۶ تیر ۱۴۰۵، ۱۷:۰۴ XAUUSD 264689089
+فروش بسته 7852214 - Not Reviewed
+Not Reviewed 4,002.65 - - 4,015.66 -65.05 0
+
+BUTTONS:
+[
+  "خروج",
+  "آموزش",
+  "فارسی",
+  "روشن",
+  "تیره",
+  "معامله جدید",
+  "فیلتر"
+]
+
+LINKS:
+[
+  {
+    "text": "حساب‌ها",
+    "href": "http://127.0.0.1:3002/dashboard/accounts"
+  },
+  {
+    "text": "تقویم",
+    "href": "http://127.0.0.1:3002/journal/calendar"
+  },
+  {
+    "text": "دستیار هوش مصنوعی",
+    "href": "http://127.0.0.1:3002/dashboard/ai-reader"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3002/journal/analytics"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3002/dashboard/daily-journal"
+  },
+  {
+    "text": "پلی‌بوک‌ها",
+    "href": "http://127.0.0.1:3002/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست‌ها",
+    "href": "http://127.0.0.1:3002/journal/checklists"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3002/dashboard/reports"
+  },
+  {
+    "text": "تنظیمات",
+    "href": "http://127.0.0.1:3002/dashboard/settings"
+  },
+  {
+    "text": "پراپ فرم‌ها",
+    "href": "http://127.0.0.1:3002/dashboard/prop-firms"
+  },
+  {
+    "text": "پلی‌بوک",
+    "href": "http://127.0.0.1:3002/journal/playbooks"
+  },
+  {
+    "text": "چک‌لیست پیش از معامله",
+    "href": "http://127.0.0.1:3002/journal/checklists"
+  },
+  {
+    "text": "ژورنال روزانه",
+    "href": "http://127.0.0.1:3002/dashboard/daily-journal"
+  },
+  {
+    "text": "تحلیل‌ها",
+    "href": "http://127.0.0.1:3002/journal/analytics"
+  },
+  {
+    "text": "گزارش ها",
+    "href": "http://127.0.0.1:3002/dashboard/reports"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5ofmn007dtfnk38lm5usm"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5ofmn007dtfnk38lm5usm"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5ofwc007htfnketdzxbbe"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5ofwc007htfnketdzxbbe"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5og32007ltfnkp3r7np5h"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5og32007ltfnkp3r7np5h"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5og92007ptfnk2s2usky9"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5og92007ptfnk2s2usky9"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5j78e006dtfnkn2y30imz"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5j78e006dtfnkn2y30imz"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jafq006htfnkdcjyupil"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jafq006htfnkdcjyupil"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5r25w007ttfnkeqoj2ol0"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5r25w007ttfnkeqoj2ol0"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jvtk006ntfnkq524wreo"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jvtk006ntfnkq524wreo"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jyii006rtfnka3co2v8f"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5jyii006rtfnka3co2v8f"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5je6f006ltfnkxuhmyma7"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5je6f006ltfnkxuhmyma7"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5mu8b006xtfnkcv8eq63m"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5mu8b006xtfnkcv8eq63m"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5mxb70071tfnkhocdisxi"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5mxb70071tfnkhocdisxi"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5n0du0075tfnkzgoo4x7r"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5n0du0075tfnkzgoo4x7r"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5n42i0079tfnk4j6vt6en"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5n42i0079tfnk4j6vt6en"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp5i7ty0069tfnk53bmtlmf"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp5i7ty0069tfnk53bmtlmf"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp4w3kj005xtfnkpoobkc1g"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp4w3kj005xtfnkpoobkc1g"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp3pxj8005ptfnkx7htfmfk"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp3pxj8005ptfnkx7htfmfk"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp3hcsd005dtfnk73ltnf6j"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp3hcsd005dtfnk73ltnf6j"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp2jkrk0059tfnkloytxvhp"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp2jkrk0059tfnkloytxvhp"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrp0cre4004vtfnkg8ckcxae"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrp0cre4004vtfnkg8ckcxae"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmroy4yg9003stfnkvj2kc9jr"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmroy4yg9003stfnkvj2kc9jr"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmroxv38s003itfnku0qih29i"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmroxv38s003itfnku0qih29i"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmroxhtzx003ctfnkzj3o961o"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmroxhtzx003ctfnkzj3o961o"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrox9z9k002ytfnk580e3djk"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrox9z9k002ytfnk580e3djk"
+  },
+  {
+    "text": "EURUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrox6yz5002stfnkdd63o5ez"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrox6yz5002stfnkdd63o5ez"
+  },
+  {
+    "text": "EURUSD",
+    "href": "http://127.0.0.1:3002/journal/cmrorcc09002gtfnk193au6a7"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmrorcc09002gtfnk193au6a7"
+  },
+  {
+    "text": "EURUSD",
+    "href": "http://127.0.0.1:3002/journal/cmror5v5h0026tfnkcpw0z9dk"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmror5v5h0026tfnkcpw0z9dk"
+  },
+  {
+    "text": "EURUSD",
+    "href": "http://127.0.0.1:3002/journal/cmror3uex001ytfnky73x0135"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmror3uex001ytfnky73x0135"
+  },
+  {
+    "text": "EURUSD",
+    "href": "http://127.0.0.1:3002/journal/cmror366b001qtfnk2oso7w7s"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmror366b001qtfnk2oso7w7s"
+  },
+  {
+    "text": "EURUSD",
+    "href": "http://127.0.0.1:3002/journal/cmroqtooz000otfnklm5yby5g"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmroqtooz000otfnklm5yby5g"
+  },
+  {
+    "text": "EURUSD",
+    "href": "http://127.0.0.1:3002/journal/cmroqtoog000mtfnkhzcisdv7"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmroqtoog000mtfnkhzcisdv7"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmroqt7an0008tfnkdq55a74r"
+  },
+  {
+    "text": "View trade",
+    "href": "http://127.0.0.1:3002/journal/cmroqt7an0008tfnkdq55a74r"
+  },
+  {
+    "text": "XAUUSD",
+    "href": "http://127.0.0.1:3002/journal/cmroqt7an0007tfnkoz67ihnr"
+  }
+]

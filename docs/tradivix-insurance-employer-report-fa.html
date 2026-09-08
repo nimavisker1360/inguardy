@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>گزارش مدیریتی سامانه بیمه حساب معاملاتی Tradivix</title>
+  <style>
+    @page { size: A4; margin: 14mm 14mm 17mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Tahoma, Arial, sans-serif; color: #15233b; background: #fff; font-size: 10.2pt; line-height: 1.85; }
+    .cover { min-height: 260mm; padding: 22mm 13mm; background: linear-gradient(145deg,#092a55 0%,#0e5cad 58%,#1aa6be 100%); color: white; border-radius: 7mm; position: relative; display: flex; flex-direction: column; justify-content: center; }
+    .cover:after { content: ""; position: absolute; width: 95mm; height: 95mm; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; left: -30mm; top: 18mm; }
+    .brand { font-size: 14pt; letter-spacing: .5px; opacity: .9; }
+    .cover h1 { font-size: 29pt; line-height: 1.55; margin: 12mm 0 5mm; color: #fff; }
+    .cover .lead { font-size: 15pt; max-width: 145mm; color: #e7f4ff; }
+    .meta { margin-top: 23mm; border-top: 1px solid rgba(255,255,255,.3); padding-top: 6mm; font-size: 10pt; color: #dceeff; }
+    .page { break-before: page; }
+    h1,h2,h3 { color: #0d4f93; margin: 0 0 4mm; }
+    h2 { font-size: 19pt; padding-bottom: 2mm; border-bottom: 2px solid #dceafb; }
+    h3 { font-size: 12.5pt; margin-top: 5mm; }
+    p { margin: 0 0 3mm; }
+    .intro { font-size: 11.5pt; color: #324a68; }
+    .note { padding: 4mm 5mm; border-radius: 3mm; background: #fff6e8; border: 1px solid #f4c773; color: #6e4700; margin: 4mm 0; }
+    .success { background: #ebf8f3; border-color: #91d5bd; color: #135c48; }
+    .info { background: #edf5ff; border-color: #aacdf5; color: #164f86; }
+    .kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 3mm; margin: 4mm 0 6mm; }
+    .kpi { border: 1px solid #cddff3; background: #f5f9fe; border-radius: 3mm; padding: 4mm; text-align: center; }
+    .kpi strong { display: block; font-size: 17pt; color: #0c5ca8; }
+    table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 9.2pt; page-break-inside: auto; }
+    th { background: #0e5ca8; color: white; font-weight: bold; }
+    th,td { border: 1px solid #cfdeee; padding: 2.3mm 2.5mm; vertical-align: top; }
+    tr:nth-child(even) td { background: #f7faff; }
+    tr { page-break-inside: avoid; }
+    ul,ol { margin: 2mm 0 4mm; padding-right: 6mm; }
+    li { margin-bottom: 1.2mm; }
+    .flow { display: grid; grid-template-columns: repeat(4,1fr); gap: 2mm; margin: 5mm 0; direction: rtl; }
+    .step { border-radius: 3mm; padding: 4mm 3mm; background: #eef6ff; border: 1px solid #bdd8f5; min-height: 29mm; }
+    .step b { color: #0b559c; display: block; margin-bottom: 1mm; }
+    .tag { display: inline-block; padding: .5mm 2.2mm; margin: 0 .5mm; border-radius: 5mm; background: #eaf3ff; color: #12589a; font-size: 8.5pt; }
+    .status-done { color: #0b7758; font-weight: bold; }
+    .status-needed { color: #a45b00; font-weight: bold; }
+    .formula { direction: ltr; text-align: center; font: bold 11pt Arial; background: #f0f6fc; border: 1px solid #c8dced; padding: 4mm; border-radius: 2mm; margin: 3mm 0; }
+    .small { font-size: 8.5pt; color: #57708c; }
+    .footer { position: fixed; bottom: -11mm; left: 0; right: 0; text-align: center; color: #778ba2; font-size: 8pt; direction: rtl; }
+    .footer:after { content: " | گزارش مدیریتی بیمه Tradivix"; }
+    .avoid { break-inside: avoid; }
+  </style>
+</head>
+<body>
+  <div class="footer">نسخه ۱.۰ ـ ۱۴ شهریور ۱۴۰۵</div>
+
+  <section class="cover">
+    <div class="brand">TRADIVIX · SAFESIDE</div>
+    <h1>گزارش مدیریتی<br>سامانه بیمه حساب معاملاتی</h1>
+    <div class="lead">شرح روشن عملکرد سامانه، داده‌های ثبت‌شده در داشبورد، منطق ارزیابی ریسک و اقدامات لازم تا عرضه تجاری</div>
+    <div class="meta">مخاطب: کارفرما و مدیران تصمیم‌گیر<br>دامنه گزارش: فقط ماژول بیمه حساب معاملاتی<br>وضعیت: نسخه آزمایشی و قابل ارزیابی؛ شرایط مالی و حقوقی نیازمند تصویب نهایی</div>
+  </section>
+
+  <section class="page">
+    <h2>۱. خلاصه مدیریتی</h2>
+    <p class="intro">ماژول بیمه Tradivix حساب MT5 معامله‌گر را به‌صورت مستمر پایش می‌کند، کیفیت داده را می‌سنجد، رفتار معاملاتی و افت سرمایه را تحلیل می‌کند و بر اساس یک Policy نسخه‌بندی‌شده درباره واجد شرایط بودن، سطح ریسک و پکیج قابل ارائه تصمیم می‌گیرد.</p>
+    <div class="kpis">
+      <div class="kpi"><strong>۵</strong>محور اصلی امتیاز ریسک</div>
+      <div class="kpi"><strong>۰–۱۰۰</strong>بازه امتیاز ریسک</div>
+      <div class="kpi"><strong>۳</strong>پکیج آزمایشی</div>
+      <div class="kpi"><strong>۱ دقیقه</strong>فاصله هدف Snapshot</div>
+    </div>
+    <h3>سامانه دقیقاً چه کاری انجام می‌دهد؟</h3>
+    <ol>
+      <li>اطلاعات حساب، معاملات، موجودی و مشخصات نمادها را از MT5 دریافت و ذخیره می‌کند.</li>
+      <li>کامل بودن داده را کنترل می‌کند؛ داده ناقص به‌عنوان هشدار نمایش داده می‌شود و پنهان نمی‌گردد.</li>
+      <li>ریسک اولیه هر معامله را با حد ضرر اولیه، حجم و مشخصات واقعی همان نماد محاسبه می‌کند.</li>
+      <li>افت سرمایه، رفتار بعد از زیان، ثبات ریسک، عملکرد و تعداد معاملات را امتیازدهی می‌کند.</li>
+      <li>نتیجه را به یکی از حالت‌های واجد شرایط، بررسی دستی، غیرواجد شرایط یا داده ناکافی تبدیل می‌کند.</li>
+      <li>برای حساب واجد شرایط، مبلغ پوشش، حق‌بیمه، مدت و شرایط پکیج را محاسبه و ثبت می‌کند.</li>
+      <li>پس از فعال‌سازی، رعایت سقف افت سرمایه را پایش و فرایند درخواست و پرداخت خسارت را مدیریت می‌کند.</li>
+    </ol>
+    <div class="note"><b>نکته تصمیم‌گیری:</b> مقادیر فعلی Policy و پکیج‌ها «آزمایشی» هستند. قیمت پکیج‌ها اکنون صفر ثبت شده و برای فروش واقعی باید نرخ‌ها، متن قرارداد، مقررات و مسئولیت‌های بروکر/بیمه‌گر تصویب شوند.</div>
+
+    <h3>گردش‌کار کلان</h3>
+    <div class="flow">
+      <div class="step"><b>۱. اتصال</b>اتصال حساب MT5 و شروع همگام‌سازی پیوسته</div>
+      <div class="step"><b>۲. ارزیابی</b>کنترل کیفیت داده و محاسبه امتیاز ریسک</div>
+      <div class="step"><b>۳. صدور</b>انتخاب پکیج، بررسی درخواست و فعال‌سازی</div>
+      <div class="step"><b>۴. خسارت</b>پایش دوره، ثبت درخواست و تصمیم عملیاتی</div>
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>۲. اقداماتی که باید انجام شود</h2>
+    <table>
+      <thead><tr><th style="width:22%">مرحله</th><th>اقدام لازم</th><th style="width:19%">مسئول پیشنهادی</th></tr></thead>
+      <tbody>
+        <tr><td>اتصال حساب</td><td>کاربر حساب MT5 را متصل کند؛ Worker و Bridge دائماً آنلاین باشند و Snapshot تقریباً هر یک دقیقه ثبت شود.</td><td>فنی / عملیات</td></tr>
+        <tr><td>تکمیل داده</td><td>حداقل ۱۴ روز سابقه و ۲۰ معامله بسته ثبت شود. پوشش Snapshot حداقل ۷۰٪، مشخصات همه نمادها موجود و داده ریسک حداقل ۸۰٪ معاملات کامل باشد.</td><td>سیستم / کاربر</td></tr>
+        <tr><td>کنترل معامله</td><td>هر معامله پیش از ورود حد ضرر معتبر داشته باشد؛ حد ضرر اولیه، حجم، قیمت ورود و موجودی زمان ورود قابل محاسبه باشند.</td><td>معامله‌گر</td></tr>
+        <tr><td>ارزیابی</td><td>ارزیابی اجرا و امتیاز ریسک، سطح ریسک، کیفیت داده، اعتماد و هشدارها ذخیره شود.</td><td>سیستم</td></tr>
+        <tr><td>بررسی پرونده</td><td>درخواست‌های دارای هشدار داده یا ریسک بالا توسط کارشناس همراه شواهد بررسی و نتیجه ثبت شود.</td><td>کارشناس بیمه</td></tr>
+        <tr><td>صدور</td><td>پکیج، مبلغ پوشش، حق‌بیمه، مدت، سقف افت سرمایه و نسخه Policy در لحظه شروع قفل و ثبت شوند.</td><td>سیستم / مدیر</td></tr>
+        <tr><td>پایش دوره</td><td>حساب تا پایان دوره متصل بماند؛ افت سرمایه و نقض قوانین قطعی به‌صورت پیوسته کنترل شود.</td><td>سیستم / عملیات</td></tr>
+        <tr><td>درخواست خسارت</td><td>فقط در ۲۴ ساعت پایانی دوره، پس از بستن تمام پوزیشن‌ها و همگام شدن موجودی نهایی قابل ثبت است.</td><td>کاربر / سیستم</td></tr>
+        <tr><td>پرداخت</td><td>کارشناس درخواست را پردازش کند، تأیید بروکر ثبت شود و سپس پرداخت یا رد با دلیل و شناسه مرجع ثبت گردد.</td><td>بروکر / مالی / کارشناس</td></tr>
+      </tbody>
+    </table>
+    <div class="note info"><b>قاعده خسارت فعلی:</b> خسارت برابر ۸۰٪ زیان واقعی، حداکثر تا مبلغ بیمه‌شده است. باز شدن پوزیشن بعد از ثبت درخواست، درخواست و پوشش را لغو می‌کند. عبور از سقف افت سرمایه نیز بیمه‌نامه را باطل می‌کند.</div>
+
+    <h3>مواردی که پیش از عرضه واقعی باید تصویب شوند</h3>
+    <ul>
+      <li><b>حقوقی و رگولاتوری:</b> ماهیت حقوقی محصول، شرایط عمومی، استثناها، KYC/AML، رضایت پردازش داده و حوزه قضایی.</li>
+      <li><b>اکچوئری و مالی:</b> احتمال خسارت، نرخ حق‌بیمه، سقف تعهد، ذخیره خسارت و سهم صندوق/بروکر/Tradivix.</li>
+      <li><b>عملیات:</b> SLA بررسی درخواست، روش تأیید بروکر، پرداخت، رسیدگی به اعتراض و کنترل تقلب.</li>
+      <li><b>فنی:</b> مانیتورینگ ۲۴/۷، هشدار قطعی Sync، پشتیبان‌گیری، امنیت دسترسی و تست فشار.</li>
+      <li><b>آزمون پذیرش:</b> اجرای پایلوت با حساب‌های واقعی و سناریوهای سود، زیان، قطع اتصال، واریز/برداشت و خسارت.</li>
+    </ul>
+  </section>
+
+  <section class="page">
+    <h2>۳. داده‌هایی که از MT5 ذخیره می‌شود</h2>
+    <p>این داده‌ها ورودی قابل ممیزی ارزیابی هستند؛ نتیجه بیمه بدون حفظ این شواهد قابل اتکا نیست.</p>
+    <table>
+      <thead><tr><th style="width:25%">گروه داده</th><th>مقادیر ذخیره‌شده</th><th style="width:31%">کاربرد بیمه‌ای</th></tr></thead>
+      <tbody>
+        <tr><td>مشخصات حساب</td><td>شناسه داخلی، شماره حساب MT5، نام حساب/بروکر، نوع حساب، ارز، Balance و Equity جاری، زمان آخرین Sync</td><td>شناسایی پرونده، تعیین موجودی مبنا و وضعیت اتصال</td></tr>
+        <tr><td>Snapshot حساب</td><td>زمان، Balance، Equity، سود/زیان شناور، Margin، Free Margin و Margin Level</td><td>محاسبه افت سرمایه شناور، شکاف داده و موجودی زمان معامله</td></tr>
+        <tr><td>معامله</td><td>Ticket/Position ID، نماد، جهت، وضعیت، زمان باز و بسته شدن، قیمت ورود/خروج، حجم، سود ناخالص و خالص</td><td>تحلیل عملکرد، تعداد معاملات، سبک، ساعات فعالیت و رفتار بعد از زیان</td></tr>
+        <tr><td>حفاظت معامله</td><td>SL و TP اولیه، SL و TP فعلی، مبلغ ریسک، Balance و Equity هنگام ورود</td><td>تشخیص معامله بدون حد ضرر و محاسبه ریسک واقعی اولیه</td></tr>
+        <tr><td>مشخصات نماد</td><td>Symbol، Contract Size، Tick Size، Tick Value، Digits، ارز پایه و ارز سود</td><td>تبدیل فاصله قیمت تا حد ضرر به مبلغ ریسک؛ مقادیر از بروکر دریافت می‌شوند و هاردکد نیستند</td></tr>
+        <tr><td>جریان نقدی</td><td>نوع واریز/برداشت، مبلغ، ارز، زمان، مرجع و Payload خام</td><td>جلوگیری از اشتباه گرفتن واریز/برداشت با سود یا افت سرمایه</td></tr>
+      </tbody>
+    </table>
+
+    <h3>فرمول ریسک اولیه معامله</h3>
+    <div class="formula">Risk Amount = |Entry Price − Initial Stop Loss| ÷ Tick Size × Tick Value × Lot Size</div>
+    <p>اولویت محاسبه با <b>حد ضرر اولیه</b> است؛ جابه‌جایی بعدی حد ضرر نباید ریسک زمان ورود را تغییر دهد. اگر داده واقعی وجود نداشته باشد، سامانه حد ضرر یا ریسک ساختگی تولید نمی‌کند و کمبود داده را گزارش می‌دهد.</p>
+    <div class="note success"><b>نمونه XAUUSD در حساب بررسی‌شده:</b> Contract Size = 100، Tick Size = 0.01، Tick Value = 1، Digits = 2. یعنی در حجم یک لات، هر حرکت 0.01 قیمت تقریباً یک دلار تغییر سود/زیان ایجاد می‌کند. این مشخصات مختص همان بروکر/حساب است.</div>
+  </section>
+
+  <section class="page">
+    <h2>۴. شاخص‌هایی که در داشبورد محاسبه و ذخیره می‌شود</h2>
+    <table>
+      <thead><tr><th>بخش داشبورد</th><th>شاخص‌های ذخیره‌شده</th><th>معنی مدیریتی</th></tr></thead>
+      <tbody>
+        <tr><td>بازه و کیفیت داده</td><td>از/تا تاریخ داده، سن حساب، تعداد معاملات بسته، درصد پوشش Snapshot، تعداد شکاف‌ها، شروع مانیتورینگ، معاملات قبل از مانیتورینگ، نمادهای ناقص، پوشش داده ریسک</td><td>تعیین می‌کند آیا ارزیابی قابل اعتماد است یا خیر</td></tr>
+        <tr><td>فعالیت معامله</td><td>معاملات ۱، ۲ و ۴ هفته، معامله در روز/هفته، میانگین و میانه زمان نگهداری، سبک معاملاتی و توزیع ساعتی</td><td>تشخیص Scalper/Day Trader/Swing و بیش‌معامله‌گری</td></tr>
+        <tr><td>عملکرد</td><td>Win Rate، Profit Factor، سود و زیان ناخالص، P&amp;L خالص ۱، ۲ و ۴ هفته</td><td>پایداری عملکرد و کیفیت بازده</td></tr>
+        <tr><td>ریسک هر معامله</td><td>میانگین، میانه، انحراف معیار و بیشترین درصد ریسک؛ تعداد معاملات بالای ۴٪؛ Average/Median R</td><td>ثبات حجم‌گیری و وجود ریسک غیرعادی</td></tr>
+        <tr><td>رفتار بعد از ضرر</td><td>افزایش متوسط/میانه ریسک، زمان ورود بعدی، تعداد و درصد معاملات انتقامی، زنجیره افزایش ریسک پس از ضرر</td><td>تشخیص Revenge Trading و Martingale</td></tr>
+        <tr><td>افت سرمایه</td><td>بیشترین DD روزانه، هفتگی، ماهانه، بسته‌شده و شناور؛ نزدیکی به آستانه؛ زمان بازیابی؛ نمودار Equity تعدیل‌شده</td><td>اندازه‌گیری شدت و تکرار افت سرمایه با حذف اثر واریز/برداشت</td></tr>
+        <tr><td>نتیجه ارزیابی</td><td>Risk Score، Risk Level، Data Quality، Confidence، Eligibility، پکیج پیشنهادی، نسخه Policy، Snapshot کامل Metrics و خلاصه</td><td>ثبت نتیجه‌ای نسخه‌بندی‌شده و قابل بازبینی</td></tr>
+        <tr><td>هشدارها</td><td>کد، عنوان، شدت، اثر بر احراز شرایط، معامله مرتبط، پیشنهاد اصلاح، Evidence و زمان کشف</td><td>توضیح‌پذیری تصمیم و بررسی انسانی</td></tr>
+      </tbody>
+    </table>
+
+    <h3>منطق امتیاز ریسک</h3>
+    <table>
+      <thead><tr><th>محور</th><th style="width:16%">وزن فعلی</th><th>ورودی اصلی</th></tr></thead>
+      <tbody>
+        <tr><td>کنترل افت سرمایه</td><td>۳۰٪</td><td>بیشترین افت سرمایه ماهانه نسبت به آستانه بد ۸٪</td></tr>
+        <tr><td>رفتار بعد از ضرر</td><td>۲۵٪</td><td>درصد معاملات انتقامی؛ آستانه بد فعلی ۳۵٪</td></tr>
+        <tr><td>ثبات ریسک</td><td>۲۰٪</td><td>بیشترین ریسک پوزیشن و انحراف معیار درصد ریسک</td></tr>
+        <tr><td>عملکرد</td><td>۱۵٪</td><td>Profit Factor؛ مقدار مطلوب فعلی ۱.۳</td></tr>
+        <tr><td>فرکانس معامله</td><td>۱۰٪</td><td>تعداد معاملات روزانه؛ آستانه زیاد فعلی ۸ معامله</td></tr>
+      </tbody>
+    </table>
+    <p class="small">امتیاز کمتر بهتر است: ۰ تا ۳۰ کم‌ریسک، ۳۱ تا ۵۰ متوسط، ۵۱ تا ۷۰ پرریسک و بالاتر از ۷۰ بسیار پرریسک.</p>
+  </section>
+
+  <section class="page">
+    <h2>۵. شرایط احراز و هشدارهای اصلی</h2>
+    <table>
+      <thead><tr><th>کنترل</th><th>مقدار فعلی نسخه آزمایشی</th><th>اثر</th></tr></thead>
+      <tbody>
+        <tr><td>حداقل سابقه حساب</td><td>۱۴ روز</td><td>کمتر از آن: داده ناکافی</td></tr>
+        <tr><td>حداقل معاملات بسته</td><td>۲۰ معامله</td><td>کمتر از آن: داده ناکافی</td></tr>
+        <tr><td>پوشش Snapshot</td><td>حداقل ۷۰٪؛ متوسط از ۹۰٪</td><td>کمتر از ۷۰٪: کیفیت پایین؛ ۷۰–۹۰٪: متوسط</td></tr>
+        <tr><td>بزرگ‌ترین فاصله Sync</td><td>حداکثر ۱۰ دقیقه</td><td>شکاف بیشتر: هشدار و بررسی</td></tr>
+        <tr><td>پوشش داده ریسک</td><td>حداقل ۸۰٪ معاملات</td><td>کمتر از آن: بررسی دستی</td></tr>
+        <tr><td>ریسک هر پوزیشن</td><td>بیش از ۴٪ بحرانی</td><td>هشدار Critical و اثر بر احراز شرایط</td></tr>
+        <tr><td>ورود سریع بعد از ضرر</td><td>۵ دقیقه یا کمتر</td><td>هشدار رفتاری</td></tr>
+        <tr><td>الگوی Martingale</td><td>۳ زیان متوالی همراه تشدید ریسک</td><td>هشدار پرخطر و اثر بر احراز شرایط</td></tr>
+      </tbody>
+    </table>
+    <h3>خروجی نهایی پرونده</h3>
+    <ul>
+      <li><span class="tag">ELIGIBLE</span> واجد شرایط؛ امکان دریافت پیشنهاد پکیج.</li>
+      <li><span class="tag">MANUAL REVIEW</span> نیازمند بررسی انسانی به‌علت کیفیت پایین، هشدارهای داده یا امتیاز بالاتر از ۷۰.</li>
+      <li><span class="tag">NOT ELIGIBLE</span> نقض قانون قطعی یا عبور از سقف مجاز.</li>
+      <li><span class="tag">INSUFFICIENT DATA</span> سابقه یا تعداد معامله هنوز کافی نیست.</li>
+    </ul>
+    <h3>هشدارهای قابل ثبت</h3>
+    <p>داده ناکافی، شکاف Sync، سابقه قبل از مانیتورینگ، مشخصات ناقص نماد، داده ناقص ریسک، معامله بدون حد ضرر، افزایش ریسک پس از زیان، احتمال معامله انتقامی، ورود سریع پس از زیان، الگوی Martingale، ریسک بیش از ۴٪، Overtrading و نزدیکی مکرر به سقف افت سرمایه.</p>
+    <div class="note">هشدار «سابقه پیش از مانیتورینگ» صرفاً اطلاع‌رسانی است. پوشش Snapshot از زمان شروع واقعی مانیتورینگ سنجیده می‌شود و Snapshot تاریخی ساختگی ایجاد نمی‌گردد.</div>
+  </section>
+
+  <section class="page">
+    <h2>۶. پکیج‌ها، قیمت‌گذاری و اطلاعات بیمه‌نامه</h2>
+    <table>
+      <thead><tr><th>پکیج آزمایشی</th><th>پوشش افت سرمایه</th><th>رده قابل ارائه</th></tr></thead>
+      <tbody>
+        <tr><td>SAFESIDE 15</td><td>تا ۱۵٪</td><td>کم، متوسط و بالا ـ در صورت احراز شرایط</td></tr>
+        <tr><td>SAFESIDE 20</td><td>تا ۲۰٪</td><td>کم و متوسط</td></tr>
+        <tr><td>SAFESIDE 30</td><td>تا ۳۰٪</td><td>فقط کم‌ریسک</td></tr>
+      </tbody>
+    </table>
+    <p>مدت فعلی برای ریسک کم ۳۰ روز و برای ریسک متوسط/بالا ۱۴ روز است. تخفیف وفاداری به‌ازای هر دوره موفق ۵٪ و سقف آن ۲۵٪ است.</p>
+    <div class="formula">Insured Amount = Account Balance × Coverage %</div>
+    <div class="formula">Premium Rate = Claim Probability × 80% ÷ 45%</div>
+    <p>در بیمه‌نامه فعال، این اطلاعات ذخیره می‌شود: وضعیت، نسخه Policy، امتیاز و سطح ریسک شروع، موجودی شروع، مبلغ و درصد پوشش، سقف افت سرمایه، نرخ پرداخت، نرخ و مبلغ حق‌بیمه، تخفیف وفاداری، سهم صندوق/بروکر/Tradivix، زمان شروع و پایان، دلیل ابطال و زمان تکمیل.</p>
+    <p>تقسیم آزمایشی حق‌بیمه فعلی: <b>۶۰٪ صندوق، ۲۰٪ بروکر و ۲۰٪ Tradivix</b>.</p>
+    <div class="note"><b>هشدار تجاری:</b> احتمال‌های خسارت و فرمول فوق پارامترهای نرم‌افزاری فعلی‌اند، نه نرخ مصوب بیمه. قبل از ارائه به مشتری باید با داده تاریخی، نظر اکچوئر و تأیید حقوقی بازتنظیم شوند.</div>
+
+    <h3>اطلاعات درخواست و خسارت</h3>
+    <table>
+      <thead><tr><th>پرونده</th><th>داده‌های ذخیره‌شده</th></tr></thead>
+      <tbody>
+        <tr><td>درخواست بیمه</td><td>کاربر، حساب، ارزیابی، پکیج، وضعیت، دلیل بررسی، بازبین، مبلغ پوشش، نرخ و مبلغ حق‌بیمه، تخفیف، مدت و نرخ پرداخت</td></tr>
+        <tr><td>خسارت</td><td>شماره خسارت، وضعیت و زمان‌های صف/پردازش/پرداخت/رد/لغو، موجودی درخواست، زیان واقعی، مبلغ پرداخت، تعداد پوزیشن باز، تأیید بروکر، مرجع خارجی و دلایل تصمیم</td></tr>
+        <tr><td>وفاداری</td><td>تعداد دوره موفق، درصد تخفیف، کاهش امتیاز ریسک و آخرین بیمه‌نامه</td></tr>
+        <tr><td>ممیزی تصمیم</td><td>تصمیم قبلی و جدید، دلیل، کاربر تصمیم‌گیر، مرجع هدف و زمان</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page">
+    <h2>۷. نمونه تفسیر داشبورد فعلی</h2>
+    <p>برای حساب نمونه نمایش‌داده‌شده در داشبورد، نتیجه فعلی چنین خوانده می‌شود:</p>
+    <div class="kpis">
+      <div class="kpi"><strong>۴ روز</strong>سن حساب</div>
+      <div class="kpi"><strong>۱۲</strong>معامله بررسی‌شده</div>
+      <div class="kpi"><strong>۶۰/۱۰۰</strong>امتیاز ریسک</div>
+      <div class="kpi"><strong>۵۵٪</strong>اطمینان</div>
+    </div>
+    <table>
+      <thead><tr><th>مشاهده</th><th>تفسیر برای کارفرما</th></tr></thead>
+      <tbody>
+        <tr><td>کیفیت داده پایین</td><td>حساب هنوز به حداقل ۱۴ روز و ۲۰ معامله نرسیده و بخشی از داده ریسک کامل نیست.</td></tr>
+        <tr><td>پوشش Snapshot حدود ۸۸.۹٪</td><td>از شروع واقعی مانیتورینگ، بخش زیادی از داده ثبت شده؛ بااین‌حال شکاف‌های Sync باید رفع شوند.</td></tr>
+        <tr><td>پوشش داده ریسک ۵۰٪</td><td>فقط نیمی از معاملات ورودی کافی برای محاسبه قطعی ریسک داشته‌اند؛ حداقل لازم ۸۰٪ است.</td></tr>
+        <tr><td>مشخصات XAUUSD موجود</td><td>محاسبه مبلغ ریسک طلا اکنون با Tick Size و Tick Value واقعی بروکر امکان‌پذیر است.</td></tr>
+        <tr><td>پکیج پیشنهادی ندارد</td><td>این رفتار صحیح است؛ پرونده ناقص یا نیازمند بررسی نباید خودکار بیمه‌نامه دریافت کند.</td></tr>
+      </tbody>
+    </table>
+    <div class="note success"><b>نتیجه نمونه:</b> زیرساخت داده و ارزیابی فعال است، اما این حساب در وضعیت فعلی برای صدور خودکار آماده نیست. باید مانیتورینگ ادامه یابد، حداقل سابقه و تعداد معامله تکمیل شود، شکاف‌های Sync کاهش یابد و پوشش داده ریسک به ۸۰٪ یا بیشتر برسد.</div>
+
+    <h3>جمع‌بندی تحویل به کارفرما</h3>
+    <table>
+      <thead><tr><th>موضوع</th><th>وضعیت</th><th>اقدام بعدی</th></tr></thead>
+      <tbody>
+        <tr><td>دریافت داده MT5، معاملات و نمادها</td><td class="status-done">پیاده‌سازی شده</td><td>مانیتورینگ دائمی و تست چند بروکر</td></tr>
+        <tr><td>تحلیل کیفیت، ریسک، DD و رفتار</td><td class="status-done">پیاده‌سازی شده</td><td>اعتبارسنجی با نمونه آماری بزرگ‌تر</td></tr>
+        <tr><td>پکیج، درخواست، پوشش و خسارت</td><td class="status-done">گردش‌کار نرم‌افزاری موجود</td><td>آزمون انتهابه‌انتها و آموزش عملیات</td></tr>
+        <tr><td>نرخ‌ها و شرایط تجاری</td><td class="status-needed">آزمایشی</td><td>تصویب اکچوئری، مالی و حقوقی</td></tr>
+        <tr><td>آمادگی عرضه عمومی</td><td class="status-needed">نیازمند پایلوت</td><td>UAT، SLA، امنیت و مجوزهای لازم</td></tr>
+      </tbody>
+    </table>
+    <p class="small">مبنای این گزارش: پیاده‌سازی موجود ماژول Insurance و MT5 Direct در پروژه Tradivix، نسخه Policy آزمایشی SAFESIDE-DRAFT-2026-09. این سند جایگزین بیمه‌نامه، شرایط حقوقی یا تأیید اکچوئری نیست.</p>
+  </section>
+</body>
+</html>

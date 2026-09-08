@@ -1,0 +1,221 @@
+{
+  "before": [
+    {
+      "i": 0,
+      "text": "خروج",
+      "rect": {
+        "x": 1152.800048828125,
+        "y": 936,
+        "w": 255.1999969482422,
+        "h": 44
+      }
+    },
+    {
+      "i": 1,
+      "text": "آموزش",
+      "rect": {
+        "x": 285.6625061035156,
+        "y": 14,
+        "w": 82.8375015258789,
+        "h": 36
+      }
+    },
+    {
+      "i": 2,
+      "text": "فارسی",
+      "rect": {
+        "x": 186.58750915527344,
+        "y": 16,
+        "w": 87.07500457763672,
+        "h": 32
+      }
+    },
+    {
+      "i": 3,
+      "text": "روشن",
+      "rect": {
+        "x": 94.875,
+        "y": 14,
+        "w": 74.9124984741211,
+        "h": 36
+      }
+    },
+    {
+      "i": 4,
+      "text": "تیره",
+      "rect": {
+        "x": 28.80000114440918,
+        "y": 14,
+        "w": 66.07500457763672,
+        "h": 36
+      }
+    },
+    {
+      "i": 5,
+      "text": "معامله جدید",
+      "rect": {
+        "x": 988.6875,
+        "y": 319.9875183105469,
+        "w": 124.11250305175781,
+        "h": 40
+      }
+    },
+    {
+      "i": 6,
+      "text": "فیلتر",
+      "rect": {
+        "x": 54.32500076293945,
+        "y": 574.3375244140625,
+        "w": 81.20000457763672,
+        "h": 44
+      }
+    },
+    {
+      "i": 7,
+      "text": "",
+      "rect": {
+        "x": 739.6000366210938,
+        "y": 334.7875061035156,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 8,
+      "text": "قبلی",
+      "rect": {
+        "x": 925.4750366210938,
+        "y": 475.5874938964844,
+        "w": 74.25,
+        "h": 36
+      }
+    },
+    {
+      "i": 9,
+      "text": "رد کردن",
+      "rect": {
+        "x": 825.3250122070312,
+        "y": 475.5874938964844,
+        "w": 92.1500015258789,
+        "h": 36
+      }
+    },
+    {
+      "i": 10,
+      "text": "بعدی",
+      "rect": {
+        "x": 739.6000366210938,
+        "y": 475.5874938964844,
+        "w": 77.7249984741211,
+        "h": 36
+      }
+    }
+  ],
+  "after": {
+    "hasXAU": true,
+    "hasSave": false,
+    "fieldNames": [
+      "symbol",
+      "side",
+      "entryPrice",
+      "exitPrice",
+      "stopLoss",
+      "takeProfit",
+      "lotSize",
+      "riskAmount",
+      "profitLoss",
+      "entryTime",
+      "exitTime",
+      "status",
+      "setup",
+      "emotion",
+      "mistakes",
+      "notes",
+      "ticket",
+      "symbol",
+      "status",
+      "result",
+      "reviewStatus",
+      "source",
+      "tradeType",
+      "dateFrom",
+      "dateTo"
+    ],
+    "buttons": [
+      {
+        "i": 0,
+        "text": "خروج"
+      },
+      {
+        "i": 1,
+        "text": "آموزش"
+      },
+      {
+        "i": 2,
+        "text": "فارسی"
+      },
+      {
+        "i": 3,
+        "text": "روشن"
+      },
+      {
+        "i": 4,
+        "text": "تیره"
+      },
+      {
+        "i": 5,
+        "text": "بستن"
+      },
+      {
+        "i": 6,
+        "text": "لغو"
+      },
+      {
+        "i": 7,
+        "text": "ذخیره معامله"
+      },
+      {
+        "i": 8,
+        "text": "فیلتر"
+      },
+      {
+        "i": 9,
+        "text": ""
+      },
+      {
+        "i": 10,
+        "text": "قبلی"
+      },
+      {
+        "i": 11,
+        "text": "رد کردن"
+      },
+      {
+        "i": 12,
+        "text": "بعدی"
+      }
+    ],
+    "hrefs": [
+      "http://127.0.0.1:3014/journal/calendar",
+      "http://127.0.0.1:3014/journal/analytics",
+      "http://127.0.0.1:3014/journal/playbooks",
+      "http://127.0.0.1:3014/journal/checklists",
+      "http://127.0.0.1:3014/journal/playbooks",
+      "http://127.0.0.1:3014/journal/checklists",
+      "http://127.0.0.1:3014/journal/analytics",
+      "http://127.0.0.1:3014/journal/cmrp5ofmn007dtfnk38lm5usm",
+      "http://127.0.0.1:3014/journal/cmrp5ofmn007dtfnk38lm5usm",
+      "http://127.0.0.1:3014/journal/cmrp5ofwc007htfnketdzxbbe",
+      "http://127.0.0.1:3014/journal/cmrp5ofwc007htfnketdzxbbe",
+      "http://127.0.0.1:3014/journal/cmrp5og32007ltfnkp3r7np5h",
+      "http://127.0.0.1:3014/journal/cmrp5og32007ltfnkp3r7np5h",
+      "http://127.0.0.1:3014/journal/cmrp5og92007ptfnk2s2usky9",
+      "http://127.0.0.1:3014/journal/cmrp5og92007ptfnk2s2usky9",
+      "http://127.0.0.1:3014/journal/cmrp5j78e006dtfnkn2y30imz",
+      "http://127.0.0.1:3014/journal/cmrp5j78e006dtfnkn2y30imz",
+      "http://127.0.0.1:3014/journal/cmrp5jafq006htfnkdcjyupil",
+      "http://127.0.0.1:3014/journal/cmrp5jafq006htfnkdcjyupil",
+      "http://127.0.0.1:3014/journal/cmrp5r25w007ttfnkeqoj2ol0"
+    ]
+  }
+}
