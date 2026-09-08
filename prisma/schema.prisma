@@ -84,6 +84,7 @@ enum TradingAccountIngestionMode {
   EA_LEGACY
   DIRECT_MT5
   DIRECT_CTRADER
+  DIRECT_TRADELOCKER
 }
 
 enum Mt5DirectConnectionStatus {
@@ -101,6 +102,14 @@ enum CtraderDirectConnectionStatus {
   INITIAL_SYNC
   ACTIVE
   ERROR
+  DISCONNECTED
+}
+
+enum TradeLockerConnectionStatus {
+  CONNECTED
+  SYNCING
+  ERROR
+  REAUTH_REQUIRED
   DISCONNECTED
 }
 
@@ -197,6 +206,8 @@ model User {
   mt5DirectConnections          Mt5DirectConnection[]
   ctraderOAuthGrant             CtraderOAuthGrant?
   ctraderDirectConnections      CtraderDirectConnection[]
+  tradeLockerConnections        TradeLockerConnection[]
+  tradeLockerAuthSessions       TradeLockerAuthSession[]
   insuranceAssessments          InsuranceAssessment[]
   insuranceApplications         InsuranceApplication[]     @relation("InsuranceApplicant")
   reviewedInsuranceApplications InsuranceApplication[]     @relation("InsuranceReviewer")
@@ -389,18 +400,24 @@ model TradingAccount {
   journalSecretEncrypted String?
   mt5AccountNumber       String?
   ctraderAccountId       String?
+  tradeLockerAccountId   String?
   lastConnectedAt        DateTime?
   lastSyncAt             DateTime?
   ingestionMode          TradingAccountIngestionMode @default(MANUAL)
   createdAt              DateTime                    @default(now())
   updatedAt              DateTime                    @updatedAt
 
-  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
   trades                Trade[]
   directConnection      Mt5DirectConnection?
   mt5BrokerDeals        Mt5BrokerDeal[]
   ctraderConnection     CtraderDirectConnection?
   ctraderBrokerDeals    CtraderBrokerDeal[]
+  tradeLockerConnection TradeLockerConnection?
+  tradeLockerOrders     TradeLockerOrder[]
+  tradeLockerExecutions TradeLockerExecution[]
+  tradeLockerPositions  TradeLockerPosition[]
+  tradeLockerSnapshots  TradeLockerAccountSnapshot[]
   equitySnapshots       AccountEquitySnapshot[]
   symbolSpecifications  SymbolSpecification[]
   cashTransactions      CashTransaction[]
@@ -415,7 +432,184 @@ model TradingAccount {
   @@index([userId])
   @@index([mt5AccountNumber])
   @@index([ctraderAccountId])
+  @@index([tradeLockerAccountId])
   @@index([ingestionMode])
+}
+
+model TradeLockerAuthSession {
+  id                    String    @id @default(cuid())
+  userId                String
+  environment           String
+  server                String
+  email                 String
+  accessTokenEncrypted  String
+  refreshTokenEncrypted String
+  accessTokenExpiresAt  DateTime
+  refreshTokenExpiresAt DateTime?
+  expiresAt             DateTime
+  createdAt             DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model TradeLockerConnection {
+  id                     String                      @id @default(cuid())
+  userId                 String
+  accountId              String                      @unique
+  environment            String
+  server                 String
+  email                  String
+  tradeLockerAccountId   String
+  accNum                 String
+  accountName            String?
+  accountStatus          String?
+  accessTokenEncrypted   String?
+  refreshTokenEncrypted  String?
+  accessTokenExpiresAt   DateTime?
+  refreshTokenExpiresAt  DateTime?
+  tokenVersion           Int                         @default(0)
+  tokenRefreshOwner      String?
+  tokenRefreshUntil      DateTime?
+  status                 TradeLockerConnectionStatus @default(SYNCING)
+  enabled                Boolean                     @default(true)
+  historyStartAt         DateTime
+  cursorAt               DateTime?
+  lastAttemptAt          DateTime?
+  lastConnectedAt        DateTime?
+  lastSyncAt             DateTime?
+  lastError              String?
+  importedOrderCount     Int                         @default(0)
+  importedExecutionCount Int                         @default(0)
+  leaseOwner             String?
+  leaseUntil             DateTime?
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+
+  user        User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account     TradingAccount               @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orders      TradeLockerOrder[]
+  executions  TradeLockerExecution[]
+  positions   TradeLockerPosition[]
+  instruments TradeLockerInstrument[]
+  snapshots   TradeLockerAccountSnapshot[]
+
+  @@unique([userId, environment, server, tradeLockerAccountId])
+  @@index([enabled, status])
+  @@index([leaseUntil])
+  @@index([lastSyncAt])
+  @@index([tokenRefreshUntil])
+}
+
+model TradeLockerOrder {
+  id                   String    @id @default(cuid())
+  connectionId         String
+  accountId            String
+  externalOrderId      String
+  dataKind             String
+  externalPositionId   String?
+  tradableInstrumentId String?
+  side                 String?
+  orderType            String?
+  status               String?
+  quantity             Decimal?  @db.Decimal(24, 8)
+  filledQuantity       Decimal?  @db.Decimal(24, 8)
+  averagePrice         Decimal?  @db.Decimal(24, 10)
+  createdAtProvider    DateTime?
+  modifiedAtProvider   DateTime?
+  rawPayload           Json
+  createdAt            DateTime  @default(now())
+
+  connection TradeLockerConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  account    TradingAccount        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, externalOrderId, dataKind])
+  @@index([connectionId, externalPositionId])
+  @@index([connectionId, modifiedAtProvider])
+}
+
+model TradeLockerExecution {
+  id                   String    @id @default(cuid())
+  connectionId         String
+  accountId            String
+  externalExecutionId  String
+  externalOrderId      String?
+  externalPositionId   String?
+  tradableInstrumentId String?
+  side                 String?
+  quantity             Decimal?  @db.Decimal(24, 8)
+  price                Decimal?  @db.Decimal(24, 10)
+  executedAt           DateTime?
+  rawPayload           Json
+  createdAt            DateTime  @default(now())
+
+  connection TradeLockerConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  account    TradingAccount        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, externalExecutionId])
+  @@index([connectionId, externalPositionId])
+  @@index([connectionId, executedAt])
+}
+
+model TradeLockerPosition {
+  id                   String    @id @default(cuid())
+  connectionId         String
+  accountId            String
+  externalPositionId   String
+  tradableInstrumentId String?
+  side                 String?
+  quantity             Decimal?  @db.Decimal(24, 8)
+  averagePrice         Decimal?  @db.Decimal(24, 10)
+  unrealizedPnl        Decimal?  @db.Decimal(18, 2)
+  openedAt             DateTime?
+  isOpen               Boolean   @default(true)
+  rawPayload           Json
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  connection TradeLockerConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  account    TradingAccount        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, externalPositionId])
+  @@index([accountId, isOpen])
+}
+
+model TradeLockerInstrument {
+  id                   String   @id @default(cuid())
+  connectionId         String
+  tradableInstrumentId String
+  instrumentId         String
+  name                 String
+  type                 String?
+  rawPayload           Json
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  connection TradeLockerConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, tradableInstrumentId])
+  @@index([connectionId, name])
+}
+
+model TradeLockerAccountSnapshot {
+  id           String   @id @default(cuid())
+  connectionId String
+  accountId    String
+  capturedAt   DateTime
+  balance      Decimal? @db.Decimal(18, 2)
+  equity       Decimal? @db.Decimal(18, 2)
+  floatingPnl  Decimal? @db.Decimal(18, 2)
+  margin       Decimal? @db.Decimal(18, 2)
+  freeMargin   Decimal? @db.Decimal(18, 2)
+  rawPayload   Json
+  createdAt    DateTime @default(now())
+
+  connection TradeLockerConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  account    TradingAccount        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, capturedAt])
+  @@index([accountId, capturedAt])
 }
 
 model CtraderOAuthGrant {
@@ -598,12 +792,13 @@ model Trade {
   mistake String?
   notes   String?
 
-  source         String            @default("MANUAL")
-  mt5Ticket      String?
-  aiReviewStatus String            @default("NOT_REVIEWED")
-  aiReviewScore  Int?
-  reviewStatus   TradeReviewStatus @default(DRAFT)
-  reviewedAt     DateTime?
+  source                String            @default("MANUAL")
+  mt5Ticket             String?
+  tradeLockerPositionId String?
+  aiReviewStatus        String            @default("NOT_REVIEWED")
+  aiReviewScore         Int?
+  reviewStatus          TradeReviewStatus @default(DRAFT)
+  reviewedAt            DateTime?
 
   playbookId                  String?
   checklistCompletedAt        DateTime?
@@ -628,6 +823,7 @@ model Trade {
   insuranceRiskFlags InsuranceRiskFlag[]
 
   @@unique([accountId, mt5Ticket])
+  @@unique([accountId, tradeLockerPositionId])
   @@index([userId])
   @@index([accountId])
   @@index([symbol])
@@ -1368,24 +1564,24 @@ model InsuranceRiskFlag {
 }
 
 model InsuranceApplication {
-  id           String                     @id @default(cuid())
-  userId       String
-  accountId    String
-  assessmentId String
-  packageId    String
-  status       InsuranceApplicationStatus @default(PENDING)
-  reviewReason String?
-  reviewedById String?
-  reviewedAt   DateTime?
-  insuredAmount             Decimal? @db.Decimal(18, 2)
-  premiumRate               Decimal? @db.Decimal(10, 6)
-  basePremium               Decimal? @db.Decimal(18, 2)
-  loyaltyDiscountPercent    Decimal? @db.Decimal(5, 2)
-  quotedPremium             Decimal? @db.Decimal(18, 2)
+  id                         String                     @id @default(cuid())
+  userId                     String
+  accountId                  String
+  assessmentId               String
+  packageId                  String
+  status                     InsuranceApplicationStatus @default(PENDING)
+  reviewReason               String?
+  reviewedById               String?
+  reviewedAt                 DateTime?
+  insuredAmount              Decimal?                   @db.Decimal(18, 2)
+  premiumRate                Decimal?                   @db.Decimal(10, 6)
+  basePremium                Decimal?                   @db.Decimal(18, 2)
+  loyaltyDiscountPercent     Decimal?                   @db.Decimal(5, 2)
+  quotedPremium              Decimal?                   @db.Decimal(18, 2)
   quotedCoverageDurationDays Int?
-  payoutRate                Decimal? @db.Decimal(5, 4)
-  createdAt    DateTime                   @default(now())
-  updatedAt    DateTime                   @updatedAt
+  payoutRate                 Decimal?                   @db.Decimal(5, 4)
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime                   @updatedAt
 
   user         User                   @relation("InsuranceApplicant", fields: [userId], references: [id], onDelete: Cascade)
   reviewer     User?                  @relation("InsuranceReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
@@ -1401,37 +1597,37 @@ model InsuranceApplication {
 }
 
 model InsuranceCoverage {
-  id                      String                  @id @default(cuid())
-  applicationId           String                  @unique
-  userId                  String
-  accountId               String
-  assessmentId            String
-  packageId               String
-  policyId                String
-  status                  InsuranceCoverageStatus @default(ACTIVE)
-  policyVersion           String
-  riskScoreAtStart        Int
-  riskLevelAtStart        InsuranceRiskLevel
-  balanceAtStart          Decimal                 @db.Decimal(18, 2)
-  insuredAmount           Decimal                 @db.Decimal(18, 2)
-  coveragePercent         Decimal                 @db.Decimal(5, 2)
-  drawdownLimitPercent    Decimal                 @db.Decimal(5, 2)
-  payoutRate              Decimal                 @db.Decimal(5, 4)
-  premiumRate             Decimal                 @db.Decimal(10, 6)
-  basePremium             Decimal                 @db.Decimal(18, 2)
-  loyaltyDiscountPercent  Decimal                 @db.Decimal(5, 2)
-  premiumAmount           Decimal                 @db.Decimal(18, 2)
-  poolShare               Decimal                 @db.Decimal(18, 2)
-  brokerShare             Decimal                 @db.Decimal(18, 2)
-  safesideShare           Decimal                 @db.Decimal(18, 2)
-  startsAt                DateTime
-  endsAt                  DateTime
-  voidReason              String?
-  voidedAt                DateTime?
-  completedAt             DateTime?
-  loyaltyApplied          Boolean                 @default(false)
-  createdAt               DateTime                @default(now())
-  updatedAt               DateTime                @updatedAt
+  id                     String                  @id @default(cuid())
+  applicationId          String                  @unique
+  userId                 String
+  accountId              String
+  assessmentId           String
+  packageId              String
+  policyId               String
+  status                 InsuranceCoverageStatus @default(ACTIVE)
+  policyVersion          String
+  riskScoreAtStart       Int
+  riskLevelAtStart       InsuranceRiskLevel
+  balanceAtStart         Decimal                 @db.Decimal(18, 2)
+  insuredAmount          Decimal                 @db.Decimal(18, 2)
+  coveragePercent        Decimal                 @db.Decimal(5, 2)
+  drawdownLimitPercent   Decimal                 @db.Decimal(5, 2)
+  payoutRate             Decimal                 @db.Decimal(5, 4)
+  premiumRate            Decimal                 @db.Decimal(10, 6)
+  basePremium            Decimal                 @db.Decimal(18, 2)
+  loyaltyDiscountPercent Decimal                 @db.Decimal(5, 2)
+  premiumAmount          Decimal                 @db.Decimal(18, 2)
+  poolShare              Decimal                 @db.Decimal(18, 2)
+  brokerShare            Decimal                 @db.Decimal(18, 2)
+  safesideShare          Decimal                 @db.Decimal(18, 2)
+  startsAt               DateTime
+  endsAt                 DateTime
+  voidReason             String?
+  voidedAt               DateTime?
+  completedAt            DateTime?
+  loyaltyApplied         Boolean                 @default(false)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
 
   application InsuranceApplication @relation(fields: [applicationId], references: [id], onDelete: Restrict)
   user        User                 @relation("InsuranceCoverageOwner", fields: [userId], references: [id], onDelete: Cascade)
@@ -1447,31 +1643,31 @@ model InsuranceCoverage {
 }
 
 model InsuranceClaim {
-  id                    String               @id @default(cuid())
-  claimNumber           String               @unique
-  idempotencyKey        String               @unique
-  coverageId            String               @unique
-  userId                String
-  accountId             String
-  status                InsuranceClaimStatus @default(QUEUED)
-  requestedAt           DateTime             @default(now())
-  queuedAt              DateTime             @default(now())
-  processingAt          DateTime?
-  paidAt                DateTime?
-  rejectedAt            DateTime?
-  cancelledAt           DateTime?
-  balanceAtRequest      Decimal              @db.Decimal(18, 2)
-  actualLoss            Decimal              @db.Decimal(18, 2)
-  payoutAmount          Decimal              @db.Decimal(18, 2)
-  openPositionsAtRequest Int                 @default(0)
-  brokerAcknowledgedAt  DateTime?
-  externalReference     String?
-  decisionReason        String?
-  cancellationReason    String?
-  reviewerId            String?
-  brokerPayload         Json
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
+  id                     String               @id @default(cuid())
+  claimNumber            String               @unique
+  idempotencyKey         String               @unique
+  coverageId             String               @unique
+  userId                 String
+  accountId              String
+  status                 InsuranceClaimStatus @default(QUEUED)
+  requestedAt            DateTime             @default(now())
+  queuedAt               DateTime             @default(now())
+  processingAt           DateTime?
+  paidAt                 DateTime?
+  rejectedAt             DateTime?
+  cancelledAt            DateTime?
+  balanceAtRequest       Decimal              @db.Decimal(18, 2)
+  actualLoss             Decimal              @db.Decimal(18, 2)
+  payoutAmount           Decimal              @db.Decimal(18, 2)
+  openPositionsAtRequest Int                  @default(0)
+  brokerAcknowledgedAt   DateTime?
+  externalReference      String?
+  decisionReason         String?
+  cancellationReason     String?
+  reviewerId             String?
+  brokerPayload          Json
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
 
   coverage InsuranceCoverage @relation(fields: [coverageId], references: [id], onDelete: Restrict)
   user     User              @relation("InsuranceClaimOwner", fields: [userId], references: [id], onDelete: Cascade)
@@ -1484,15 +1680,15 @@ model InsuranceClaim {
 }
 
 model InsuranceLoyaltyProfile {
-  id                    String   @id @default(cuid())
-  userId                String
-  accountId             String   @unique
-  successfulCycles      Int      @default(0)
-  premiumDiscountPercent Int     @default(0)
-  riskScoreReduction    Int      @default(0)
-  lastCoverageId        String?
-  updatedAt             DateTime @updatedAt
-  createdAt             DateTime @default(now())
+  id                     String   @id @default(cuid())
+  userId                 String
+  accountId              String   @unique
+  successfulCycles       Int      @default(0)
+  premiumDiscountPercent Int      @default(0)
+  riskScoreReduction     Int      @default(0)
+  lastCoverageId         String?
+  updatedAt              DateTime @updatedAt
+  createdAt              DateTime @default(now())
 
   user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   account TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)

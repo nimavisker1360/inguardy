@@ -49,6 +49,20 @@ type DirectConnectResponse = {
   message?: string;
 };
 
+type TradeLockerCandidate = {
+  accountId: string;
+  accNum: string;
+  name: string;
+  currency: string;
+  status: string | null;
+  environment: "LIVE" | "DEMO";
+  balance: number | null;
+};
+
+type TradeLockerConnectResponse = DirectConnectResponse & {
+  data?: { sessionId: string; accounts: TradeLockerCandidate[] };
+};
+
 const platforms: PlatformOption[] = [
   {
     id: "mt5",
@@ -78,7 +92,7 @@ const platforms: PlatformOption[] = [
     searchTerms: "tradelocker prop firm broker",
     mark: "TL",
     markClassName: "bg-slate-950 text-white",
-    supportsAutoSync: false,
+    supportsAutoSync: true,
   },
   {
     id: "tradingview",
@@ -114,13 +128,15 @@ const englishText = {
   autoTitle: "Live sync",
   autoDetail: "Keep MT5 trades updated automatically",
   ctraderAutoDetail: "Keep cTrader trades updated automatically",
+  tradeLockerAutoDetail: "Keep TradeLocker trades updated automatically",
   fileTitle: "File upload",
   fileDetail: "Import an MT5 report or journal file",
   manualTitle: "Add manually",
   manualDetail: "Create an account and enter trades yourself",
-  mt5Only: "Available for MetaTrader 5 and cTrader",
+  mt5Only: "Available for MetaTrader 5, cTrader and TradeLocker",
   connectTitle: "Connect MetaTrader 5",
   ctraderConnectTitle: "Connect cTrader",
+  tradeLockerConnectTitle: "Connect TradeLocker",
   manualConnectTitle: "Add account details",
   fileRedirect: "Open trade importer",
   supported: "Supported workflow",
@@ -156,6 +172,19 @@ const englishText = {
   ctraderAuthorize: "Authorize with cTrader",
   ctraderOAuthDetail: "You will be redirected to cTrader to grant read-only account access.",
   ctraderTokenSafe: "OAuth tokens are encrypted at rest",
+  environment: "Environment",
+  live: "Live",
+  demo: "Demo",
+  tradeLockerEmail: "TradeLocker email",
+  tradeLockerPassword: "TradeLocker password",
+  tradeLockerServerPlaceholder: "Server name used in TradeLocker",
+  tradeLockerConnecting: "Connecting to TradeLocker...",
+  tradeLockerConnect: "Connect TradeLocker",
+  chooseTradeLockerAccount: "Choose TradeLocker Account",
+  tradeLockerPasswordSafe: "Your password is used only to authenticate and is never stored.",
+  selectAccount: "Connect",
+  tradeLockerConnected: "TradeLocker account connected and initial synchronization started.",
+  tradeLockerFailed: "Unable to connect to TradeLocker.",
 };
 
 const persianText: typeof englishText = {
@@ -174,13 +203,15 @@ const persianText: typeof englishText = {
   autoTitle: "همگام‌سازی زنده",
   autoDetail: "معاملات MT5 را خودکار به‌روز نگه دارید",
   ctraderAutoDetail: "معاملات cTrader را خودکار به‌روز نگه دارید",
+  tradeLockerAutoDetail: "معاملات TradeLocker را خودکار به‌روز نگه دارید",
   fileTitle: "بارگذاری فایل",
   fileDetail: "گزارش MT5 یا فایل ژورنال را وارد کنید",
   manualTitle: "ثبت دستی",
   manualDetail: "حساب را بسازید و معاملات را دستی ثبت کنید",
-  mt5Only: "برای MetaTrader 5 و cTrader در دسترس است",
+  mt5Only: "برای MetaTrader 5، cTrader و TradeLocker در دسترس است",
   connectTitle: "اتصال MetaTrader 5",
   ctraderConnectTitle: "اتصال cTrader",
+  tradeLockerConnectTitle: "اتصال TradeLocker",
   manualConnectTitle: "اطلاعات حساب را وارد کنید",
   fileRedirect: "باز کردن بخش ورود فایل",
   supported: "قابلیت‌های اتصال",
@@ -216,6 +247,19 @@ const persianText: typeof englishText = {
   ctraderAuthorize: "تأیید دسترسی در cTrader",
   ctraderOAuthDetail: "برای دادن دسترسی فقط‌خواندنی حساب، به cTrader هدایت می‌شوید.",
   ctraderTokenSafe: "توکن‌های OAuth به‌صورت رمزنگاری‌شده ذخیره می‌شوند",
+  environment: "محیط",
+  live: "واقعی",
+  demo: "آزمایشی",
+  tradeLockerEmail: "ایمیل TradeLocker",
+  tradeLockerPassword: "رمز عبور TradeLocker",
+  tradeLockerServerPlaceholder: "نام سرور مورد استفاده در TradeLocker",
+  tradeLockerConnecting: "در حال اتصال به TradeLocker...",
+  tradeLockerConnect: "اتصال TradeLocker",
+  chooseTradeLockerAccount: "انتخاب حساب TradeLocker",
+  tradeLockerPasswordSafe: "رمز عبور فقط برای احراز هویت استفاده می‌شود و هرگز ذخیره نمی‌شود.",
+  selectAccount: "اتصال",
+  tradeLockerConnected: "حساب TradeLocker متصل شد و همگام‌سازی اولیه آغاز شد.",
+  tradeLockerFailed: "اتصال به TradeLocker انجام نشد.",
 };
 
 function PlatformMark({ platform, large = false }: { platform: PlatformOption; large?: boolean }) {
@@ -713,8 +757,146 @@ function CtraderConnectStep({
   );
 }
 
+function TradeLockerConnectStep({
+  labels,
+  onCreated,
+  onDone,
+}: {
+  labels: typeof englishText;
+  onCreated: () => Promise<void>;
+  onDone: () => void;
+}) {
+  const [environment, setEnvironment] = useState<"LIVE" | "DEMO">("LIVE");
+  const [server, setServer] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [sessionId, setSessionId] = useState("");
+  const [accounts, setAccounts] = useState<TradeLockerCandidate[]>([]);
+  const [busy, setBusy] = useState<"authenticate" | string | null>(null);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  async function authenticate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy("authenticate");
+    setStatus("idle");
+    setMessage("");
+    try {
+      const response = await fetch("/api/integrations/tradelocker/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ environment, server, email, password }),
+      });
+      const result = (await response.json()) as TradeLockerConnectResponse;
+      setPassword("");
+      if (!response.ok || !result.success || !result.data?.sessionId || !result.data.accounts.length) {
+        throw new Error(result.message || labels.tradeLockerFailed);
+      }
+      setSessionId(result.data.sessionId);
+      setAccounts(result.data.accounts);
+    } catch (error) {
+      setPassword("");
+      setStatus("error");
+      setMessage(error instanceof Error ? error.message : labels.tradeLockerFailed);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function selectAccount(account: TradeLockerCandidate) {
+    setBusy(account.accountId);
+    setStatus("idle");
+    setMessage("");
+    try {
+      const response = await fetch("/api/integrations/tradelocker/select", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, accountId: account.accountId }),
+      });
+      const result = (await response.json()) as DirectConnectResponse;
+      if (!response.ok || !result.success) throw new Error(result.message || labels.tradeLockerFailed);
+      setStatus("success");
+      setMessage(result.message || labels.tradeLockerConnected);
+      await onCreated();
+    } catch (error) {
+      setStatus("error");
+      setMessage(error instanceof Error ? error.message : labels.tradeLockerFailed);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.9fr)] md:gap-10">
+      <div>
+        {accounts.length ? (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-slate-900">{labels.chooseTradeLockerAccount}</h3>
+            {accounts.map((account) => (
+              <div key={`${account.accountId}:${account.accNum}`} className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-bold text-slate-950">{account.name || `Account #${account.accountId}`}</p>
+                  <p className="mt-1 text-xs text-slate-500" dir="ltr">#{account.accountId} · {account.environment === "LIVE" ? labels.live : labels.demo} · {account.currency}</p>
+                </div>
+                <button type="button" onClick={() => selectAccount(account)} disabled={busy !== null || status === "success"} className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#5b3daf] px-4 text-sm font-bold text-white hover:bg-[#4e329b] disabled:opacity-50">
+                  {busy === account.accountId ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  {labels.selectAccount}
+                </button>
+              </div>
+            ))}
+            {status === "success" ? (
+              <button type="button" onClick={onDone} className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#5b3daf] px-4 text-sm font-bold text-white">{labels.done}</button>
+            ) : null}
+          </div>
+        ) : (
+          <form className="space-y-4" onSubmit={authenticate}>
+            <fieldset>
+              <legend className="text-xs font-semibold text-slate-600">{labels.environment}</legend>
+              <div className="mt-1.5 grid grid-cols-2 gap-2">
+                {(["LIVE", "DEMO"] as const).map((value) => (
+                  <button key={value} type="button" onClick={() => setEnvironment(value)} className={cn("h-10 rounded-lg border text-sm font-bold", environment === value ? "border-[#6547b7] bg-[#f4f1fb] text-[#4f3596] ring-1 ring-[#6547b7]" : "border-slate-200 bg-white text-slate-600")}>
+                    {value === "LIVE" ? labels.live : labels.demo}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <label className="block text-xs font-semibold text-slate-600">{labels.server}
+              <input required autoComplete="off" value={server} onChange={(event) => setServer(event.target.value)} placeholder={labels.tradeLockerServerPlaceholder} dir="ltr" className="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-900 outline-none focus:border-[#6547b7] focus:ring-2 focus:ring-[#6547b7]/15" />
+            </label>
+            <label className="block text-xs font-semibold text-slate-600">{labels.tradeLockerEmail}
+              <input required type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} dir="ltr" className="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-900 outline-none focus:border-[#6547b7] focus:ring-2 focus:ring-[#6547b7]/15" />
+            </label>
+            <label className="block text-xs font-semibold text-slate-600">{labels.tradeLockerPassword}
+              <span className="relative mt-1.5 block">
+                <input required type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} dir="ltr" className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 pe-11 text-left text-sm text-slate-900 outline-none focus:border-[#6547b7] focus:ring-2 focus:ring-[#6547b7]/15" />
+                <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute end-1 top-1 flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100" aria-label={showPassword ? labels.hidePassword : labels.showPassword}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </span>
+              <span className="mt-1 block text-[11px] font-normal leading-5 text-slate-500">{labels.tradeLockerPasswordSafe}</span>
+            </label>
+            <button type="submit" disabled={busy !== null} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#5b3daf] px-4 text-sm font-bold text-white hover:bg-[#4e329b] disabled:opacity-55">
+              {busy === "authenticate" ? <RefreshCw className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+              {busy === "authenticate" ? labels.tradeLockerConnecting : labels.tradeLockerConnect}
+            </button>
+          </form>
+        )}
+        <p className={cn("mt-3 min-h-5 text-xs font-semibold", status === "success" ? "text-emerald-700" : status === "error" ? "text-red-600" : "text-slate-500")}>{message}</p>
+      </div>
+      <div className="border-t border-slate-200 pt-6 md:border-s md:border-t-0 md:ps-8 md:pt-0">
+        <div className="flex items-center gap-3"><PlatformMark platform={platforms[3]} /><div><strong className="block text-base text-slate-950">TradeLocker</strong><span className="text-xs text-slate-500">{labels.supported}</span></div></div>
+        <ul className="mt-5 grid gap-3 text-sm text-slate-600">
+          {[labels.ctraderTokenSafe, labels.journalReady, labels.tradeLockerPasswordSafe].map((item) => <li key={item} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-[#6547b7]" /><span>{item}</span></li>)}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export function AccountConnectionWizard({
   open,
+  initialPlatformId,
   canUseAutoSync,
   errorMessage,
   onClose,
@@ -722,6 +904,7 @@ export function AccountConnectionWizard({
   onAccountsChanged,
 }: {
   open: boolean;
+  initialPlatformId?: string;
   canUseAutoSync: boolean;
   errorMessage?: string;
   onClose: () => void;
@@ -753,6 +936,11 @@ export function AccountConnectionWizard({
 
   useEffect(() => {
     if (!open) return;
+    if (initialPlatformId) {
+      setSelectedPlatformId(initialPlatformId);
+      setMethod("auto");
+      setStep("connect");
+    }
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -763,7 +951,7 @@ export function AccountConnectionWizard({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [closeWizard, open]);
+  }, [closeWizard, initialPlatformId, open]);
 
   if (!open) return null;
 
@@ -833,6 +1021,8 @@ export function AccountConnectionWizard({
                     : method === "auto"
                       ? selectedPlatformId === "ctrader"
                         ? labels.ctraderConnectTitle
+                        : selectedPlatformId === "tradelocker"
+                          ? labels.tradeLockerConnectTitle
                         : labels.connectTitle
                       : labels.manualConnectTitle}
               </h2>
@@ -905,6 +1095,8 @@ export function AccountConnectionWizard({
                     detail={autoSyncAvailable
                       ? selectedPlatform.id === "ctrader"
                         ? labels.ctraderAutoDetail
+                        : selectedPlatform.id === "tradelocker"
+                          ? labels.tradeLockerAutoDetail
                         : labels.autoDetail
                       : labels.mt5Only}
                     onClick={() => setMethod("auto")}
@@ -947,6 +1139,8 @@ export function AccountConnectionWizard({
                 {method === "auto" ? (
                   selectedPlatform.id === "ctrader" ? (
                     <CtraderConnectStep labels={labels} />
+                  ) : selectedPlatform.id === "tradelocker" ? (
+                    <TradeLockerConnectStep labels={labels} onCreated={onAccountsChanged} onDone={closeWizard} />
                   ) : (
                     <Mt5DirectConnectStep labels={labels} onCreated={onAccountsChanged} onDone={closeWizard} />
                   )

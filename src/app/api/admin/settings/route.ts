@@ -44,7 +44,12 @@ export async function GET() {
           usdtWalletBEP20: Boolean(process.env.USDT_WALLET_BEP20?.trim()),
           adminEmails: Boolean(process.env.ADMIN_EMAILS?.trim()),
           plans: plansCount > 0,
-          mailerSendApiToken: Boolean(process.env.MAILERSEND_API_TOKEN?.trim()),
+          smtp: Boolean(
+            (process.env.CONTACT_SMTP_USER?.trim() || process.env.SMTP_USER?.trim()) &&
+              (process.env.CONTACT_SMTP_PASSWORD?.trim() ||
+                process.env.CONTACT_SMTP_PASS?.trim() ||
+                process.env.SMTP_PASS?.trim())
+          ),
           mailTestTo: Boolean(process.env.MAIL_TEST_TO?.trim()),
         },
         trialDurationDays: 10,

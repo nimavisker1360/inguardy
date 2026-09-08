@@ -42,7 +42,7 @@ import {
 } from "@/components/dashboard/types";
 import { cn } from "@/lib/utils";
 
-const DASHBOARD_REFRESH_INTERVAL_MS = 15000;
+const DASHBOARD_REFRESH_INTERVAL_MS = 2_000;
 const DASHBOARD_DATE_TIME_ZONE = "UTC";
 
 type EconomicEventDto = {

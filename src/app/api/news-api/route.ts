@@ -74,7 +74,7 @@ function fallbackNews(): BlogNewsItem[] {
         "Review upcoming market drivers, volatility risk, and trade planning before entering new positions.",
       source: "Tradivix",
       publishTime: new Date().toISOString(),
-      url: "https://tradivix.com/blog",
+      url: "https://inguardy.com/blog",
       imageUrl:
         "https://images.unsplash.com/photo-1611324586758-17c1192ef510?q=80&w=1000&auto=format&fit=crop",
     },
@@ -85,7 +85,7 @@ function fallbackNews(): BlogNewsItem[] {
         "Track session volatility, important levels, and position sizing discipline before trading major pairs.",
       source: "Tradivix",
       publishTime: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
-      url: "https://tradivix.com/blog",
+      url: "https://inguardy.com/blog",
       imageUrl:
         "https://images.unsplash.com/photo-1627163439134-7a8c47e08208?q=80&w=1000&auto=format&fit=crop",
     },
@@ -96,7 +96,7 @@ function fallbackNews(): BlogNewsItem[] {
         "Use a simple checklist to avoid chasing moves around high-impact news and fast gold market swings.",
       source: "Tradivix",
       publishTime: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
-      url: "https://tradivix.com/blog",
+      url: "https://inguardy.com/blog",
       imageUrl:
         "https://images.unsplash.com/photo-1605231081543-2c22858eeaf3?q=80&w=1000&auto=format&fit=crop",
     },

@@ -35,7 +35,8 @@ function destination(request: Request, parameters: Record<string, string>) {
   }
   // In production, do not trust a proxy-derived internal host. Local callbacks
   // still need to return to the local development server.
-  const baseUrl = ["localhost", "127.0.0.1"].includes(requestUrl.hostname)
+  const isLocalRequest = ["localhost", "127.0.0.1"].includes(requestUrl.hostname);
+  const baseUrl = process.env.NODE_ENV !== "production" && isLocalRequest
     ? requestUrl
     : getConfiguredSiteUrl();
   const url = new URL("/dashboard/accounts", baseUrl);

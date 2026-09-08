@@ -7,6 +7,7 @@ import { AccountConnectionWizard } from "@/components/dashboard/AccountConnectio
 import { AccountJournalConnectionPanel } from "@/components/dashboard/AccountJournalConnectionPanel";
 import { Mt5DirectConnectionPanel } from "@/components/dashboard/Mt5DirectConnectionPanel";
 import { CtraderDirectConnectionPanel } from "@/components/dashboard/CtraderDirectConnectionPanel";
+import { TradeLockerConnectionPanel } from "@/components/dashboard/TradeLockerConnectionPanel";
 import { TradingAccountForm } from "@/components/dashboard/TradingAccountForm";
 import { useLanguage } from "@/lib/language-context";
 import {
@@ -31,6 +32,7 @@ export function AccountsManager({
   const [editingAccount, setEditingAccount] = useState<TradingAccountDto | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showConnectionWizard, setShowConnectionWizard] = useState(false);
+  const [connectionPlatform, setConnectionPlatform] = useState<string | undefined>();
   const [message, setMessage] = useState("");
   const [messageKind, setMessageKind] = useState<"error" | "success">("error");
   const { language, t } = useLanguage();
@@ -122,6 +124,7 @@ export function AccountsManager({
           onClick={() => {
             setEditingAccount(null);
             setMessage("");
+            setConnectionPlatform(undefined);
             setShowConnectionWizard(true);
           }}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
@@ -221,7 +224,16 @@ export function AccountsManager({
                 <div className="mt-1 font-semibold text-white">{account.currency}</div>
               </div>
             </div>
-            {account.ingestionMode === "DIRECT_CTRADER" || account.ctraderConnection ? (
+            {account.ingestionMode === "DIRECT_TRADELOCKER" || account.tradeLockerConnection ? (
+              <TradeLockerConnectionPanel
+                account={account}
+                onChanged={loadAccounts}
+                onReconnect={() => {
+                  setConnectionPlatform("tradelocker");
+                  setShowConnectionWizard(true);
+                }}
+              />
+            ) : account.ingestionMode === "DIRECT_CTRADER" || account.ctraderConnection ? (
               <CtraderDirectConnectionPanel account={account} onChanged={loadAccounts} />
             ) : account.ingestionMode === "DIRECT_MT5" || account.directConnection ? (
               <Mt5DirectConnectionPanel account={account} onChanged={loadAccounts} />
@@ -242,6 +254,7 @@ export function AccountsManager({
 
       <AccountConnectionWizard
         open={showConnectionWizard}
+        initialPlatformId={connectionPlatform}
         canUseAutoSync={journalAccess.canUseJournal}
         errorMessage={message}
         onClose={() => {

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { EmailParams, MailerSend, Recipient, Sender } from "mailersend";
+import nodemailer from "nodemailer";
 
 type MailAddress =
   | string
@@ -15,6 +15,7 @@ type SendTransactionalEmailInput = {
   html: string;
   text?: string;
   replyTo?: MailAddress;
+  fromName?: string;
 };
 
 type SendTransactionalEmailResult = {
@@ -22,15 +23,15 @@ type SendTransactionalEmailResult = {
   statusCode: number;
 };
 
-type MailerSendApiResponse = {
-  headers?: Record<string, unknown>;
-  statusCode?: number;
+type NormalizedAddress = {
+  address: string;
+  name?: string;
 };
 
-const DEFAULT_FROM_EMAIL = "noreply@tradivix.com";
-const DEFAULT_FROM_NAME = "Tradivix";
-
-let mailerSendClient: MailerSend | null = null;
+const DEFAULT_FROM_EMAIL = "info@inguardy.com";
+const DEFAULT_FROM_NAME = "Inguardy";
+const DEFAULT_SMTP_HOST = "smtp.hostinger.com";
+const DEFAULT_SMTP_PORT = 465;
 
 export class MailConfigurationError extends Error {
   constructor(message: string) {
@@ -49,39 +50,69 @@ export class MailDeliveryError extends Error {
   }
 }
 
-function getRequiredEnv(name: string) {
-  const value = process.env[name]?.trim();
+function cleanEnvValue(value: string | undefined) {
+  const trimmed = value?.trim() || "";
+
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+
+  return trimmed;
+}
+
+function getFirstEnv(...names: string[]) {
+  for (const name of names) {
+    const value = cleanEnvValue(process.env[name]);
+
+    if (value) {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function getRequiredEnv(names: string[], label: string) {
+  const value = getFirstEnv(...names);
 
   if (!value) {
-    throw new MailConfigurationError(`${name} is not configured`);
+    throw new MailConfigurationError(`${label} is not configured`);
   }
 
   return value;
 }
 
-function getMailerSendClient() {
-  if (!mailerSendClient) {
-    mailerSendClient = new MailerSend({
-      apiKey: getRequiredEnv("MAILERSEND_API_TOKEN"),
-    });
+function getSmtpPort() {
+  const rawPort =
+    getFirstEnv("CONTACT_SMTP_PORT", "SMTP_PORT") ||
+    String(DEFAULT_SMTP_PORT);
+  const port = Number(rawPort);
+
+  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+    throw new MailConfigurationError("SMTP port is invalid");
   }
 
-  return mailerSendClient;
+  return port;
 }
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function normalizeAddress(address: MailAddress) {
-  const email = typeof address === "string" ? address.trim() : address.email.trim();
-  const name = typeof address === "string" ? undefined : address.name?.trim() || undefined;
+function normalizeAddress(address: MailAddress): NormalizedAddress {
+  const email =
+    typeof address === "string" ? address.trim() : address.email.trim();
+  const name =
+    typeof address === "string" ? undefined : address.name?.trim() || undefined;
 
   if (!isValidEmail(email)) {
     throw new MailConfigurationError("Invalid email address");
   }
 
-  return new Recipient(email, name);
+  return { address: email, name };
 }
 
 function normalizeRecipients(to: MailAddress | MailAddress[]) {
@@ -111,26 +142,15 @@ function htmlToText(html: string) {
     .trim();
 }
 
-function getHeader(headers: Record<string, unknown> | undefined, name: string) {
-  if (!headers) {
-    return null;
-  }
-
-  const wanted = name.toLowerCase();
-  const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === wanted);
-  const value = entry?.[1];
-
-  if (Array.isArray(value)) {
-    return String(value[0] || "") || null;
-  }
-
-  return typeof value === "string" && value ? value : null;
-}
-
 function getErrorStatusCode(error: unknown) {
-  if (typeof error === "object" && error && "statusCode" in error) {
-    const statusCode = Number((error as { statusCode?: unknown }).statusCode);
-    return Number.isInteger(statusCode) ? statusCode : null;
+  if (typeof error === "object" && error) {
+    const responseCode = Number(
+      (error as { responseCode?: unknown }).responseCode
+    );
+
+    if (Number.isInteger(responseCode)) {
+      return responseCode;
+    }
   }
 
   return null;
@@ -142,9 +162,26 @@ export async function sendTransactionalEmail({
   html,
   text,
   replyTo,
+  fromName: inputFromName,
 }: SendTransactionalEmailInput): Promise<SendTransactionalEmailResult> {
-  const fromEmail = process.env.MAIL_FROM_EMAIL?.trim() || DEFAULT_FROM_EMAIL;
-  const fromName = process.env.MAIL_FROM_NAME?.trim() || DEFAULT_FROM_NAME;
+  const host =
+    getFirstEnv("CONTACT_SMTP_HOST", "SMTP_HOST") || DEFAULT_SMTP_HOST;
+  const port = getSmtpPort();
+  const user = getRequiredEnv(
+    ["CONTACT_SMTP_USER", "SMTP_USER"],
+    "SMTP user"
+  );
+  const password = getRequiredEnv(
+    ["CONTACT_SMTP_PASSWORD", "CONTACT_SMTP_PASS", "SMTP_PASS"],
+    "SMTP password"
+  );
+  const fromEmail =
+    getFirstEnv("MAIL_FROM_EMAIL", "CONTACT_EMAIL_FROM") ||
+    DEFAULT_FROM_EMAIL;
+  const fromName =
+    inputFromName?.trim() ||
+    getFirstEnv("MAIL_FROM_NAME", "CONTACT_EMAIL_FROM_NAME") ||
+    DEFAULT_FROM_NAME;
 
   if (!isValidEmail(fromEmail)) {
     throw new MailConfigurationError("MAIL_FROM_EMAIL is invalid");
@@ -158,35 +195,36 @@ export async function sendTransactionalEmail({
     throw new MailConfigurationError("Email HTML is required");
   }
 
-  const params = new EmailParams()
-    .setFrom(new Sender(fromEmail, fromName))
-    .setTo(normalizeRecipients(to))
-    .setSubject(subject.trim())
-    .setHtml(html)
-    .setText(text?.trim() || htmlToText(html));
-
-  if (replyTo) {
-    params.setReplyTo(normalizeAddress(replyTo));
-  }
+  const recipients = normalizeRecipients(to);
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user,
+      pass: password,
+    },
+  });
 
   try {
-    const response = (await getMailerSendClient().email.send(
-      params
-    )) as MailerSendApiResponse;
-    const messageId =
-      getHeader(response.headers, "x-message-id") ||
-      getHeader(response.headers, "message-id") ||
-      null;
-
+    const result = await transporter.sendMail({
+      from: { address: fromEmail, name: fromName },
+      to: recipients,
+      replyTo: replyTo ? normalizeAddress(replyTo) : undefined,
+      subject: subject.trim(),
+      html,
+      text: text?.trim() || htmlToText(html),
+      envelope: {
+        from: user,
+        to: recipients.map((recipient) => recipient.address),
+      },
+    });
 
     return {
-      messageId,
-      statusCode: response.statusCode ?? 202,
+      messageId: result.messageId ?? null,
+      statusCode: 250,
     };
   } catch (error) {
-    const statusCode = getErrorStatusCode(error);
-
-
-    throw new MailDeliveryError(statusCode);
+    throw new MailDeliveryError(getErrorStatusCode(error));
   }
 }

@@ -10,7 +10,7 @@ import {
 
 loadEnvConfig(process.cwd());
 
-const POLL_INTERVAL_MS = Number(process.env.MT5_SYNC_POLL_INTERVAL_MS || 30_000);
+const POLL_INTERVAL_MS = Number(process.env.MT5_SYNC_POLL_INTERVAL_MS || 2_000);
 const MAX_CONNECTIONS_PER_POLL = Number(process.env.MT5_SYNC_CONNECTION_LIMIT || 10);
 const CATCHUP_BATCHES = Number(process.env.MT5_SYNC_CATCHUP_BATCHES || 4);
 

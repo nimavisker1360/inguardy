@@ -29,6 +29,7 @@ export const accountSelect = {
   journalSecretEncrypted: true,
   mt5AccountNumber: true,
   ctraderAccountId: true,
+  tradeLockerAccountId: true,
   lastConnectedAt: true,
   lastSyncAt: true,
   ingestionMode: true,
@@ -62,6 +63,27 @@ export const accountSelect = {
       lastSyncAt: true,
       lastError: true,
       importedDealCount: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  },
+  tradeLockerConnection: {
+    select: {
+      id: true,
+      tradeLockerAccountId: true,
+      accNum: true,
+      accountName: true,
+      accountStatus: true,
+      environment: true,
+      server: true,
+      status: true,
+      enabled: true,
+      lastAttemptAt: true,
+      lastConnectedAt: true,
+      lastSyncAt: true,
+      lastError: true,
+      importedOrderCount: true,
+      importedExecutionCount: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -183,6 +205,7 @@ export function serializeAccount(
     journalEnabled: account.journalEnabled,
     mt5AccountNumber: account.mt5AccountNumber,
     ctraderAccountId: account.ctraderAccountId,
+    tradeLockerAccountId: account.tradeLockerAccountId,
     lastConnectedAt: account.lastConnectedAt
       ? serializeDate(account.lastConnectedAt)
       : null,
@@ -218,6 +241,22 @@ export function serializeAccount(
             : null,
           createdAt: serializeDate(account.ctraderConnection.createdAt),
           updatedAt: serializeDate(account.ctraderConnection.updatedAt),
+        }
+      : null,
+    tradeLockerConnection: account.tradeLockerConnection
+      ? {
+          ...account.tradeLockerConnection,
+          lastAttemptAt: account.tradeLockerConnection.lastAttemptAt
+            ? serializeDate(account.tradeLockerConnection.lastAttemptAt)
+            : null,
+          lastConnectedAt: account.tradeLockerConnection.lastConnectedAt
+            ? serializeDate(account.tradeLockerConnection.lastConnectedAt)
+            : null,
+          lastSyncAt: account.tradeLockerConnection.lastSyncAt
+            ? serializeDate(account.tradeLockerConnection.lastSyncAt)
+            : null,
+          createdAt: serializeDate(account.tradeLockerConnection.createdAt),
+          updatedAt: serializeDate(account.tradeLockerConnection.updatedAt),
         }
       : null,
     hasJournalSecret: Boolean(account.journalSecretHash),

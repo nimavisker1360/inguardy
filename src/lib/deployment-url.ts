@@ -1,4 +1,4 @@
-export const PRODUCTION_SITE_URL = "https://tradivix.com";
+export const PRODUCTION_SITE_URL = "https://inguardy.com";
 export const MT5_JOURNAL_API_PATH = "/api/mt5/journal";
 export const DEFAULT_MT5_JOURNAL_API_URL = `${PRODUCTION_SITE_URL}${MT5_JOURNAL_API_PATH}`;
 

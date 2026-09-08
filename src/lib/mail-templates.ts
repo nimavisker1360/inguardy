@@ -214,17 +214,17 @@ export function buildOtpEmail({
       "If you did not request this code, you can safely ignore this email.",
     ],
     code,
-    footerNote: "This one-time code should only be entered on tradivix.com.",
+    footerNote: "This one-time code should only be entered on inguardy.com.",
   });
 }
 
 export function buildTestEmail() {
   return renderTradivixEmail({
-    preheader: "MailerSend test email from Tradivix development.",
-    title: "Tradivix email test",
+    preheader: "SMTP test email from Inguardy.",
+    title: "Inguardy email test",
     greetingName: "there",
     body: [
-      "This is a development-only test email sent through the Tradivix MailerSend integration.",
+      "This is a test email sent through the Inguardy Hostinger SMTP integration.",
       "If you received this, the transactional email service is configured correctly.",
     ],
   });

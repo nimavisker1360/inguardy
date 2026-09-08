@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   const { html, text } = buildTestEmail();
   const result = await sendTransactionalEmail({
     to: testTo,
-    subject: "Tradivix MailerSend test",
+    subject: "Inguardy SMTP test",
     html,
     text,
   });

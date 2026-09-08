@@ -1,0 +1,23 @@
+[Unit]
+Description=Inguardy cTrader automatic synchronization worker
+After=network-online.target postgresql.service inguardy-app.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tradivix
+Group=tradivix
+WorkingDirectory=/opt/tradivix/app
+Environment=NODE_ENV=production
+Environment=HOME=/opt/tradivix
+ExecStart=/usr/local/bin/node /opt/tradivix/app/node_modules/tsx/dist/cli.mjs src/workers/ctrader-sync-worker.ts
+Restart=always
+RestartSec=10
+TimeoutStopSec=30
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

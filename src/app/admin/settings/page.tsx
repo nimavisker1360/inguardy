@@ -59,7 +59,7 @@ export default function AdminSettingsPage() {
 
       setMailTestResult({
         type: "success",
-        message: `Accepted by MailerSend${payload.mail?.statusCode ? ` (${payload.mail.statusCode})` : ""}.`,
+        message: `Accepted by Hostinger SMTP${payload.mail?.statusCode ? ` (${payload.mail.statusCode})` : ""}.`,
       });
     } catch (err) {
       setMailTestResult({
@@ -100,7 +100,7 @@ export default function AdminSettingsPage() {
       <AdminCard>
         <h2 className="mb-3 text-sm font-semibold text-white">Transactional Email</h2>
         <div className="space-y-3">
-          <SettingRow label="MailerSend API token configured" value={<StatusBadge value={settings.configured.mailerSendApiToken ? "YES" : "NO"} />} />
+          <SettingRow label="Hostinger SMTP configured" value={<StatusBadge value={settings.configured.smtp ? "YES" : "NO"} />} />
           <SettingRow label="Mail test recipient configured" value={<StatusBadge value={settings.configured.mailTestTo ? "YES" : "NO"} />} />
           <Button type="button" onClick={sendMailTest} disabled={mailTestLoading}>
             {mailTestLoading ? "Sending..." : "Send Test Email"}

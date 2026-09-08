@@ -15,11 +15,13 @@ export type TradingAccountDto = {
   journalEnabled: boolean;
   mt5AccountNumber: string | null;
   ctraderAccountId: string | null;
+  tradeLockerAccountId: string | null;
   lastConnectedAt: string | null;
   lastSyncAt: string | null;
-  ingestionMode: "MANUAL" | "EA_LEGACY" | "DIRECT_MT5" | "DIRECT_CTRADER";
+  ingestionMode: "MANUAL" | "EA_LEGACY" | "DIRECT_MT5" | "DIRECT_CTRADER" | "DIRECT_TRADELOCKER";
   directConnection: Mt5DirectConnectionDto | null;
   ctraderConnection: CtraderDirectConnectionDto | null;
+  tradeLockerConnection: TradeLockerConnectionDto | null;
   hasJournalSecret?: boolean;
   journalUploadSecret?: string | null;
   createdAt: string;
@@ -206,6 +208,26 @@ export type CtraderDirectConnectionDto = {
   lastSyncAt: string | null;
   lastError: string | null;
   importedDealCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TradeLockerConnectionDto = {
+  id: string;
+  tradeLockerAccountId: string;
+  accNum: string;
+  accountName: string | null;
+  accountStatus: string | null;
+  environment: "LIVE" | "DEMO" | string;
+  server: string;
+  status: "CONNECTED" | "SYNCING" | "ERROR" | "REAUTH_REQUIRED" | "DISCONNECTED";
+  enabled: boolean;
+  lastAttemptAt: string | null;
+  lastConnectedAt: string | null;
+  lastSyncAt: string | null;
+  lastError: string | null;
+  importedOrderCount: number;
+  importedExecutionCount: number;
   createdAt: string;
   updatedAt: string;
 };

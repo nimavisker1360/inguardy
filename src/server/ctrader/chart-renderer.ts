@@ -19,8 +19,11 @@ type RenderInput = {
 
 export async function renderCtraderChart(input: RenderInput) {
   const pythonPath =
-    process.env.MT5_PYTHON_PATH?.trim() ||
-    path.join(process.cwd(), ".venv-mt5", "Scripts", "python.exe");
+    process.env.CTRADER_PYTHON_PATH?.trim() ||
+    (process.platform === "win32"
+      ? process.env.MT5_PYTHON_PATH?.trim() ||
+        path.join(process.cwd(), ".venv-mt5", "Scripts", "python.exe")
+      : "python3");
   const scriptPath = path.join(process.cwd(), "workers", "ctrader_chart.py");
   const payload = JSON.stringify({
     ...input,

@@ -33,7 +33,7 @@ const footerCopy = {
       "AI-powered trading journal for MT5 sync, trade review, playbooks, analytics, and reports.",
     copyright: "© {year} Tradivix. All rights reserved.",
     address: "Address: Turkey",
-    email: "Email: info@tradivix.com",
+    email: "Email: info@inguardy.com",
     links: {
       home: "Home",
       signals: "Signals",
@@ -51,7 +51,7 @@ const footerCopy = {
       "ژورنال معاملاتی هوشمند برای همگام‌سازی MT5، بررسی معامله، پلی‌بوک، تحلیل و گزارش‌ها.",
     copyright: "© {year} Tradivix. تمامی حقوق محفوظ است.",
     address: "آدرس: ترکیه",
-    email: "ایمیل: info@tradivix.com",
+    email: "ایمیل: info@inguardy.com",
     links: {
       home: "خانه",
       signals: "سیگنال‌ها",

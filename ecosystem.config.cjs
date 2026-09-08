@@ -49,5 +49,16 @@ module.exports = {
         CTRADER_DIRECT_SYNC_ENABLED: "true",
       },
     },
+    {
+      name: "tradivix-tradelocker-sync",
+      cwd: "E:/signal-forex",
+      script: "./node_modules/tsx/dist/cli.mjs",
+      args: "src/workers/tradelocker-sync-worker.ts",
+      interpreter: "node",
+      env: {
+        NODE_ENV: "production",
+        TRADELOCKER_DIRECT_SYNC_ENABLED: "true",
+      },
+    },
   ],
 };

@@ -3,14 +3,9 @@ import {
   MailDeliveryError,
   sendTransactionalEmail,
 } from "@/lib/mail";
-import {
-  ContactMailConfigurationError,
-  ContactMailDeliveryError,
-  sendContactEmailViaSmtp,
-} from "@/lib/contact-mail";
 import { NextResponse } from "next/server";
 
-const contactRecipient = "info@tradivix.com";
+const contactRecipient = "info@inguardy.com";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -18,6 +13,10 @@ function isValidEmail(email: string) {
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeHeaderText(value: string, maxLength: number) {
+  return value.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
 
 function escapeHtml(value: string) {
@@ -62,7 +61,7 @@ export async function POST(request: Request) {
 
     const emailHtml = `
         <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
-          <h2 style="margin:0 0 16px">New Tradivix contact message</h2>
+          <h2 style="margin:0 0 16px">New Inguardy contact message</h2>
           <p><strong>Name:</strong> ${safeName}</p>
           <p><strong>Email:</strong> ${safeEmail}</p>
           <p><strong>Subject:</strong> ${safeSubject}</p>
@@ -72,7 +71,7 @@ export async function POST(request: Request) {
         </div>
       `;
     const emailText = [
-      "New Tradivix contact message",
+      "New Inguardy contact message",
       "",
       `Name: ${name}`,
       `Email: ${email}`,
@@ -81,35 +80,20 @@ export async function POST(request: Request) {
       message,
     ].join("\n");
 
-    try {
-      await sendContactEmailViaSmtp({
-        name,
+    await sendTransactionalEmail({
+      to: {
+        email: process.env.CONTACT_EMAIL_TO?.trim() || contactRecipient,
+        name: "Inguardy Support",
+      },
+      replyTo: {
         email,
-        subject,
-        message,
-        html: emailHtml,
-        text: emailText,
-      });
-    } catch (error) {
-      if (error instanceof ContactMailConfigurationError) {
-
-        await sendTransactionalEmail({
-          to: {
-            email: contactRecipient,
-            name: "Tradivix Support",
-          },
-          replyTo: {
-            email,
-            name,
-          },
-          subject: `Tradivix contact: ${subject}`,
-          html: emailHtml,
-          text: emailText,
-        });
-      } else {
-        throw error;
-      }
-    }
+        name,
+      },
+      fromName: normalizeHeaderText(name, 120),
+      subject: `${normalizeHeaderText(name, 120)}: ${normalizeHeaderText(subject, 180)}`,
+      html: emailHtml,
+      text: emailText,
+    });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
@@ -125,13 +109,6 @@ export async function POST(request: Request) {
     }
 
     if (error instanceof MailDeliveryError) {
-      return NextResponse.json(
-        { error: "Failed to send message" },
-        { status: 502 }
-      );
-    }
-
-    if (error instanceof ContactMailDeliveryError) {
       return NextResponse.json(
         { error: "Failed to send message" },
         { status: 502 }

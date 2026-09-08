@@ -3,10 +3,17 @@
 	grace_period 10s
 }
 
-tradivix.com {
-	reverse_proxy 127.0.0.1:3002
+inguardy.com {
+	handle /journal_screenshots/* {
+		root * /opt/tradivix/app/public
+		file_server
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3002
+	}
 }
 
-www.tradivix.com {
-	redir https://tradivix.com{uri} permanent
+www.inguardy.com {
+	redir https://inguardy.com{uri} permanent
 }

@@ -25,14 +25,14 @@ export async function POST() {
     const { html, text } = buildTestEmail();
     const result = await sendTransactionalEmail({
       to: testTo,
-      subject: "Tradivix MailerSend test",
+      subject: "Inguardy SMTP test",
       html,
       text,
     });
 
     return apiJson({
       success: true,
-      message: "Test email accepted by MailerSend.",
+      message: "Test email accepted by Hostinger SMTP.",
       mail: {
         messageId: result.messageId,
         statusCode: result.statusCode,
@@ -40,10 +40,7 @@ export async function POST() {
     });
   } catch (error) {
     if (error instanceof MailDeliveryError) {
-      const message =
-        error.statusCode === 401
-          ? "MailerSend rejected the API token. Update MAILERSEND_API_TOKEN and restart the app."
-          : `MailerSend rejected the test email${error.statusCode ? ` (${error.statusCode})` : ""}.`;
+      const message = `Hostinger SMTP rejected the test email${error.statusCode ? ` (${error.statusCode})` : ""}.`;
 
       return apiJson(
         {
