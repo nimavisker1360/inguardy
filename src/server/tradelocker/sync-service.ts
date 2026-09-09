@@ -19,6 +19,7 @@ import {
   TradeLockerApiError,
 } from "@/server/tradelocker/client";
 import { projectTradeLockerPositions } from "@/server/tradelocker/projector";
+import { captureTradeLockerTradeScreenshots } from "@/server/tradelocker/screenshots";
 import { tradeLockerEnvironmentSchema, type TradeLockerEnvironment } from "@/server/tradelocker/schemas";
 import { decryptTradeLockerToken, encryptTradeLockerToken, jwtExpiration } from "@/server/tradelocker/token-vault";
 
@@ -29,6 +30,7 @@ const CONNECTION_LEASE_MS = 15 * 60 * 1000;
 const TOKEN_LEASE_MS = 30 * 1000;
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
 const MAX_HISTORY_SPLIT_DEPTH = 18;
+const SYNC_REQUEST_DELAY_MS = Number(process.env.TRADELOCKER_SYNC_REQUEST_DELAY_MS || 1_100);
 
 export const TRADELOCKER_SYNC_WORKER_ID = `${os.hostname()}:${process.pid}`;
 
@@ -65,6 +67,12 @@ function stringValue(value: unknown) {
 
 function jsonValue(value: unknown) {
   return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
+
+async function waitForTradeLockerRateWindow() {
+  if (SYNC_REQUEST_DELAY_MS > 0) {
+    await new Promise((resolve) => setTimeout(resolve, SYNC_REQUEST_DELAY_MS));
+  }
 }
 
 export async function getValidTradeLockerAccessToken(connectionId: string, forceRefresh = false) {
@@ -176,6 +184,7 @@ async function completeOrderHistory(input: {
   to: Date;
   depth?: number;
 }): Promise<unknown[][]> {
+  await waitForTradeLockerRateWindow();
   const response = await getTradeLockerOrderHistory(
     input.environment, input.accessToken, input.accNum, input.accountId, input.from, input.to
   );
@@ -193,9 +202,13 @@ async function completeOrderHistory(input: {
 async function fetchSnapshot(connection: TradeLockerConnection, accessToken: string, from: Date, to: Date) {
   const env = environment(connection.environment);
   const config = await getTradeLockerConfig(env, accessToken, connection.accNum);
+  await waitForTradeLockerRateWindow();
   const accountDetails = await getTradeLockerAccountDetails(env, accessToken, connection.accNum);
+  await waitForTradeLockerRateWindow();
   const state = await getTradeLockerAccountState(env, accessToken, connection.accNum, connection.tradeLockerAccountId);
+  await waitForTradeLockerRateWindow();
   const positions = await getTradeLockerPositions(env, accessToken, connection.accNum, connection.tradeLockerAccountId);
+  await waitForTradeLockerRateWindow();
   const orders = await getTradeLockerOrders(env, accessToken, connection.accNum, connection.tradeLockerAccountId, from, to);
   const orderHistoryRows = await completeOrderHistory({
     environment: env,
@@ -205,10 +218,12 @@ async function fetchSnapshot(connection: TradeLockerConnection, accessToken: str
     from,
     to,
   });
+  await waitForTradeLockerRateWindow();
   const instruments = await getTradeLockerInstruments(env, accessToken, connection.accNum, connection.tradeLockerAccountId);
   let executionRows: unknown[][] = [];
   if (config.d.filledOrdersConfig) {
     try {
+      await waitForTradeLockerRateWindow();
       executionRows = (await getTradeLockerExecutions(env, accessToken, connection.accNum, connection.tradeLockerAccountId)).d.executions;
     } catch (error) {
       if (!(error instanceof TradeLockerApiError) || error.status !== 404) throw error;
@@ -407,7 +422,7 @@ export async function synchronizeTradeLockerConnection(connectionId: string) {
       snapshot = await fetchSnapshot(connection, accessToken, range.from, range.to);
     }
     const now = new Date();
-    return await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       const persisted = await persistSnapshot(tx, connection, snapshot, now);
       const projectedTrades = await projectTradeLockerPositions(tx, connection, persisted.changedPositionIds);
       const detail = snapshot.accountDetails.find((item) => item.id === connection.tradeLockerAccountId);
@@ -441,6 +456,17 @@ export async function synchronizeTradeLockerConnection(connectionId: string) {
       });
       return { connection: updated, ...persisted, projectedTrades };
     }, { timeout: 60_000 });
+    let screenshotResult = { captured: 0, errors: [] as string[] };
+    try {
+      screenshotResult = await captureTradeLockerTradeScreenshots(connection, accessToken);
+    } catch (error) {
+      screenshotResult.errors.push(cleanError(error));
+    }
+    return {
+      ...result,
+      capturedScreenshots: screenshotResult.captured,
+      screenshotErrors: screenshotResult.errors,
+    };
   } catch (error) {
     const reauth = error instanceof TradeLockerApiError && (error.code === "AUTH_FAILED" || error.code === "INVALID_CREDENTIALS");
     await prisma.tradeLockerConnection.update({

@@ -258,6 +258,7 @@ function hasText(value: string | null | undefined) {
 
 function sourceLabel(trade: PrismaTradeDto, manualLabel: string) {
   if (trade.source?.trim().toUpperCase() === "CTRADER_DIRECT") return "cTrader";
+  if (trade.source?.trim().toUpperCase() === "TRADELOCKER_DIRECT") return "TradeLocker";
   return isImportedTradeSource(trade.source, trade.setup) ? "MT5" : manualLabel;
 }
 

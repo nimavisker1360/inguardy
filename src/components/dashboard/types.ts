@@ -112,6 +112,7 @@ export type TradeDto = {
   rr: string | number | null;
   source: string;
   mt5Ticket: string | null;
+  tradeLockerPositionId?: string | null;
   aiReviewStatus: "NOT_REVIEWED" | "REVIEWED" | "FAILED" | string;
   aiReviewScore: number | null;
   reviewStatus?: "DRAFT" | "NEEDS_REVIEW" | "REVIEWED" | string;

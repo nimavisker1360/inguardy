@@ -1,11 +1,19 @@
 import { spawn } from "child_process";
 import path from "path";
-import type { CtraderChartBar } from "@/server/ctrader/open-api-client";
 
 const MAX_OUTPUT_BYTES = 12 * 1024 * 1024;
 
-type RenderInput = {
-  bars: CtraderChartBar[];
+export type TradingChartBar = {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+};
+
+export type TradingChartRenderInput = {
+  bars: TradingChartBar[];
   symbol: string;
   capturedAt: Date;
   timeframe: string;
@@ -17,7 +25,7 @@ type RenderInput = {
   takeProfit?: number;
 };
 
-export async function renderCtraderChart(input: RenderInput) {
+export async function renderTradingChart(input: TradingChartRenderInput) {
   const pythonPath =
     process.env.CTRADER_PYTHON_PATH?.trim() ||
     (process.platform === "win32"
@@ -81,3 +89,6 @@ export async function renderCtraderChart(input: RenderInput) {
     child.stdin.end(payload);
   });
 }
+
+// Keep the existing cTrader API stable while sharing the renderer with other providers.
+export const renderCtraderChart = renderTradingChart;

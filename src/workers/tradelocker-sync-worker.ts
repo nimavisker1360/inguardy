@@ -12,7 +12,9 @@ loadEnvConfig(process.cwd());
 
 const POLL_INTERVAL_MS = Number(process.env.TRADELOCKER_SYNC_POLL_INTERVAL_MS || 5_000);
 const MAX_CONNECTIONS_PER_POLL = Number(process.env.TRADELOCKER_SYNC_CONNECTION_LIMIT || 10);
-const CATCHUP_BATCHES = Number(process.env.TRADELOCKER_SYNC_CATCHUP_BATCHES || 4);
+// A snapshot already calls every rate-limited TradeLocker read route once.
+// Running catch-up batches back-to-back exceeds the default per-route limits.
+const CATCHUP_BATCHES = Number(process.env.TRADELOCKER_SYNC_CATCHUP_BATCHES || 1);
 let stopping = false;
 
 function log(event: string, details: Record<string, unknown> = {}) {
@@ -29,6 +31,8 @@ async function syncConnection(connectionId: string) {
         createdOrders: result.createdOrders,
         createdExecutions: result.createdExecutions,
         projectedTrades: result.projectedTrades,
+        capturedScreenshots: result.capturedScreenshots,
+        screenshotErrors: result.screenshotErrors.slice(0, 3),
         status: result.connection.status,
       });
       if (result.connection.status === TradeLockerConnectionStatus.CONNECTED) break;

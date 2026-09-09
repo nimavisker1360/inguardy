@@ -5,6 +5,7 @@ export const MT5_HTML_IMPORT_SOURCE = "MT5_HTML";
 export const EXCEL_JOURNAL_IMPORT_SOURCE = "EXCEL_JOURNAL";
 export const CTRADER_DIRECT_TRADE_SOURCE = "CTRADER_DIRECT";
 export const MT5_DIRECT_TRADE_SOURCE = "MT5_DIRECT";
+export const TRADELOCKER_DIRECT_TRADE_SOURCE = "TRADELOCKER_DIRECT";
 
 const LEGACY_MT5_SOURCE = "MT5_EA";
 const MT5_SETUP_PREFIX = "MT5:";
@@ -16,6 +17,7 @@ export const IMPORTED_TRADE_SOURCES = new Set([
   LEGACY_MT5_SOURCE,
   CTRADER_DIRECT_TRADE_SOURCE,
   MT5_DIRECT_TRADE_SOURCE,
+  TRADELOCKER_DIRECT_TRADE_SOURCE,
 ]);
 
 export const BROKER_DATA_FIELDS = [
@@ -49,7 +51,8 @@ export type TradeSource =
   | typeof EA_IMPORT_TRADE_SOURCE
   | typeof MT5_HTML_IMPORT_SOURCE
   | typeof EXCEL_JOURNAL_IMPORT_SOURCE
-  | typeof CTRADER_DIRECT_TRADE_SOURCE;
+  | typeof CTRADER_DIRECT_TRADE_SOURCE
+  | typeof TRADELOCKER_DIRECT_TRADE_SOURCE;
 
 export function normalizeTradeSource(
   source: string | null | undefined,
@@ -79,6 +82,10 @@ export function normalizeTradeSource(
 
   if (normalized === CTRADER_DIRECT_TRADE_SOURCE) {
     return CTRADER_DIRECT_TRADE_SOURCE;
+  }
+
+  if (normalized === TRADELOCKER_DIRECT_TRADE_SOURCE) {
+    return TRADELOCKER_DIRECT_TRADE_SOURCE;
   }
 
   if (setup?.trim().toUpperCase().startsWith(MT5_SETUP_PREFIX)) {

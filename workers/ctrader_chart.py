@@ -20,7 +20,7 @@ def render_chart(request):
 
     bars = request.get("bars") or []
     if len(bars) < 10:
-        raise ValueError("At least 10 cTrader chart bars are required.")
+        raise ValueError("At least 10 chart bars are required.")
 
     data = pd.DataFrame(bars)
     data["time"] = pd.to_datetime(data["time"], unit="s", utc=True)
@@ -94,7 +94,7 @@ def main():
         request = json.loads(sys.stdin.read() or "{}")
         result = {"ok": True, "imageBase64": render_chart(request)}
     except Exception as error:
-        result = {"ok": False, "error": f"Could not render cTrader chart: {error}"}
+        result = {"ok": False, "error": f"Could not render chart: {error}"}
     sys.stdout.write(json.dumps(result, ensure_ascii=True, separators=(",", ":")))
     sys.stdout.flush()
 

@@ -3,6 +3,7 @@ import { afterEach, test } from "node:test";
 import {
   authenticateTradeLocker,
   getTradeLockerAccounts,
+  getTradeLockerPriceHistory,
   refreshTradeLockerToken,
   rowsToRecords,
   safeTradeLockerMessage,
@@ -97,6 +98,41 @@ test("refreshes with only the refresh token and supports developer API key", asy
 
 test("maps dynamic TradeLocker table columns without inventing fields", () => {
   assert.deepEqual(rowsToRecords([{ id: "id" }, { id: "side" }], [["42", "buy"]]), [{ id: "42", side: "buy" }]);
+});
+
+test("normalizes TradeLocker historical bars for chart rendering", async () => {
+  let requestedUrl = "";
+  let headers: Headers | undefined;
+  global.fetch = async (url, init) => {
+    requestedUrl = String(url);
+    headers = new Headers(init?.headers);
+    return new Response(JSON.stringify({
+      s: "ok",
+      d: {
+        barDetails: [
+          { t: 1_700_000_300_000, o: 2, h: 3, l: 1, c: 2.5, v: 11 },
+          { t: "1700000000000", o: "1", h: "2", l: "0.5", c: "1.5", v: "10" },
+        ],
+      },
+    }));
+  };
+  const bars = await getTradeLockerPriceHistory({
+    environment: "DEMO",
+    accessToken: "access",
+    accNum: "2",
+    tradableInstrumentId: "11308",
+    routeId: "583325",
+    resolution: "5m",
+    from: new Date(1_700_000_000_000),
+    to: new Date(1_700_000_300_000),
+  });
+  assert.equal(headers?.get("accNum"), "2");
+  assert.match(requestedUrl, /trade\/history\?/);
+  assert.match(requestedUrl, /routeId=583325/);
+  assert.deepEqual(bars, [
+    { time: 1_700_000_000, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10 },
+    { time: 1_700_000_300, open: 2, high: 3, low: 1, close: 2.5, volume: 11 },
+  ]);
 });
 
 test("encrypts tokens with authenticated encryption and decodes JWT expiration", () => {

@@ -200,6 +200,7 @@ export type PrismaTradeDto = {
   rr: string | number | null;
   source: string;
   mt5Ticket: string | null;
+  tradeLockerPositionId?: string | null;
   aiReviewStatus: "NOT_REVIEWED" | "REVIEWED" | "FAILED" | string;
   aiReviewScore: number | null;
   reviewStatus?: "DRAFT" | "NEEDS_REVIEW" | "REVIEWED" | string;
@@ -399,8 +400,8 @@ export function mapPrismaTradeToJournalTrade(trade: PrismaTradeDto): JournalTrad
     broker: account?.broker || "-",
     serverName: account?.platform || "-",
     symbol: trade.symbol,
-    ticket: trade.mt5Ticket,
-    positionId: trade.mt5Ticket,
+    ticket: trade.tradeLockerPositionId || trade.mt5Ticket,
+    positionId: trade.tradeLockerPositionId || trade.mt5Ticket,
     orderTicket: null,
     dealTicketOpen: null,
     dealTicketClose: null,

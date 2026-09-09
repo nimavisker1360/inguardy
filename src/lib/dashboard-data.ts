@@ -434,6 +434,7 @@ export function serializeTrade(trade: TradeListRecord): TradeDto {
     rr: serializeDecimal(trade.rr),
     source: trade.source,
     mt5Ticket: trade.mt5Ticket,
+    tradeLockerPositionId: trade.tradeLockerPositionId,
     aiReviewStatus: trade.aiReviewStatus,
     aiReviewScore: trade.aiReviewScore,
     reviewStatus: trade.reviewStatus,

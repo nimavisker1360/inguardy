@@ -221,6 +221,10 @@ function sourceLabel(source: string | null | undefined, setup: string | null | u
     return "cTrader";
   }
 
+  if (source?.trim().toUpperCase() === "TRADELOCKER_DIRECT") {
+    return "TradeLocker";
+  }
+
   if (source === MT5_HTML_IMPORT_SOURCE) {
     return "MT5 HTML";
   }

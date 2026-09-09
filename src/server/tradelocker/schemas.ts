@@ -103,7 +103,30 @@ export const tradeLockerAccountDetailsSchema = z.object({
   d: z.array(tradeLockerDetailedAccountSchema),
 });
 
+const finiteHistoryNumber = z.union([z.number(), z.string()])
+  .transform(Number)
+  .pipe(z.number().finite());
+
+export const tradeLockerHistorySchema = z.object({
+  s: z.string(),
+  d: z.object({
+    barDetails: z.array(z.object({
+      t: finiteHistoryNumber,
+      o: finiteHistoryNumber,
+      h: finiteHistoryNumber,
+      l: finiteHistoryNumber,
+      c: finiteHistoryNumber,
+      v: finiteHistoryNumber,
+    })),
+  }).optional(),
+}).passthrough();
+
+export type TradeLockerResolution = "1m" | "5m" | "15m" | "30m" | "1H" | "4H" | "1D" | "1W" | "1M";
+
 export type TradeLockerAccount = z.infer<typeof tradeLockerAccountSchema>;
 export type TradeLockerTokens = z.infer<typeof tradeLockerTokenSchema>;
 export type TradeLockerConfig = z.infer<typeof tradeLockerConfigSchema>;
 export type TradeLockerInstrument = z.infer<typeof tradeLockerInstrumentSchema>;
+export type TradeLockerHistoryBar = NonNullable<
+  z.infer<typeof tradeLockerHistorySchema>["d"]
+>["barDetails"][number];

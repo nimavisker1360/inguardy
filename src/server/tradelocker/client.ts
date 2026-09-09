@@ -4,6 +4,7 @@ import {
   tradeLockerAccountDetailsSchema,
   tradeLockerConfigSchema,
   tradeLockerExecutionsSchema,
+  tradeLockerHistorySchema,
   tradeLockerInstrumentsSchema,
   tradeLockerOrderHistorySchema,
   tradeLockerOrdersSchema,
@@ -11,6 +12,7 @@ import {
   tradeLockerStateSchema,
   tradeLockerTokenSchema,
   type TradeLockerEnvironment,
+  type TradeLockerResolution,
 } from "@/server/tradelocker/schemas";
 
 const REQUEST_TIMEOUT_MS = 15_000;
@@ -28,9 +30,10 @@ export type TradeLockerErrorCode =
 export class TradeLockerApiError extends Error {
   constructor(
     public readonly code: TradeLockerErrorCode,
-    public readonly status?: number
+    public readonly status?: number,
+    public readonly path?: string
   ) {
-    super(code);
+    super(path ? `${code}:${path}` : code);
     this.name = "TradeLockerApiError";
   }
 }
@@ -88,7 +91,7 @@ async function requestJson<T>(input: {
           await new Promise((resolve) => setTimeout(resolve, Number.isFinite(retryAfter) ? retryAfter * 1000 : 400 * 2 ** attempt));
           continue;
         }
-        throw classified;
+        throw new TradeLockerApiError(classified.code, classified.status, input.path);
       }
 
       const parsed = input.schema.safeParse(await response.json());
@@ -190,6 +193,40 @@ export function getTradeLockerExecutions(environment: TradeLockerEnvironment, ac
 
 export function getTradeLockerInstruments(environment: TradeLockerEnvironment, accessToken: string, accNum: string, accountId: string) {
   return tradeRequest({ environment, accessToken, accNum, path: `/trade/accounts/${encodeURIComponent(accountId)}/instruments`, schema: tradeLockerInstrumentsSchema });
+}
+
+export async function getTradeLockerPriceHistory(input: {
+  environment: TradeLockerEnvironment;
+  accessToken: string;
+  accNum: string;
+  tradableInstrumentId: string;
+  routeId: string;
+  resolution: TradeLockerResolution;
+  from: Date;
+  to: Date;
+}) {
+  const parameters = new URLSearchParams({
+    tradableInstrumentId: input.tradableInstrumentId,
+    routeId: input.routeId,
+    resolution: input.resolution,
+    from: String(input.from.getTime()),
+    to: String(input.to.getTime()),
+  });
+  const response = await tradeRequest({
+    environment: input.environment,
+    accessToken: input.accessToken,
+    accNum: input.accNum,
+    path: `/trade/history?${parameters}`,
+    schema: tradeLockerHistorySchema,
+  });
+  return (response.d?.barDetails || []).map((bar) => ({
+    time: Math.floor(bar.t / 1000),
+    open: bar.o,
+    high: bar.h,
+    low: bar.l,
+    close: bar.c,
+    volume: bar.v,
+  })).sort((left, right) => left.time - right.time);
 }
 
 export function rowsToRecords(columns: Array<{ id: string }>, rows: unknown[][]) {

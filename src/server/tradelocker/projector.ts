@@ -41,17 +41,16 @@ export async function projectTradeLockerPositions(
       }),
     ]);
     const openPosition = openPositions.find((item) => item.externalPositionId === externalPositionId);
-    const first = executions[0] || orders[0];
+    // Order history spans sessions, while executions can contain only the current
+    // session. Prefer orders so a lone closing execution cannot invert a trade.
+    const providerEvents = orders.length ? orders : executions;
+    const first = providerEvents[0];
     if (!first && !openPosition && !existing) continue;
 
     const firstSide = (first?.side || openPosition?.side || "buy").toLowerCase();
     const direction = firstSide === "sell" ? TradeDirection.SELL : TradeDirection.BUY;
-    const entries = executions.length
-      ? executions.filter((item) => (item.side || "").toLowerCase() === firstSide)
-      : orders.filter((item) => (item.side || "").toLowerCase() === firstSide);
-    const exits = executions.length
-      ? executions.filter((item) => (item.side || "").toLowerCase() !== firstSide)
-      : orders.filter((item) => (item.side || "").toLowerCase() !== firstSide);
+    const entries = providerEvents.filter((item) => (item.side || "").toLowerCase() === firstSide);
+    const exits = providerEvents.filter((item) => (item.side || "").toLowerCase() !== firstSide);
     const eventQuantity = (item: { quantity: Prisma.Decimal | null; filledQuantity?: Prisma.Decimal | null }) =>
       numberValue(item.filledQuantity) ?? numberValue(item.quantity) ?? 0;
     const eventPrice = (item: { quantity: Prisma.Decimal | null; filledQuantity?: Prisma.Decimal | null; price?: Prisma.Decimal | null; averagePrice?: Prisma.Decimal | null }) =>
@@ -60,10 +59,10 @@ export async function projectTradeLockerPositions(
       ? Number(openPosition.averagePrice)
       : weightedPrice(entries, eventQuantity, eventPrice);
     const exitPrice = weightedPrice(exits, eventQuantity, eventPrice);
-    const openedAt = executions[0]?.executedAt || orders[0]?.createdAtProvider || openPosition?.openedAt || existing?.openedAt || new Date();
+    const openedAt = orders[0]?.createdAtProvider || executions[0]?.executedAt || openPosition?.openedAt || existing?.openedAt || new Date();
     const closedAt = openPosition
       ? null
-      : executions.at(-1)?.executedAt || orders.at(-1)?.modifiedAtProvider || existing?.closedAt || null;
+      : orders.at(-1)?.modifiedAtProvider || executions.at(-1)?.executedAt || existing?.closedAt || null;
     const instrumentId = first?.tradableInstrumentId || openPosition?.tradableInstrumentId || "";
     const symbol = names.get(instrumentId) || existing?.symbol || instrumentId || "Unknown";
     const totalEntryQuantity = entries.reduce((sum, item) => sum + eventQuantity(item), 0);
