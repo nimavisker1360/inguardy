@@ -20,7 +20,8 @@ test("persistent bridge symbol data creates a valid account symbol specification
     deals: [],
     symbols: [{
       name: "XAUUSD", trade_contract_size: 100, trade_tick_size: 0.01,
-      trade_tick_value: 1, digits: 2, currency_base: "XAU", currency_profit: "USD",
+      trade_tick_value: 1, volume_min: 0.01, volume_max: 50, volume_step: 0.01,
+      digits: 2, currency_base: "XAU", currency_profit: "USD",
     }],
   });
   assert.equal(result.symbolSpecificationsPersisted, 1);
@@ -30,5 +31,8 @@ test("persistent bridge symbol data creates a valid account symbol specification
   assert.equal(create.tickSize, 0.01);
   assert.equal(create.tickValue, 1);
   assert.equal(create.contractSize, 100);
+  assert.equal(create.volumeMin, 0.01);
+  assert.equal(create.volumeMax, 50);
+  assert.equal(create.volumeStep, 0.01);
   assert.equal(create.digits, 2);
 });

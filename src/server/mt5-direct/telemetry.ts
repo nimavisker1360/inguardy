@@ -58,16 +58,20 @@ export async function persistMt5AccountTelemetry(
     const contractSize = positiveFiniteOrUndefined(symbol.trade_contract_size);
     const tickSize = positiveFiniteOrUndefined(symbol.trade_tick_size);
     const tickValue = positiveFiniteOrUndefined(symbol.trade_tick_value);
+    const volumeMin = positiveFiniteOrUndefined(symbol.volume_min);
+    const volumeMax = positiveFiniteOrUndefined(symbol.volume_max);
+    const volumeStep = positiveFiniteOrUndefined(symbol.volume_step);
     const digitsValue = finiteOrUndefined(symbol.digits);
     const digits = digitsValue !== undefined && Number.isInteger(digitsValue) && digitsValue >= 0 ? digitsValue : undefined;
     await tx.symbolSpecification.upsert({
       where: { accountId_symbol: { accountId: input.accountId, symbol: name } },
       create: {
-        accountId: input.accountId, symbol: name, contractSize, tickSize, tickValue, digits,
+        accountId: input.accountId, symbol: name, contractSize, tickSize, tickValue,
+        volumeMin, volumeMax, volumeStep, digits,
         baseCurrency: symbol.currency_base || null, quoteCurrency: symbol.currency_profit || null,
       },
       update: {
-        contractSize, tickSize, tickValue, digits,
+        contractSize, tickSize, tickValue, volumeMin, volumeMax, volumeStep, digits,
         baseCurrency: symbol.currency_base || null, quoteCurrency: symbol.currency_profit || null,
       },
     });

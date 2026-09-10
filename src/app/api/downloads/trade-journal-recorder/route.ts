@@ -6,11 +6,14 @@ import { authErrorResponse, requireUser } from "@/lib/server-auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const archiveName = "TradeJournalRecorder.zip";
+const archiveName = "InguardyMT5Tools.zip";
 const files = [
   "TradeJournalRecorder.mq5",
   "TradeJournalRecorder.ex5",
   "README_MT5_SETUP.md",
+  "InguardyPositionSizeCalculator.mq5",
+  "InguardyPositionSizeCalculator.ex5",
+  "README_POSITION_SIZE_CALCULATOR_FA.md",
 ] as const;
 
 type ZipEntry = {

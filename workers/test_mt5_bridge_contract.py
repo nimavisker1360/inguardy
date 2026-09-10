@@ -7,7 +7,18 @@ from mt5_bridge_contract import collect_symbol_infos
 Item = namedtuple("Item", ["symbol"])
 Symbol = namedtuple(
     "Symbol",
-    ["name", "trade_contract_size", "trade_tick_size", "trade_tick_value", "digits", "currency_base", "currency_profit"],
+    [
+        "name",
+        "trade_contract_size",
+        "trade_tick_size",
+        "trade_tick_value",
+        "volume_min",
+        "volume_max",
+        "volume_step",
+        "digits",
+        "currency_base",
+        "currency_profit",
+    ],
 )
 
 
@@ -17,7 +28,7 @@ class FakeMt5:
 
     def symbol_info(self, name):
         self.requested.append(name)
-        return Symbol(name, 100, 0.01, 1, 2, "XAU", "USD")
+        return Symbol(name, 100, 0.01, 1, 0.01, 100, 0.01, 2, "XAU", "USD")
 
 
 class BridgeContractTest(unittest.TestCase):
@@ -34,6 +45,7 @@ class BridgeContractTest(unittest.TestCase):
         self.assertEqual([item.name for item in symbols], ["EURUSD", "XAUUSD"])
         self.assertGreater(symbols[1].trade_tick_size, 0)
         self.assertGreater(symbols[1].trade_tick_value, 0)
+        self.assertGreater(symbols[1].volume_step, 0)
 
 
 if __name__ == "__main__":

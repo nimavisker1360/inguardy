@@ -1388,6 +1388,9 @@ model SymbolSpecification {
   contractSize  Decimal? @db.Decimal(24, 8)
   tickSize      Decimal? @db.Decimal(24, 12)
   tickValue     Decimal? @db.Decimal(24, 8)
+  volumeMin     Decimal? @db.Decimal(18, 8)
+  volumeMax     Decimal? @db.Decimal(18, 8)
+  volumeStep    Decimal? @db.Decimal(18, 8)
   digits        Int?
   baseCurrency  String?
   quoteCurrency String?

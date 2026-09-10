@@ -1,8 +1,8 @@
+import ctypes
 import json
 import os
-import subprocess
-import tempfile
 import time
+from ctypes import wintypes
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -33,7 +33,6 @@ load_local_env()
 PORT = int(os.environ.get("MT5_BRIDGE_PORT", "8765"))
 BRIDGE_SECRET = os.environ.get("MT5_BRIDGE_SECRET", "")
 AUTH_WAIT_SECONDS = 30
-TERMINAL_START_SECONDS = 10
 MT5_TIME_OFFSET_HOURS = float(os.environ.get("MT5_TIME_OFFSET_HOURS", "0"))
 MT5_TIME_OFFSET_SECONDS = int(MT5_TIME_OFFSET_HOURS * 60 * 60)
 SECOND_TIME_FIELDS = {
@@ -86,46 +85,80 @@ def failure(code, message):
     return {"ok": False, "errorCode": code, "error": message}
 
 
-def secure_remove(path):
-    if not path:
-        return
-    try:
-        size = os.path.getsize(path)
-        with open(path, "r+b") as config_file:
-            config_file.write(b"\x00" * size)
-            config_file.flush()
-            os.fsync(config_file.fileno())
-    except OSError:
-        pass
-    try:
-        os.remove(path)
-    except OSError:
-        pass
+TH32CS_SNAPPROCESS = 0x00000002
+PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
 
 
-def create_startup_config(login, password, server):
-    descriptor, path = tempfile.mkstemp(prefix="tradivix-mt5-", suffix=".ini")
-    config = (
-        "[Common]\r\n"
-        f"Login={login}\r\n"
-        f"Password={password}\r\n"
-        f"Server={server}\r\n"
-        "KeepPrivate=0\r\n"
-        "ProxyEnable=0\r\n"
-        "CertInstall=0\r\n"
-        "NewsEnable=0\r\n"
-        "[Experts]\r\n"
-        "Enabled=1\r\n"
-        "AllowLiveTrading=0\r\n"
-        "AllowDllImport=0\r\n"
-        "Api=1\r\n"
-    )
-    with os.fdopen(descriptor, "w", encoding="utf-16", newline="") as config_file:
-        config_file.write(config)
-        config_file.flush()
-        os.fsync(config_file.fileno())
-    os.chmod(path, 0o600)
-    return path
+class PROCESSENTRY32W(ctypes.Structure):
+    _fields_ = [
+        ("dwSize", wintypes.DWORD),
+        ("cntUsage", wintypes.DWORD),
+        ("th32ProcessID", wintypes.DWORD),
+        ("th32DefaultHeapID", ctypes.c_size_t),
+        ("th32ModuleID", wintypes.DWORD),
+        ("cntThreads", wintypes.DWORD),
+        ("th32ParentProcessID", wintypes.DWORD),
+        ("pcPriClassBase", wintypes.LONG),
+        ("dwFlags", wintypes.DWORD),
+        ("szExeFile", wintypes.WCHAR * 260),
+    ]
+
+
+def normalized_windows_path(path):
+    return os.path.normcase(os.path.abspath(path))
+
+
+def terminal_process_is_running(terminal_path):
+    """Return True only when the configured terminal executable is already running.
+
+    This check intentionally happens before calling MetaTrader5.initialize because
+    initialize launches the terminal when it cannot find a running instance.
+    """
+    if os.name != "nt" or not terminal_path:
+        return False
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
+    kernel32.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+    kernel32.Process32FirstW.argtypes = [wintypes.HANDLE, ctypes.POINTER(PROCESSENTRY32W)]
+    kernel32.Process32FirstW.restype = wintypes.BOOL
+    kernel32.Process32NextW.argtypes = [wintypes.HANDLE, ctypes.POINTER(PROCESSENTRY32W)]
+    kernel32.Process32NextW.restype = wintypes.BOOL
+    kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+    kernel32.QueryFullProcessImageNameW.restype = wintypes.BOOL
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel32.CloseHandle.restype = wintypes.BOOL
+
+    target_path = normalized_windows_path(terminal_path)
+    target_name = os.path.basename(target_path).casefold()
+    snapshot = kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+    if snapshot == INVALID_HANDLE_VALUE:
+        return False
+
+    try:
+        entry = PROCESSENTRY32W()
+        entry.dwSize = ctypes.sizeof(PROCESSENTRY32W)
+        has_process = bool(kernel32.Process32FirstW(snapshot, ctypes.byref(entry)))
+        while has_process:
+            if entry.szExeFile.casefold() == target_name:
+                process = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, entry.th32ProcessID)
+                if process:
+                    try:
+                        size = wintypes.DWORD(32768)
+                        buffer = ctypes.create_unicode_buffer(size.value)
+                        if kernel32.QueryFullProcessImageNameW(process, 0, buffer, ctypes.byref(size)):
+                            if normalized_windows_path(buffer.value) == target_path:
+                                return True
+                    finally:
+                        kernel32.CloseHandle(process)
+            has_process = bool(kernel32.Process32NextW(snapshot, ctypes.byref(entry)))
+    finally:
+        kernel32.CloseHandle(snapshot)
+
+    return False
 
 
 class TerminalSession:
@@ -133,37 +166,19 @@ class TerminalSession:
         self.initialized = False
         self.terminal_path = None
 
-    def restart_terminal(self, terminal_path, login=None, password=None, server=None):
-        if self.initialized:
+    def refresh_process_state(self):
+        if self.initialized and self.terminal_path and not terminal_process_is_running(self.terminal_path):
             mt5.shutdown()
             self.initialized = False
 
-        subprocess.run(
-            ["taskkill", "/IM", "terminal64.exe", "/T", "/F"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=False,
-            creationflags=subprocess.CREATE_NO_WINDOW,
-        )
-        config_path = None
-        command = [terminal_path]
-        try:
-            if login is not None and password is not None and server is not None:
-                config_path = create_startup_config(login, password, server)
-                command.append(f"/config:{config_path}")
-            subprocess.Popen(
-                command,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                close_fds=True,
-                creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP,
-            )
-            time.sleep(TERMINAL_START_SECONDS)
-        finally:
-            secure_remove(config_path)
-
     def ensure_initialized(self, terminal_path, numeric_login, password, server):
+        if not terminal_process_is_running(terminal_path):
+            if self.initialized:
+                mt5.shutdown()
+            self.initialized = False
+            self.terminal_path = terminal_path
+            return False
+
         if self.initialized and self.terminal_path == terminal_path:
             return True
 
@@ -173,14 +188,6 @@ class TerminalSession:
 
         self.initialized = bool(mt5.initialize(terminal_path, timeout=30000))
         self.terminal_path = terminal_path
-        if self.initialized:
-            return True
-
-        # A fresh terminal must receive the account configuration on startup.
-        # Starting it without credentials leaves the terminal offline and the
-        # MetaTrader Python IPC handshake can time out indefinitely on retries.
-        self.restart_terminal(terminal_path, numeric_login, password, server)
-        self.initialized = bool(mt5.initialize(terminal_path, timeout=30000))
         return self.initialized
 
     def connected_account(self, numeric_login, server):
@@ -220,12 +227,7 @@ class TerminalSession:
         if account is not None:
             return account
 
-        self.restart_terminal(terminal_path, numeric_login, password, server)
-        self.initialized = bool(mt5.initialize(terminal_path, timeout=30000))
-        self.terminal_path = terminal_path
-        if not self.initialized:
-            return None
-        return self.wait_for_connection(numeric_login, server)
+        return None
 
     def execute(self, request):
         operation = str(request.get("operation") or "snapshot")
@@ -244,6 +246,11 @@ class TerminalSession:
             return failure("INVALID_LOGIN", "The MetaTrader login must be numeric.")
 
         if not self.ensure_initialized(terminal_path, numeric_login, password, server):
+            if not terminal_process_is_running(terminal_path):
+                return failure(
+                    "MT5_TERMINAL_CLOSED",
+                    "MetaTrader is closed. Start the configured terminal manually to resume synchronization.",
+                )
             error = mt5.last_error()
             return failure("MT5_INITIALIZE_FAILED", f"MetaTrader initialization failed ({error[0]}): {error[1]}")
 
@@ -324,6 +331,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/health":
+            SESSION.refresh_process_state()
             terminal = mt5.terminal_info() if SESSION.initialized else None
             self.send_json(
                 200,

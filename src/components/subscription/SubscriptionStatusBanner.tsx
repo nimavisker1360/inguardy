@@ -145,9 +145,9 @@ export function SubscriptionStatusBanner({
             <Link
               href={href}
               className={cn(
-                "inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-semibold",
+                "inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200",
                 isTrialTone
-                  ? "bg-sky-600 text-white hover:bg-sky-500"
+                  ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-sm shadow-blue-500/25 hover:from-blue-500 hover:to-cyan-500 hover:shadow-md"
                   : isWarning
                     ? "bg-amber-300 text-slate-950 hover:bg-amber-200"
                     : "bg-blue-600 text-white hover:bg-blue-500"

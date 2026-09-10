@@ -28,6 +28,9 @@ export type Mt5BridgeSymbol = {
   trade_contract_size?: number;
   trade_tick_size?: number;
   trade_tick_value?: number;
+  volume_min?: number;
+  volume_max?: number;
+  volume_step?: number;
   digits?: number;
   currency_base?: string;
   currency_profit?: string;
