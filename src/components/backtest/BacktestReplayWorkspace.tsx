@@ -28,6 +28,7 @@ import {
   type SimulatedPosition,
 } from "@/lib/backtest-simulation";
 import { useLanguage } from "@/lib/language-context";
+import { calculatePositionSize } from "@/lib/position-sizing";
 import { cn } from "@/lib/utils";
 
 type PlaybookOption = {
@@ -48,6 +49,14 @@ export type BacktestAccountOption = {
   freeMargin: number | null;
   marginLevel: number | null;
   snapshotAt: string | null;
+  symbols: Array<{
+    symbol: string;
+    tickSize: number | null;
+    tickValue: number | null;
+    volumeMin: number | null;
+    volumeMax: number | null;
+    volumeStep: number | null;
+  }>;
 };
 
 type ReplayResponse = {
@@ -59,6 +68,44 @@ type ReplayResponse = {
   candles?: ReplayCandle[];
   replayStartIndex?: number;
   replayCandleCount?: number;
+};
+
+type BacktestSummary = {
+  totalTrades: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  netR: number;
+  netProfitLoss: number;
+};
+
+type StoredBacktestSession = {
+  id: string;
+  accountId: string | null;
+  playbookId: string | null;
+  symbol: string;
+  timeframe: string;
+  endDate: string;
+  historySize: number;
+  speed: number;
+  currentCandleTime: string | null;
+  activePosition: SimulatedPosition | null;
+  summary: BacktestSummary;
+};
+
+type BacktestSessionResponse = {
+  ok?: boolean;
+  message?: string;
+  session?: StoredBacktestSession | null;
+};
+
+const EMPTY_BACKTEST_SUMMARY: BacktestSummary = {
+  totalTrades: 0,
+  wins: 0,
+  losses: 0,
+  winRate: 0,
+  netR: 0,
+  netProfitLoss: 0,
 };
 
 const SYMBOLS = ["XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "NAS100", "US30", "BTCUSD", "ETHUSD"];
@@ -128,9 +175,17 @@ const copy = {
     open: "Position open — reveal the next candle to continue.",
     won: "Take profit reached",
     lost: "Stop loss reached",
+    trades: "Trades",
+    winRate: "Win rate",
+    netPnl: "Net P/L",
+    totalR: "Total R",
+    sessionSaved: "Session saved automatically",
+    sessionSaving: "Saving session...",
+    sessionRestoring: "Restoring last session...",
+    sessionSaveError: "Session could not be saved",
     invalidLevels: "For Long use SL < Entry < TP; for Short use TP < Entry < SL.",
     noRealOrder: "Simulation only — no real order is sent",
-    phaseNote: "Simulated positions run only in this browser session. Saving sessions and performance reports are the next phase.",
+    phaseNote: "This replay session, its positions, and its results are saved automatically.",
   },
   fa: {
     account: "حساب معاملاتی",
@@ -187,9 +242,17 @@ const copy = {
     open: "پوزیشن باز است؛ برای ادامه کندل بعدی را نمایش دهید.",
     won: "حد سود لمس شد",
     lost: "حد ضرر لمس شد",
+    trades: "معامله‌ها",
+    winRate: "نرخ برد",
+    netPnl: "سود/زیان خالص",
+    totalR: "مجموع R",
+    sessionSaved: "جلسه به‌صورت خودکار ذخیره شد",
+    sessionSaving: "در حال ذخیره جلسه...",
+    sessionRestoring: "در حال بازیابی آخرین جلسه...",
+    sessionSaveError: "ذخیره جلسه انجام نشد",
     invalidLevels: "برای خرید SL < Entry < TP و برای فروش TP < Entry < SL باشد.",
     noRealOrder: "فقط شبیه‌سازی — هیچ سفارش واقعی ارسال نمی‌شود",
-    phaseNote: "پوزیشن‌های آزمایشی فعلاً فقط در همین نشست مرورگر نگهداری می‌شوند؛ ذخیره جلسات و گزارش عملکرد مرحله بعد است.",
+    phaseNote: "جلسه بک‌تست، پوزیشن‌ها و نتایج آن به‌صورت خودکار ذخیره می‌شوند.",
   },
 } as const;
 
@@ -317,7 +380,14 @@ export function BacktestReplayWorkspace({
   const [activeSymbol, setActiveSymbol] = useState("XAUUSD");
   const [activeTimeframe, setActiveTimeframe] = useState("M15");
   const [position, setPosition] = useState<SimulatedPosition | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionSummary, setSessionSummary] = useState<BacktestSummary>(EMPTY_BACKTEST_SUMMARY);
+  const [sessionState, setSessionState] = useState<"idle" | "restoring" | "saving" | "saved" | "error">("idle");
   const loadRequestIdRef = useRef(0);
+  const restoreStartedRef = useRef(false);
+  const activeSessionIdRef = useRef<string | null>(null);
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const latestSessionSaveRef = useRef<() => void>(() => undefined);
 
   const selectedAccount = useMemo(
     () => accounts.find((account) => account.id === accountId) ?? null,
@@ -342,6 +412,141 @@ export function BacktestReplayWorkspace({
   const replayFreeMargin = selectedAccount?.freeMargin === null || selectedAccount?.freeMargin === undefined
     ? null
     : selectedAccount.freeMargin + liveAmount;
+
+  const sessionStatusText = sessionState === "restoring"
+    ? t.sessionRestoring
+    : sessionState === "saving"
+      ? t.sessionSaving
+      : sessionState === "error"
+        ? t.sessionSaveError
+        : sessionId
+          ? t.sessionSaved
+          : t.protected;
+
+  function positionPersistencePayload(snapshot: SimulatedPosition) {
+    const openedAt = snapshot.openedAtIndex === undefined ? null : candles[snapshot.openedAtIndex]?.time ?? null;
+    const closedAt = snapshot.closedAtIndex === undefined ? null : candles[snapshot.closedAtIndex]?.time ?? null;
+    const specification = selectedAccount?.symbols.find(
+      (item) => item.symbol.toUpperCase() === activeSymbol.toUpperCase()
+    );
+    const sizing = specification?.tickSize && specification.tickValue && accountEquity
+      ? calculatePositionSize({
+          balance: accountEquity,
+          riskMode: "AMOUNT",
+          riskValue: snapshot.riskAmount,
+          direction: snapshot.direction === "LONG" ? "BUY" : "SELL",
+          entryPrice: snapshot.entry,
+          stopLoss: snapshot.stopLoss,
+          riskReward: positionRiskReward(snapshot),
+          tickSize: specification.tickSize,
+          tickValue: specification.tickValue,
+          minVolume: specification.volumeMin,
+          maxVolume: specification.volumeMax,
+          volumeStep: specification.volumeStep,
+        })
+      : null;
+
+    return {
+      ...snapshot,
+      riskReward: positionRiskReward(snapshot),
+      profitLoss: snapshot.resultR === undefined ? undefined : snapshot.resultR * snapshot.riskAmount,
+      volume: sizing?.valid && sizing.lotSize > 0 ? sizing.lotSize : null,
+      openedAt,
+      closedAt,
+    };
+  }
+
+  function queueSessionSave(targetSessionId: string, snapshot: SimulatedPosition | null = position) {
+    const isClosed = snapshot?.status === "WON" || snapshot?.status === "LOST";
+    const payload = {
+      accountId: accountId || null,
+      playbookId: playbookId || null,
+      symbol: activeSymbol,
+      timeframe: activeTimeframe,
+      endDate,
+      historySize: Number(historySize),
+      speed,
+      currentCandleTime: currentCandle?.time ?? null,
+      activePosition: snapshot && !isClosed ? snapshot : null,
+      ...(snapshot ? { trade: positionPersistencePayload(snapshot) } : {}),
+    };
+
+    setSessionState("saving");
+    const request = saveQueueRef.current
+      .catch(() => undefined)
+      .then(async () => {
+        const response = await fetch(`/api/backtest/sessions/${targetSessionId}`, {
+          method: "PATCH",
+          credentials: "include",
+          keepalive: true,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = (await response.json().catch(() => null)) as BacktestSessionResponse | null;
+        if (!response.ok || !data?.ok || !data.session) {
+          throw new Error(data?.message || t.sessionSaveError);
+        }
+
+        if (activeSessionIdRef.current === targetSessionId) {
+          setSessionSummary(data.session.summary);
+          setSessionState("saved");
+        }
+      })
+      .catch(() => {
+        if (activeSessionIdRef.current === targetSessionId) setSessionState("error");
+      });
+
+    saveQueueRef.current = request;
+    return request;
+  }
+
+  latestSessionSaveRef.current = () => {
+    if (sessionId) void queueSessionSave(sessionId, position);
+  };
+
+  async function createStoredSession({
+    nextSymbol,
+    nextTimeframe,
+    nextEndDate,
+    nextHistorySize,
+    nextSpeed,
+    currentTime,
+  }: {
+    nextSymbol: string;
+    nextTimeframe: string;
+    nextEndDate: string;
+    nextHistorySize: string;
+    nextSpeed: number;
+    currentTime: string | null;
+  }) {
+    setSessionState("saving");
+    const response = await fetch("/api/backtest/sessions", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        accountId: accountId || null,
+        playbookId: playbookId || null,
+        symbol: nextSymbol,
+        timeframe: nextTimeframe,
+        endDate: nextEndDate,
+        historySize: Number(nextHistorySize),
+        speed: nextSpeed,
+        currentCandleTime: currentTime,
+      }),
+    });
+    const data = (await response.json().catch(() => null)) as BacktestSessionResponse | null;
+    if (!response.ok || !data?.ok || !data.session) {
+      setSessionState("error");
+      throw new Error(data?.message || t.sessionSaveError);
+    }
+
+    activeSessionIdRef.current = data.session.id;
+    setSessionId(data.session.id);
+    setSessionSummary(data.session.summary);
+    setSessionState("saved");
+    return data.session;
+  }
 
   useEffect(() => {
     if (!playing || replayFinished || !candles.length) return;
@@ -368,15 +573,25 @@ export function BacktestReplayWorkspace({
   }, [candles, playing, position, visibleCount]);
 
   async function requestReplay({
+    nextSymbol = symbol,
     nextTimeframe = timeframe,
+    nextEndDate = endDate,
+    nextHistorySize = historySize,
     preserveState = false,
+    restoredSession = null,
+    startNewSession = false,
   }: {
+    nextSymbol?: string;
     nextTimeframe?: string;
+    nextEndDate?: string;
+    nextHistorySize?: string;
     preserveState?: boolean;
+    restoredSession?: StoredBacktestSession | null;
+    startNewSession?: boolean;
   } = {}) {
     const requestId = ++loadRequestIdRef.current;
-    const previousTime = preserveState ? currentCandle?.time : undefined;
-    const previousPosition = preserveState ? position : null;
+    const previousTime = restoredSession?.currentCandleTime ?? (preserveState ? currentCandle?.time : undefined);
+    const previousPosition = restoredSession?.activePosition ?? (preserveState ? position : null);
     const previousCandles = candles;
     const previousReplayCount = Math.max(candles.length - replayStartIndex, 0);
     const previousProgress = previousReplayCount
@@ -387,9 +602,19 @@ export function BacktestReplayWorkspace({
     setPlaying(false);
     setLoading(true);
     setError("");
+    if (startNewSession) {
+      activeSessionIdRef.current = null;
+      setSessionId(null);
+      setSessionSummary(EMPTY_BACKTEST_SUMMARY);
+    }
 
     try {
-      const params = new URLSearchParams({ symbol, timeframe: nextTimeframe, endDate, limit: historySize });
+      const params = new URLSearchParams({
+        symbol: nextSymbol,
+        timeframe: nextTimeframe,
+        endDate: nextEndDate,
+        limit: nextHistorySize,
+      });
       const response = await fetch(`/api/backtest/candles?${params.toString()}`, {
         credentials: "include",
         cache: "no-store",
@@ -406,7 +631,7 @@ export function BacktestReplayWorkspace({
         : initialVisibleCount(data.candles.length, data.timeframe || nextTimeframe);
       const nextReplayCount = Math.max(data.candles.length - nextReplayStartIndex, 0);
       let nextVisibleCount = nextReplayStartIndex;
-      if (preserveState) {
+      if (preserveState || restoredSession) {
         const matchingIndex = candleIndexAtOrBefore(data.candles, previousTime);
         nextVisibleCount = matchingIndex >= 0
           ? Math.max(nextReplayStartIndex, Math.min(matchingIndex + 1, data.candles.length))
@@ -419,17 +644,40 @@ export function BacktestReplayWorkspace({
       setCandles(data.candles);
       setReplayStartIndex(nextReplayStartIndex);
       setVisibleCount(nextVisibleCount);
-      setActiveSymbol(data.symbol || symbol);
+      setActiveSymbol(data.symbol || nextSymbol);
       setActiveTimeframe(data.timeframe || nextTimeframe);
-      setPosition(
-        previousPosition
-          ? remapPositionToTimeframe(previousPosition, previousCandles, data.candles, nextVisibleCount)
-          : null
-      );
+      if (previousPosition) {
+        const restoredPosition = restoredSession
+          ? {
+              ...previousPosition,
+              placedAtIndex: Math.min(previousPosition.placedAtIndex, Math.max(nextVisibleCount - 1, 0)),
+              lastEvaluatedIndex: Math.max(nextVisibleCount - 1, 0),
+            }
+          : remapPositionToTimeframe(previousPosition, previousCandles, data.candles, nextVisibleCount);
+        setPosition(restoredPosition);
+      } else {
+        setPosition(null);
+      }
+
+      if (restoredSession) {
+        activeSessionIdRef.current = restoredSession.id;
+        setSessionId(restoredSession.id);
+        setSessionSummary(restoredSession.summary);
+        setSessionState("saved");
+      } else if (startNewSession) {
+        await createStoredSession({
+          nextSymbol: data.symbol || nextSymbol,
+          nextTimeframe: data.timeframe || nextTimeframe,
+          nextEndDate,
+          nextHistorySize,
+          nextSpeed: speed,
+          currentTime: data.candles[nextVisibleCount - 1]?.time ?? null,
+        });
+      }
       if (resumePlaying && nextVisibleCount < data.candles.length) setPlaying(true);
     } catch (loadError) {
       if (requestId !== loadRequestIdRef.current) return;
-      if (!preserveState) {
+      if (!preserveState && !restoredSession) {
         setCandles([]);
         setReplayStartIndex(0);
         setVisibleCount(0);
@@ -443,9 +691,88 @@ export function BacktestReplayWorkspace({
     }
   }
 
+  useEffect(() => {
+    if (restoreStartedRef.current) return;
+    restoreStartedRef.current = true;
+    setSessionState("restoring");
+
+    void (async () => {
+      try {
+        const response = await fetch("/api/backtest/sessions", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const data = (await response.json().catch(() => null)) as BacktestSessionResponse | null;
+        if (!response.ok || !data?.ok) throw new Error(data?.message || t.sessionSaveError);
+        if (!data.session) {
+          setSessionState("idle");
+          return;
+        }
+
+        const restored = data.session;
+        const restoredAccountId = accounts.some((account) => account.id === restored.accountId)
+          ? restored.accountId || ""
+          : "";
+        const restoredPlaybookId = playbooks.some((playbook) => playbook.id === restored.playbookId)
+          ? restored.playbookId || ""
+          : "";
+
+        setAccountId(restoredAccountId);
+        setPlaybookId(restoredPlaybookId);
+        setSymbol(restored.symbol);
+        setTimeframe(restored.timeframe);
+        setEndDate(restored.endDate);
+        setHistorySize(String(restored.historySize));
+        setSpeed(restored.speed);
+        await requestReplay({
+          nextSymbol: restored.symbol,
+          nextTimeframe: restored.timeframe,
+          nextEndDate: restored.endDate,
+          nextHistorySize: String(restored.historySize),
+          restoredSession: restored,
+        });
+      } catch {
+        setSessionState("error");
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!sessionId || !candles.length || sessionState === "restoring" || playing) return;
+    const delay = position?.status === "WON" || position?.status === "LOST" ? 0 : 400;
+    const timer = window.setTimeout(() => {
+      void queueSessionSave(sessionId, position);
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [
+    accountId,
+    activeSymbol,
+    activeTimeframe,
+    currentCandle?.time,
+    endDate,
+    historySize,
+    playbookId,
+    playing,
+    position,
+    sessionId,
+    speed,
+  ]);
+
+  useEffect(() => {
+    if (!playing || !sessionId || !candles.length) return;
+    const timer = window.setInterval(() => latestSessionSaveRef.current(), 1500);
+    return () => window.clearInterval(timer);
+  }, [candles.length, playing, sessionId]);
+
+  useEffect(() => {
+    const saveBeforeLeaving = () => latestSessionSaveRef.current();
+    window.addEventListener("pagehide", saveBeforeLeaving);
+    return () => window.removeEventListener("pagehide", saveBeforeLeaving);
+  }, []);
+
   function loadReplay(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    void requestReplay();
+    void requestReplay({ startNewSession: true });
   }
 
   function changeTimeframe(nextTimeframe: string) {
@@ -454,9 +781,31 @@ export function BacktestReplayWorkspace({
   }
 
   function restartReplay() {
+    const previousSessionId = sessionId;
+    const previousPosition = position;
+    const restartTime = candles[replayStartIndex - 1]?.time ?? null;
     setPlaying(false);
     setVisibleCount(replayStartIndex);
     setPosition(null);
+    activeSessionIdRef.current = null;
+    setSessionId(null);
+    setSessionSummary(EMPTY_BACKTEST_SUMMARY);
+
+    void (async () => {
+      if (previousSessionId) await queueSessionSave(previousSessionId, previousPosition);
+      try {
+        await createStoredSession({
+          nextSymbol: activeSymbol,
+          nextTimeframe: activeTimeframe,
+          nextEndDate: endDate,
+          nextHistorySize: historySize,
+          nextSpeed: speed,
+          currentTime: restartTime,
+        });
+      } catch {
+        // The save status already exposes the failure without blocking local replay.
+      }
+    })();
   }
 
   function nextCandle() {
@@ -550,7 +899,7 @@ export function BacktestReplayWorkspace({
           </div>
           <div className="inline-flex w-fit items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
             <ShieldCheck className="h-4 w-4" />
-            {t.protected}
+            {sessionStatusText}
           </div>
         </div>
       </header>
@@ -651,7 +1000,7 @@ export function BacktestReplayWorkspace({
             </label>
           </div>
 
-          <button type="submit" disabled={loading} className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 px-4 text-sm font-semibold text-white shadow-md shadow-violet-600/20 transition hover:from-violet-500 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="submit" disabled={loading || sessionState === "restoring"} className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 px-4 text-sm font-semibold text-white shadow-md shadow-violet-600/20 transition hover:from-violet-500 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-60">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
             {loading ? t.loading : t.load}
           </button>
@@ -826,7 +1175,17 @@ export function BacktestReplayWorkspace({
                 <LockKeyhole className="h-3.5 w-3.5 text-emerald-500" />
                 {replayFinished ? t.finished : `${hiddenCount} ${t.hidden}`}
               </span>
-              <span>{Math.round(progress)}%</span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold tabular-nums" dir="ltr">
+                <span>{t.trades}: {sessionSummary.totalTrades}</span>
+                <span>{t.winRate}: {sessionSummary.winRate.toFixed(0)}%</span>
+                <span className={sessionSummary.netProfitLoss > 0 ? "text-emerald-600" : sessionSummary.netProfitLoss < 0 ? "text-rose-600" : ""}>
+                  {t.netPnl}: {sessionSummary.netProfitLoss > 0 ? "+" : ""}{sessionSummary.netProfitLoss.toFixed(2)} USD
+                </span>
+                <span className={sessionSummary.netR > 0 ? "text-emerald-600" : sessionSummary.netR < 0 ? "text-rose-600" : ""}>
+                  {t.totalR}: {sessionSummary.netR > 0 ? "+" : ""}{sessionSummary.netR.toFixed(2)}R
+                </span>
+                <span>{Math.round(progress)}%</span>
+              </div>
             </div>
           </div>
 

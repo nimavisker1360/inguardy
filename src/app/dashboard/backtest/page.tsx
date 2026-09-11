@@ -41,6 +41,17 @@ export default async function BacktestPage() {
                 marginLevel: true,
               },
             },
+            symbolSpecifications: {
+              orderBy: { symbol: "asc" },
+              select: {
+                symbol: true,
+                tickSize: true,
+                tickValue: true,
+                volumeMin: true,
+                volumeMax: true,
+                volumeStep: true,
+              },
+            },
           },
         }),
       ])
@@ -65,6 +76,14 @@ export default async function BacktestPage() {
       freeMargin: snapshot?.freeMargin === null || snapshot?.freeMargin === undefined ? null : Number(snapshot.freeMargin),
       marginLevel: snapshot?.marginLevel === null || snapshot?.marginLevel === undefined ? null : Number(snapshot.marginLevel),
       snapshotAt: snapshot?.timestamp.toISOString() ?? null,
+      symbols: account.symbolSpecifications.map((specification) => ({
+        symbol: specification.symbol,
+        tickSize: specification.tickSize === null ? null : Number(specification.tickSize),
+        tickValue: specification.tickValue === null ? null : Number(specification.tickValue),
+        volumeMin: specification.volumeMin === null ? null : Number(specification.volumeMin),
+        volumeMax: specification.volumeMax === null ? null : Number(specification.volumeMax),
+        volumeStep: specification.volumeStep === null ? null : Number(specification.volumeStep),
+      })),
     };
   });
 

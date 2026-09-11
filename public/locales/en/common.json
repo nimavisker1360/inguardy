@@ -343,6 +343,7 @@
       "dailyJournal": "Daily Journal",
       "playbooks": "Playbooks",
       "backtest": "Market Replay",
+      "backtestReports": "Backtest Reports",
       "propFirms": "Prop Firms",
       "reports": "Reports",
       "publicSite": "Public Site",
