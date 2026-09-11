@@ -89,6 +89,8 @@ const TWELVE_DATA_SYMBOLS: Record<string, string> = {
   DXY: "DXY",
 };
 
+const ALWAYS_OPEN_SYMBOLS = new Set(["BTCUSD", "ETHUSD"]);
+
 type TwelveDataCandle = {
   datetime?: string;
   open?: string;
@@ -172,10 +174,14 @@ async function fetchTwelveDataCandles({
   symbol,
   timeframe,
   limit,
+  startDate,
+  endDate,
 }: {
   symbol: string;
   timeframe: MarketTimeframe;
   limit: number;
+  startDate?: string;
+  endDate?: string;
 }) {
   const apiKey = process.env.TWELVE_DATA_API_KEY;
 
@@ -186,7 +192,14 @@ async function fetchTwelveDataCandles({
   const url = new URL("https://api.twelvedata.com/time_series");
   url.searchParams.set("symbol", toProviderSymbol(symbol));
   url.searchParams.set("interval", TWELVE_DATA_INTERVALS[timeframe]);
-  url.searchParams.set("outputsize", String(Math.max(Math.min(limit, 5000), 1)));
+  if (startDate && endDate) {
+    url.searchParams.set("start_date", startDate);
+    url.searchParams.set("end_date", endDate);
+  } else {
+    url.searchParams.set("outputsize", String(Math.max(Math.min(limit, 5000), 1)));
+    if (startDate) url.searchParams.set("start_date", startDate);
+    if (endDate) url.searchParams.set("end_date", endDate);
+  }
   url.searchParams.set("format", "JSON");
   url.searchParams.set("timezone", "UTC");
   url.searchParams.set("apikey", apiKey);
@@ -222,6 +235,49 @@ export async function getLatestCandles({
   limit?: number;
 }): Promise<Candle[]> {
   return fetchTwelveDataCandles({ symbol, timeframe, limit });
+}
+
+export async function getHistoricalCandles({
+  symbol,
+  timeframe,
+  endDate,
+  limit = 500,
+}: {
+  symbol: string;
+  timeframe: MarketTimeframe;
+  endDate: string;
+  limit?: number;
+}): Promise<Candle[]> {
+  const providerLimit = ALWAYS_OPEN_SYMBOLS.has(symbol)
+    ? limit
+    : Math.min(Math.ceil(limit * 1.5) + 24, 5000);
+  const candles = normalizeProviderCandles(
+    await fetchTwelveDataCandles({ symbol, timeframe, limit: providerLimit, endDate })
+  );
+
+  return filterClosedSessionCandles(candles, symbol).slice(-limit);
+}
+
+/**
+ * Twelve Data can return indicative weekend bars for FX, metals, and indices.
+ * They are not tradable replay candles and can compress the chart into a flat line.
+ */
+export function filterClosedSessionCandles(candles: Candle[], symbol: string) {
+  if (ALWAYS_OPEN_SYMBOLS.has(normalizeMarketSymbol(symbol))) {
+    return candles;
+  }
+
+  return candles.filter((candle) => {
+    const time = new Date(candle.time);
+    if (Number.isNaN(time.getTime())) return false;
+
+    const day = time.getUTCDay();
+    const hour = time.getUTCHours();
+    if (day === 6) return false;
+    if (day === 5 && hour >= 22) return false;
+    if (day === 0 && hour < 22) return false;
+    return true;
+  });
 }
 
 export function normalizeProviderCandles(candles: Candle[]) {

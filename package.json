@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/position-sizing.test.ts src/server/mt5-direct/*.test.ts src/server/tradelocker/*.test.ts",
+    "test": "tsx --test src/lib/backtest-simulation.test.ts src/lib/chart-indicators.test.ts src/lib/position-sizing.test.ts src/server/market/market-data-service.test.ts src/server/mt5-direct/*.test.ts src/server/tradelocker/*.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",

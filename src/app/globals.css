@@ -602,6 +602,34 @@ html[data-dashboard-theme="light"] .themeable-shell [class*="hover:text-white"]:
   }
 }
 
+@media (min-width: 1024px) {
+  .backtest-subscription-compact .subscription-status-banner {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .backtest-subscription-compact .subscription-status-banner__content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+
+  .backtest-subscription-compact .subscription-status-banner__heading {
+    align-items: center;
+  }
+
+  .backtest-subscription-compact .subscription-status-banner__details {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .backtest-subscription-compact .subscription-status-banner__progress {
+    display: none;
+  }
+}
+
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

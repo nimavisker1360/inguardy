@@ -39,6 +39,7 @@ export function DashboardShell({
   const isRtl = language === "fa";
   const normalizedPathname = pathname.replace(/\/+$/, "") || "/";
   const showTrainingPath = normalizedPathname === "/dashboard";
+  const isBacktestWorkspace = normalizedPathname === "/dashboard/backtest";
   const translatedDownloadBotLabel = t("dashboard.shell.downloadMt5Bot");
   const stableDownloadBotLabel = localizedDashboardText(
     language,
@@ -169,8 +170,19 @@ export function DashboardShell({
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-[1400px] flex-1 px-6 py-6">
-            {topContent}
+          <main
+            className={cn(
+              "mx-auto w-full flex-1",
+              isBacktestWorkspace
+                ? "flex flex-col px-3 py-3 lg:h-[calc(100dvh-4rem)] lg:min-h-0 lg:max-w-none lg:flex-none lg:overflow-hidden"
+                : "max-w-[1400px] px-6 py-6"
+            )}
+          >
+            {topContent ? (
+              <div className={cn(isBacktestWorkspace && "backtest-subscription-compact shrink-0")}>
+                {topContent}
+              </div>
+            ) : null}
             {showTrainingPath ? <DashboardTrainingPath userId={userId} /> : null}
             {children}
           </main>

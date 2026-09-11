@@ -68,6 +68,7 @@ const sidebarGroups: SidebarGroup[] = [
     items: [
       { labelKey: "dashboard.nav.playbooks", labelEn: "Playbooks", labelFa: "پلی بوک ها", href: "/journal/playbooks", icon: PlaySquare },
       { labelKey: "journal.nav.checklists", labelEn: "Checklists", labelFa: "چک لیست ها", href: "/journal/checklists", icon: ClipboardCheck },
+      { labelKey: "dashboard.nav.backtest", labelEn: "Market Replay", labelFa: "بک تست", href: "/dashboard/backtest", icon: BarChart3 },
       { labelKey: "dashboard.nav.positionSizing", labelEn: "Position Sizing", labelFa: "محاسبه حجم", href: "/dashboard/position-sizing", icon: Calculator },
       { labelKey: "dashboard.nav.propFirmTracker", labelEn: "Prop Firm Tracker", labelFa: "پراپ فرم ها", href: "/dashboard/prop-firms", icon: ShieldCheck },
     ],
