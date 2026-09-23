@@ -3,10 +3,10 @@
 //| Records MT5 trade events and sends them to a Next.js journal API. |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.15"
+#property version   "1.16"
 #property description "Trade Journal Recorder. Records trades only; never opens, closes, or modifies trades."
 
-input string          JOURNAL_API_BASE_URL = "https://tradivix.com";
+input string          JOURNAL_API_BASE_URL = "https://inguardy.com";
 input string          JOURNAL_UPLOAD_SECRET = "";
 input bool            JOURNAL_ENABLED = true;
 input bool            DEBUG_MODE = true;
@@ -24,7 +24,7 @@ input color           LIVE_SL_COLOR = clrRed;
 input int             LIVE_LEVEL_WIDTH = 1;
 input bool            HIDE_NATIVE_TRADE_LEVELS = false;
 
-const string TJR_BUILD = "TradeJournalRecorder 1.15 account-heartbeat";
+const string TJR_BUILD = "TradeJournalRecorder 1.16 inguardy-key-connect";
 const int ACCOUNT_HEARTBEAT_INTERVAL_SECONDS = 300;
 
 string g_lockName = "";

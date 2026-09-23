@@ -32,7 +32,7 @@ export type JournalReportFilters = {
   aiReview: "" | "DONE" | "MISSING";
   humanReview: "" | "DONE" | "MISSING";
   screenshots: "" | "HAS" | "NONE";
-  source: "" | "MANUAL" | "MT5" | "CTRADER";
+  source: "" | "MANUAL" | "MT4" | "MT5" | "CTRADER";
   minAiScore: string;
   maxAiScore: string;
 };
@@ -502,6 +502,7 @@ export function normalizeJournalReportFilters(
   ] as const);
   const source = normalizeOption(firstParam(params, "source"), [
     "MANUAL",
+    "MT4",
     "MT5",
     "CTRADER",
   ] as const);
@@ -541,7 +542,7 @@ export function normalizeJournalReportFilters(
   }
 
   if (source === null) {
-    errors.push("source must be MANUAL, MT5, or CTRADER");
+    errors.push("source must be MANUAL, MT4, MT5, or CTRADER");
   }
 
   if (minAiScore === null) {
@@ -656,6 +657,8 @@ function buildTradeWhere(
     and.push({ source: "MANUAL" });
   } else if (filters.source === "MT5") {
     and.push({ source: { in: ["MT5", "MT5_EA", "EA_IMPORT", "MT5_DIRECT"] } });
+  } else if (filters.source === "MT4") {
+    and.push({ source: "MT4" });
   } else if (filters.source === "CTRADER") {
     and.push({ source: "CTRADER_DIRECT" });
   }

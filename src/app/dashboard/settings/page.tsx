@@ -2,12 +2,18 @@ import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { DashboardText } from "@/components/dashboard/DashboardText";
 import { SettingsProfileForm } from "@/components/dashboard/SettingsProfileForm";
-import { getSession } from "@/lib/server-auth";
+import { getCurrentUser, getSession } from "@/lib/server-auth";
 
 export default async function SettingsPage() {
   const session = await getSession();
 
   if (!session) {
+    redirect("/login");
+  }
+
+  const user = await getCurrentUser();
+
+  if (!user) {
     redirect("/login");
   }
 
@@ -24,9 +30,9 @@ export default async function SettingsPage() {
 
       <SettingsProfileForm
         user={{
-          name: session.user.name,
-          email: session.user.email,
-          image: session.user.image,
+          name: user.name,
+          email: user.email,
+          image: user.image,
         }}
       />
 

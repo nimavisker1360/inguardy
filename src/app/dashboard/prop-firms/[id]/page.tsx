@@ -6,12 +6,14 @@ import { TradeTable } from "@/components/dashboard/TradeTable";
 import { formatMoney, formatNumber } from "@/components/dashboard/types";
 import {
   accountSelect,
+  getPropFirmChallengesForUser,
   serializeAccount,
   serializeTrade,
   tradeListInclude,
 } from "@/lib/dashboard-data";
 import { prisma } from "@/lib/prisma";
 import { closeTriggeredPropFirmChallenges, getPropFirmTradeWindow } from "@/lib/prop-firms";
+import { netTradePnl } from "@/lib/prop-firm-rule-sync";
 import { getSession } from "@/lib/server-auth";
 
 type PropFirmChallengePageProps = {
@@ -44,6 +46,9 @@ export default async function PropFirmChallengePage({
         select: accountSelect,
       })
     : null;
+  const hydratedChallenge = (await getPropFirmChallengesForUser(session.user.id)).challenges.find(
+    (item) => item.id === challenge.id
+  );
   const window = getPropFirmTradeWindow(challenge);
   const trades = challenge.accountId
     ? await prisma.trade.findMany({
@@ -68,11 +73,10 @@ export default async function PropFirmChallengePage({
   const currency = account?.currency || "USD";
   const serializedTrades = trades.map(serializeTrade);
   const totalPnl = serializedTrades.reduce(
-    (total, trade) => total + Number(trade.profitLoss || 0),
+    (total, trade) => total + netTradePnl(trade),
     0
   );
-  const profitTarget = challenge.profitTarget ? Number(challenge.profitTarget) : null;
-  const progress = profitTarget && profitTarget > 0 ? (totalPnl / profitTarget) * 100 : 0;
+  const progress = hydratedChallenge?.progress ?? 0;
 
   return (
     <div className="space-y-5">
@@ -99,7 +103,7 @@ export default async function PropFirmChallengePage({
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
         <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4">
           <div className="text-xs uppercase text-slate-400">Starting Balance</div>
           <div className="mt-1 font-semibold text-white">
@@ -107,9 +111,9 @@ export default async function PropFirmChallengePage({
           </div>
         </div>
         <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4">
-          <div className="text-xs uppercase text-slate-400">Challenge P/L</div>
-          <div className={totalPnl >= 0 ? "mt-1 font-semibold text-emerald-200" : "mt-1 font-semibold text-red-200"}>
-            {formatMoney(totalPnl, currency)}
+          <div className="text-xs uppercase text-slate-400">Current Equity</div>
+          <div className="mt-1 font-semibold text-white">
+            {formatMoney(hydratedChallenge?.currentEquity ?? null, currency)}
           </div>
         </div>
         <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4">
@@ -122,6 +126,24 @@ export default async function PropFirmChallengePage({
           <div className="text-xs uppercase text-slate-400">Progress</div>
           <div className="mt-1 font-semibold text-white">{formatNumber(progress, 2)}%</div>
         </div>
+        <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4">
+          <div className="text-xs uppercase text-slate-400">Daily loss room</div>
+          <div className="mt-1 font-semibold text-white">
+            {formatMoney(hydratedChallenge?.dailyLossRemaining ?? null, currency)}
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4">
+          <div className="text-xs uppercase text-slate-400">Total loss room</div>
+          <div className="mt-1 font-semibold text-white">
+            {formatMoney(hydratedChallenge?.totalLossRemaining ?? null, currency)}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-slate-300">
+        Closed trade net P/L: <span className={totalPnl >= 0 ? "font-semibold text-emerald-200" : "font-semibold text-red-200"}>{formatMoney(totalPnl, currency)}</span>
+        <span className="mx-2 text-slate-600">•</span>
+        Daily reset: <span className="font-semibold text-white">{hydratedChallenge?.dailyResetTimeZone || "UTC"}</span>
       </div>
 
       <TradeTable

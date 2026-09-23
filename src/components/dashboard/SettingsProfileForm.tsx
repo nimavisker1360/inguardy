@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Camera,
@@ -51,15 +51,37 @@ export function SettingsProfileForm({ user }: SettingsProfileFormProps) {
   const router = useRouter();
   const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const initialName = useMemo(() => splitName(user.name), [user.name]);
-  const [firstName, setFirstName] = useState(initialName.firstName || "Trader");
-  const [lastName, setLastName] = useState(initialName.lastName);
-  const [image, setImage] = useState(user.image || "");
+  const initialProfile = useMemo(() => {
+    const name = splitName(user.name);
+
+    return {
+      firstName: name.firstName || "Trader",
+      lastName: name.lastName,
+      image: user.image || "",
+    };
+  }, [user.image, user.name]);
+  const [savedProfile, setSavedProfile] = useState(initialProfile);
+  const [firstName, setFirstName] = useState(initialProfile.firstName);
+  const [lastName, setLastName] = useState(initialProfile.lastName);
+  const [image, setImage] = useState(initialProfile.image);
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
   const email = user.email || "";
   const avatarInitials = initials(firstName, lastName, email);
+
+  useEffect(() => {
+    setSavedProfile(initialProfile);
+    setFirstName(initialProfile.firstName);
+    setLastName(initialProfile.lastName);
+    setImage(initialProfile.image);
+    setStatus("idle");
+    setMessage("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, [initialProfile]);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -70,12 +92,14 @@ export function SettingsProfileForm({ user }: SettingsProfileFormProps) {
     if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
       setStatus("error");
       setMessage(t("dashboard.settings.imageTypeError"));
+      event.target.value = "";
       return;
     }
 
     if (file.size > 650 * 1024) {
       setStatus("error");
       setMessage(t("dashboard.settings.imageSizeError"));
+      event.target.value = "";
       return;
     }
 
@@ -107,11 +131,46 @@ export function SettingsProfileForm({ user }: SettingsProfileFormProps) {
           image,
         }),
       });
-      const data = (await response.json()) as { message?: string };
+      const data = (await response.json()) as {
+        message?: string;
+        user?: {
+          name: string;
+          image: string | null;
+        };
+      };
 
       if (!response.ok) {
         throw new Error(data.message || t("dashboard.settings.profileUpdateFailed"));
       }
+
+      if (!data.user) {
+        throw new Error(t("dashboard.settings.profileUpdateFailed"));
+      }
+
+      const savedName = splitName(data.user.name);
+      const nextSavedProfile = {
+        firstName: savedName.firstName || "Trader",
+        lastName: savedName.lastName,
+        image: data.user.image || "",
+      };
+
+      setSavedProfile(nextSavedProfile);
+      setFirstName(nextSavedProfile.firstName);
+      setLastName(nextSavedProfile.lastName);
+      setImage(nextSavedProfile.image);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      window.dispatchEvent(
+        new CustomEvent("profile-updated", {
+          detail: {
+            name: data.user.name,
+            image: data.user.image,
+          },
+        })
+      );
 
       setStatus("success");
       setMessage(t("dashboard.settings.profileSaved"));
@@ -122,12 +181,78 @@ export function SettingsProfileForm({ user }: SettingsProfileFormProps) {
     }
   }
 
-  function resetForm() {
-    setFirstName(initialName.firstName || "Trader");
-    setLastName(initialName.lastName);
-    setImage(user.image || "");
+  async function resetForm() {
+    setStatus("saving");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: savedProfile.firstName,
+          lastName: savedProfile.lastName,
+          image: "",
+        }),
+      });
+      const data = (await response.json()) as {
+        message?: string;
+        user?: {
+          name: string;
+          image: string | null;
+        };
+      };
+
+      if (!response.ok) {
+        throw new Error(data.message || t("dashboard.settings.profileUpdateFailed"));
+      }
+
+      if (!data.user) {
+        throw new Error(t("dashboard.settings.profileUpdateFailed"));
+      }
+
+      const savedName = splitName(data.user.name);
+      const resetProfile = {
+        firstName: savedName.firstName || "Trader",
+        lastName: savedName.lastName,
+        image: "",
+      };
+
+      setSavedProfile(resetProfile);
+      setFirstName(resetProfile.firstName);
+      setLastName(resetProfile.lastName);
+      setImage("");
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      window.dispatchEvent(
+        new CustomEvent("profile-updated", {
+          detail: {
+            name: data.user.name,
+            image: null,
+          },
+        })
+      );
+
+      setStatus("success");
+      setMessage(t("dashboard.settings.profileSaved"));
+      router.refresh();
+    } catch (error) {
+      setStatus("error");
+      setMessage(error instanceof Error ? error.message : t("dashboard.settings.profileUpdateFailed"));
+    }
+  }
+
+  function removePhoto() {
+    setImage("");
     setStatus("idle");
     setMessage("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   return (
@@ -176,7 +301,7 @@ export function SettingsProfileForm({ user }: SettingsProfileFormProps) {
             </button>
             <button
               type="button"
-              onClick={() => setImage("")}
+              onClick={removePhoto}
               className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 px-3 text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
               aria-label={t("dashboard.settings.removeProfilePhoto")}
             >
@@ -253,7 +378,8 @@ export function SettingsProfileForm({ user }: SettingsProfileFormProps) {
             <button
               type="button"
               onClick={resetForm}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              disabled={status === "saving"}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             >
               <RotateCcw className="h-4 w-4" />
               {t("dashboard.actions.reset")}

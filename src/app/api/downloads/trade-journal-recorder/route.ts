@@ -6,8 +6,7 @@ import { authErrorResponse, requireUser } from "@/lib/server-auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const archiveName = "InguardyMT5Tools.zip";
-const files = [
+const fullMt5Files = [
   "TradeJournalRecorder.mq5",
   "TradeJournalRecorder.ex5",
   "README_MT5_SETUP.md",
@@ -15,6 +14,8 @@ const files = [
   "InguardyPositionSizeCalculator.ex5",
   "README_POSITION_SIZE_CALCULATOR_FA.md",
 ] as const;
+const mt5ExpertFiles = ["TradeJournalRecorder.mq5", "TradeJournalRecorder.ex5", "README_MT5_SETUP.md"] as const;
+const mt4ExpertFiles = ["TradeJournalRecorder.mq4", "TradeJournalRecorder.ex4", "README_MT4_SETUP.md"] as const;
 
 type ZipEntry = {
   name: string;
@@ -119,9 +120,16 @@ function createZip(entries: ZipEntry[]) {
   return Buffer.concat([...localParts, centralDirectory, end]);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await requireUser();
+
+    const platform = new URL(request.url).searchParams.get("platform");
+    if (platform !== null && platform !== "MT4" && platform !== "MT5") {
+      return NextResponse.json({ success: false, message: "Unsupported platform" }, { status: 400 });
+    }
+    const files = platform === "MT4" ? mt4ExpertFiles : platform === "MT5" ? mt5ExpertFiles : fullMt5Files;
+    const archiveName = platform ? `Inguardy${platform}Expert.zip` : "InguardyMT5Tools.zip";
 
     const entries = await Promise.all(
       files.map(async (fileName) => ({
@@ -147,7 +155,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { success: false, message: "Failed to download MT5 bot" },
+      { success: false, message: "Failed to download Expert Advisor" },
       { status: 500 }
     );
   }

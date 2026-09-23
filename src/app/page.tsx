@@ -6,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { TradingViewTicker } from "@/components/TradingViewTicker";
 import { LandingHeroFeatures } from "@/components/landing/LandingHeroFeatures";
+import { LandingVideoStory } from "@/components/landing/LandingVideoStory";
 import { useLanguage, type Language } from "@/lib/language-context";
 import {
   ArrowRight,
   ClipboardCheck,
   ShieldCheck,
   BarChart3,
-  FileCheck2,
-  PlayCircle,
   Sparkles,
   RefreshCw,
   CalendarDays,
@@ -57,7 +56,7 @@ const landingCopy = {
       description:
         "Tradivix automatically syncs your MT5 trades, organizes your trading journal, reviews your setups, tracks mistakes, and helps you improve discipline with AI-powered insights.",
       primaryCta: "Get Started",
-      toolsLabel: "Everything in one place - 7 tools",
+      toolsLabel: "Everything in one place - 6 tools",
       imageAlt: "Tradivix trading journal dashboard",
     },
     heroTools: [
@@ -67,49 +66,15 @@ const landingCopy = {
       "Playbooks",
       "Checklists",
       "Analytics & Reports",
-      "Latest Signals",
     ],
-    signal: {
-      tools: [
-        "Live Signals",
-        "Gold Signals",
-        "Market Replay",
-        "AI Analysis",
-        "Telegram Alerts",
-        "Signal Archive",
-      ],
-      eyebrow: "Signal Dashboard",
-      title: "Every signal, clear before entry.",
-      description:
-        "Follow structured trade ideas with direction, entry, stop loss, take profit, status, and closing result visible in one live dashboard.",
-      bullets: [
-        "Live XAU/USD and forex trade ideas",
-        "Entry, stop loss, and take profit levels",
-        "Telegram alerts with compact trade details",
-        "Closed results tracked with full transparency",
-      ],
-      imageAlt: "Signal dashboard preview",
-    },
     agents: {
       eyebrow: "AI Agents",
       titleHighlight: "Smarter",
       titleRest: "Trading Desk",
       description:
-        "Specialized dashboard agents watch the parts of trading that matter most: signals, risk, review, and repeat mistakes.",
+        "Specialized dashboard agents watch the parts of trading that matter most: risk, review, and repeat mistakes.",
       ready: "Agent ready",
       cards: [
-        {
-          title: "Reads the setup before you enter.",
-          eyebrow: "Signal Agent",
-          description:
-            "Watches live forex and gold ideas, then keeps direction, entry, stop loss, take profit, and signal status easy to scan.",
-          tag: "Signals",
-          messages: [
-            "XAU/USD setup is active with entry, SL, and TP visible.",
-            "The signal plan is clear before execution.",
-          ],
-          action: "Open the signal plan.",
-        },
         {
           title: "Keeps risk visible before the click.",
           eyebrow: "Risk Agent",
@@ -242,7 +207,7 @@ const landingCopy = {
         {
           question: "What can I manage inside the dashboard?",
           answer:
-            "You can track trades, accounts, daily journal notes, screenshots, playbooks, checklists, analytics, reports, and latest signals from one clean workspace.",
+            "You can track trades, accounts, daily journal notes, screenshots, playbooks, checklists, analytics, and reports from one clean workspace.",
           tag: "Dashboard",
         },
         {
@@ -270,18 +235,6 @@ const landingCopy = {
           tag: "Pro access",
         },
         {
-          question: "Are Telegram signals connected to the dashboard?",
-          answer:
-            "Signals are shared with clear entry, stop loss, take profit, status, and closing result tracking. The dashboard helps you review the structure instead of chasing scattered messages.",
-          tag: "Signals",
-        },
-        {
-          question: "Do you guarantee profit from signals or AI feedback?",
-          answer:
-            "No. Tradivix is built for structure, tracking, and decision support. Trading always carries risk, so every trader should use personal risk management and position sizing.",
-          tag: "Risk",
-        },
-        {
           question: "Can I export my journal and reports?",
           answer:
             "Yes. Pro users can export reports and review performance history, which is useful for funded accounts, monthly reviews, and keeping a clean record of progress.",
@@ -301,7 +254,7 @@ const landingCopy = {
       description:
         "Tradivix معاملات MT5 شما را خودکار همگام‌سازی می‌کند، ژورنال معاملاتی را مرتب نگه می‌دارد، ستاپ‌ها را بررسی می‌کند، اشتباهات را ردیابی می‌کند و با بینش‌های هوش مصنوعی به تقویت نظم معاملاتی کمک می‌کند.",
       primaryCta: "شروع کنید",
-      toolsLabel: "همه چیز در یک جا - ۷ ابزار",
+      toolsLabel: "همه چیز در یک جا - ۶ ابزار",
       imageAlt: "داشبورد ژورنال معاملاتی Tradivix",
     },
     heroTools: [
@@ -311,49 +264,15 @@ const landingCopy = {
       "پلی‌بوک‌ها",
       "چک‌لیست‌ها",
       "تحلیل و گزارش‌ها",
-      "آخرین سیگنال‌ها",
     ],
-    signal: {
-      tools: [
-        "سیگنال زنده",
-        "سیگنال طلا",
-        "بازپخش بازار",
-        "تحلیل AI",
-        "هشدار تلگرام",
-        "آرشیو سیگنال",
-      ],
-      eyebrow: "داشبورد سیگنال",
-      title: "هر سیگنال، قبل از ورود کاملا شفاف.",
-      description:
-        "ایده‌های معاملاتی ساختاریافته را با جهت، ورود، حد ضرر، حد سود، وضعیت و نتیجه بسته‌شدن در یک داشبورد زنده دنبال کنید.",
-      bullets: [
-        "ایده‌های معاملاتی زنده برای XAU/USD و فارکس",
-        "سطوح ورود، حد ضرر و حد سود",
-        "هشدارهای تلگرام با جزئیات فشرده معامله",
-        "ردیابی شفاف نتیجه معاملات بسته‌شده",
-      ],
-      imageAlt: "پیش‌نمایش داشبورد سیگنال",
-    },
     agents: {
       eyebrow: "عامل‌های هوش مصنوعی",
       titleHighlight: "میز معاملاتی",
       titleRest: "هوشمندتر",
       description:
-        "عامل‌های تخصصی داشبورد بخش‌های مهم معامله‌گری را زیر نظر می‌گیرند: سیگنال، ریسک، مرور معامله و اشتباهات تکراری.",
+        "عامل‌های تخصصی داشبورد بخش‌های مهم معامله‌گری را زیر نظر می‌گیرند: ریسک، مرور معامله و اشتباهات تکراری.",
       ready: "عامل آماده است",
       cards: [
-        {
-          title: "قبل از ورود، ستاپ را می‌خواند.",
-          eyebrow: "عامل سیگنال",
-          description:
-            "ایده‌های زنده فارکس و طلا را بررسی می‌کند و جهت، ورود، حد ضرر، حد سود و وضعیت سیگنال را خوانا نگه می‌دارد.",
-          tag: "سیگنال",
-          messages: [
-            "ستاپ XAU/USD فعال است و ورود، SL و TP مشخص هستند.",
-            "برنامه سیگنال قبل از اجرا واضح است.",
-          ],
-          action: "برنامه سیگنال را باز کنید.",
-        },
         {
           title: "ریسک را قبل از کلیک قابل دیدن می‌کند.",
           eyebrow: "عامل ریسک",
@@ -486,7 +405,7 @@ const landingCopy = {
         {
           question: "داخل داشبورد چه چیزهایی را می‌توانم مدیریت کنم؟",
           answer:
-            "می‌توانید معاملات، حساب‌ها، یادداشت‌های روزانه، اسکرین‌شات‌ها، پلی‌بوک‌ها، چک‌لیست‌ها، تحلیل‌ها، گزارش‌ها و آخرین سیگنال‌ها را در یک فضای کاری مرتب دنبال کنید.",
+            "می‌توانید معاملات، حساب‌ها، یادداشت‌های روزانه، اسکرین‌شات‌ها، پلی‌بوک‌ها، چک‌لیست‌ها، تحلیل‌ها و گزارش‌ها را در یک فضای کاری مرتب دنبال کنید.",
           tag: "داشبورد",
         },
         {
@@ -512,18 +431,6 @@ const landingCopy = {
           answer:
             "Pro معاملات و اسکرین‌شات‌های نامحدود، پلی‌بوک و چک‌لیست نامحدود، بررسی معامله با AI، تحلیل پیشرفته، خروجی گزارش و جریان کامل ماهانه داشبورد را فعال می‌کند.",
           tag: "دسترسی Pro",
-        },
-        {
-          question: "آیا سیگنال‌های تلگرام به داشبورد وصل هستند؟",
-          answer:
-            "سیگنال‌ها با ورود، حد ضرر، حد سود، وضعیت و نتیجه بسته‌شدن شفاف ارائه می‌شوند. داشبورد کمک می‌کند ساختار را مرور کنید، نه اینکه میان پیام‌های پراکنده دنبال معامله بگردید.",
-          tag: "سیگنال‌ها",
-        },
-        {
-          question: "آیا از سیگنال‌ها یا بازخورد AI سود تضمین می‌کنید؟",
-          answer:
-            "خیر. Tradivix برای ساختار، ردیابی و پشتیبانی تصمیم ساخته شده است. معامله همیشه ریسک دارد و هر معامله‌گر باید مدیریت ریسک و حجم پوزیشن شخصی داشته باشد.",
-          tag: "ریسک",
         },
         {
           question: "آیا می‌توانم ژورنال و گزارش‌ها را خروجی بگیرم؟",
@@ -674,16 +581,6 @@ export default function Home() {
     { icon: Layers, label: copy.heroTools[3] },
     { icon: ClipboardCheck, label: copy.heroTools[4] },
     { icon: BarChart3, label: copy.heroTools[5] },
-    { icon: BadgeCheck, label: copy.heroTools[6] },
-  ];
-
-  const productTools = [
-    { icon: FileCheck2, label: copy.signal.tools[0], active: true },
-    { icon: BarChart3, label: copy.signal.tools[1] },
-    { icon: PlayCircle, label: copy.signal.tools[2] },
-    { icon: Sparkles, label: copy.signal.tools[3] },
-    { icon: Users, label: copy.signal.tools[4] },
-    { icon: ClipboardCheck, label: copy.signal.tools[5] },
   ];
 
   const dashboardBenefits = [
@@ -704,16 +601,11 @@ export default function Home() {
   const commandCenterCards = [
     {
       ...copy.agents.cards[0],
-      icon: BarChart3,
-      accent: "from-blue-500 to-cyan-400",
-    },
-    {
-      ...copy.agents.cards[1],
       icon: ShieldCheck,
       accent: "from-violet-500 to-fuchsia-500",
     },
     {
-      ...copy.agents.cards[2],
+      ...copy.agents.cards[1],
       icon: Sparkles,
       accent: "from-emerald-400 to-blue-500",
     },
@@ -776,14 +668,18 @@ export default function Home() {
     ...item,
     ...faqIcons[index],
   }));
+  const showLegacyLandingIntro = false;
 
   return (
     <div
-      className={`flex max-w-full flex-col overflow-x-hidden ${textAlignClass} ${
+      className={`flex max-w-full flex-col overflow-x-clip ${textAlignClass} ${
         isRtl ? "landing-fa-font" : "landing-en-font"
       }`}
       dir={dir}
     >
+      <LandingVideoStory />
+      {showLegacyLandingIntro && (
+        <>
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-white text-slate-950">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_42%,rgba(167,139,250,0.28),transparent_34%),radial-gradient(circle_at_88%_58%,rgba(244,114,182,0.22),transparent_28%),radial-gradient(circle_at_61%_70%,rgba(59,130,246,0.18),transparent_32%)]" />
@@ -891,79 +787,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-      {/* Features */}
-      <section className="relative overflow-hidden bg-white py-16 text-[#10132f]">
-        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#f8f6ff] to-white" />
-        <div className="container relative z-10 mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-10">
-          <div className="overflow-hidden rounded-[2rem] border border-violet-100 bg-[linear-gradient(135deg,#ffffff_0%,#fbfbff_58%,#eeeaff_100%)] shadow-[0_30px_90px_rgba(79,70,229,0.16)]">
-            <div className="border-b border-violet-100/80 bg-white/70 px-5 py-5 backdrop-blur sm:px-8">
-              <div className="flex flex-wrap justify-center gap-2.5">
-                {productTools.map((tool) => {
-                  const Icon = tool.icon;
-
-                  return (
-                    <button
-                      key={tool.label}
-                      type="button"
-                      className={`inline-flex h-12 items-center gap-2 rounded-full border px-4 text-sm font-semibold shadow-sm transition-colors ${
-                        tool.active
-                          ? "border-violet-300 bg-white text-slate-950 shadow-[0_10px_24px_rgba(99,102,241,0.14)]"
-                          : "border-slate-200 bg-white/80 text-slate-700 hover:border-violet-200"
-                      }`}
-                    >
-                      <span
-                        className={`flex h-8 w-8 items-center justify-center rounded-full border ${
-                          tool.active
-                            ? "border-blue-500 bg-blue-600 text-white"
-                            : "border-slate-200 bg-slate-50 text-slate-500"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </span>
-                      {tool.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="grid gap-8 p-5 sm:p-8 lg:grid-cols-[0.8fr_1.35fr] lg:items-center lg:p-12">
-              <div className={`max-w-xl ${textAlignClass}`}>
-                <div className="text-xs font-bold uppercase tracking-[0.22em] text-violet-500">
-                  {copy.signal.eyebrow}
-                </div>
-                <h2 className="mt-5 max-w-md text-3xl font-extrabold leading-tight text-[#080b29] sm:text-4xl">
-                  {copy.signal.title}
-                </h2>
-                <p className="mt-6 max-w-lg text-base leading-7 text-slate-500">
-                  {copy.signal.description}
-                </p>
-
-                <ul className="mt-7 space-y-3 text-sm font-medium text-slate-600">
-                  {copy.signal.bullets.map((bullet) => (
-                    <li key={bullet} className="flex items-center gap-3">
-                      <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                      {bullet}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="min-w-0 overflow-hidden rounded-lg border border-slate-800 bg-[#0f172a] shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
-                <Image
-                  src="/images/background/signal.png"
-                  alt={copy.signal.imageAlt}
-                  width={1320}
-                  height={780}
-                  className="h-auto w-full object-contain"
-                  sizes="(min-width: 1024px) 54vw, 100vw"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Automated Journaling */}
       <div id="automated-journaling">
         <LandingHeroFeatures />
@@ -993,7 +816,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-5 lg:grid-cols-3">
+          <div className="mt-14 grid gap-5 lg:grid-cols-2">
             {commandCenterCards.map(
               (
                 {
@@ -1212,6 +1035,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+        </>
+      )}
 
       {/* Dashboard Pricing */}
       <section

@@ -3,7 +3,7 @@
 //| On-chart position sizing panel. Calculation only; no trade calls. |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.26"
+#property version   "1.27"
 #property description "Inguardy on-chart position size calculator. Never opens, closes, or modifies trades."
 
 enum ENUM_IG_DIRECTION
@@ -38,6 +38,8 @@ input color             MUTED_COLOR = C'148,163,184';
 const string PREFIX = "IGPSC_";
 const int PANEL_WIDTH = 420;
 const int PANEL_HEIGHT = 248;
+const int MINI_PANEL_WIDTH = 300;
+const int MINI_PANEL_HEIGHT = 40;
 
 ENUM_IG_DIRECTION g_direction;
 ENUM_IG_RISK_MODE g_riskMode;
@@ -48,6 +50,7 @@ double g_stopPrice;
 double g_takeProfit;
 bool g_setupActive = false;
 bool g_internalDelete = false;
+bool g_panelMinimized = false;
 int g_panelOriginX = 0;
 int g_panelOriginY = 0;
 int g_lastChartWidth = 0;
@@ -74,7 +77,18 @@ void UpdatePanelOrigin()
    g_lastChartHeight = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS, 0);
 
    g_panelOriginX = PANEL_X;
-   g_panelOriginY = MathMax(g_lastChartHeight - PANEL_Y - PANEL_HEIGHT, 0);
+   int activePanelHeight = g_panelMinimized ? MINI_PANEL_HEIGHT : PANEL_HEIGHT;
+   g_panelOriginY = MathMax(g_lastChartHeight - PANEL_Y - activePanelHeight, 0);
+}
+
+string PanelStateKey()
+{
+   return PREFIX + "MIN_" + IntegerToString(ChartID());
+}
+
+void SavePanelState()
+{
+   GlobalVariableSet(PanelStateKey(), g_panelMinimized ? 1.0 : 0.0);
 }
 
 double NormalizePrice(const double price)
@@ -259,11 +273,24 @@ void SetTextColor(const string suffix, const color value)
 void BuildPanel()
 {
    UpdatePanelOrigin();
+
+   if(g_panelMinimized)
+   {
+      CreateRectangle(N("panel"), 0, 0, MINI_PANEL_WIDTH, MINI_PANEL_HEIGHT, PANEL_BACKGROUND, PANEL_BORDER);
+      CreateRectangle(N("accent"), 0, 0, 5, MINI_PANEL_HEIGHT, ACCENT_COLOR, ACCENT_COLOR);
+      CreateLabel(N("title"), "INGUARDY LOT CALCULATOR", 16, 12, 10, TEXT_COLOR);
+      CreateButton(N("restore"), "OPEN", 232, 7, 56, 26, C'20,42,70', ACCENT_COLOR);
+      ObjectSetString(0, N("restore"), OBJPROP_TOOLTIP, "Restore calculator panel");
+      return;
+   }
+
    CreateRectangle(N("panel"), 0, 0, PANEL_WIDTH, PANEL_HEIGHT, PANEL_BACKGROUND, PANEL_BORDER);
    CreateRectangle(N("accent"), 0, 0, 5, PANEL_HEIGHT, ACCENT_COLOR, ACCENT_COLOR);
 
    CreateLabel(N("title"), "INGUARDY LOT CALCULATOR", 16, 12, 11, TEXT_COLOR);
    CreateLabel(N("subtitle"), _Symbol + "  •  broker data", 238, 15, 8, MUTED_COLOR);
+   CreateButton(N("minimize"), "—", 312, 9, 26, 24, C'20,42,70', MUTED_COLOR);
+   ObjectSetString(0, N("minimize"), OBJPROP_TOOLTIP, "Minimize calculator panel");
    CreateButton(N("clear"), "CLEAR", 344, 9, 60, 24, C'51,31,47', SELL_COLOR);
 
    CreateButton(N("buy"), "BUY", 16, 43, 102, 31, C'15,47,55', BUY_COLOR);
@@ -644,12 +671,28 @@ void DeletePanelControls()
    string suffixes[] =
    {
       "panel", "accent", "title", "subtitle", "clear", "buy", "sell",
+      "minimize", "restore",
       "risk_label", "risk_mode", "risk_edit", "risk_unit", "rr_label", "rr_edit",
       "entry_caption", "entry_value", "market", "entry_hint", "stop_caption", "stop_value",
       "tp_caption", "tp_value", "result_box", "lot_caption", "lot_value", "risk_result", "status"
    };
    for(int index = 0; index < ArraySize(suffixes); index++)
       ObjectDelete(0, N(suffixes[index]));
+}
+
+void TogglePanelMinimized()
+{
+   if(!g_panelMinimized)
+   {
+      bool changed = SyncEditableValues();
+      if(changed && g_setupActive)
+         CalculateAndRender();
+   }
+
+   g_panelMinimized = !g_panelMinimized;
+   SavePanelState();
+   RebuildPanelControls();
+   ChartRedraw(0);
 }
 
 void RebuildPanelControls()
@@ -670,6 +713,8 @@ int OnInit()
    g_riskMode = START_RISK_MODE;
    g_riskValue = START_RISK_VALUE;
    g_riskReward = START_RISK_REWARD;
+   g_panelMinimized = GlobalVariableCheck(PanelStateKey())
+      && GlobalVariableGet(PanelStateKey()) > 0.5;
 
    DeletePanelObjects();
    BuildPanel();
@@ -685,6 +730,10 @@ int OnInit()
 void OnDeinit(const int reason)
 {
    EventKillTimer();
+   if(reason == REASON_REMOVE)
+      GlobalVariableDel(PanelStateKey());
+   else
+      SavePanelState();
    DeletePanelObjects();
    ChartRedraw(0);
 }
@@ -703,7 +752,11 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
 {
    if(id == CHARTEVENT_OBJECT_CLICK)
    {
-      if(sparam == N("buy") || sparam == N("sell"))
+      if(sparam == N("minimize") || sparam == N("restore"))
+      {
+         TogglePanelMinimized();
+      }
+      else if(sparam == N("buy") || sparam == N("sell"))
       {
          StartNewSetup(sparam == N("buy") ? IG_BUY : IG_SELL);
       }

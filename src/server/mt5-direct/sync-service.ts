@@ -10,6 +10,7 @@ import { persistMt5Deals, projectMt5Positions } from "@/server/mt5-direct/projec
 import { Mt5BridgeError, runMt5Bridge } from "@/server/mt5-direct/python-bridge";
 import { captureMt5TradeScreenshots } from "@/server/mt5-direct/screenshots";
 import { persistMt5AccountTelemetry } from "@/server/mt5-direct/telemetry";
+import { evaluateStoredAccountSafely } from "@/server/risk-guardian/service";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SYNC_BATCH_DAYS = 366;
@@ -184,6 +185,7 @@ export async function synchronizeMt5Connection(connectionId: string) {
     } catch (error) {
       screenshotResult.errors.push(errorMessage(error));
     }
+    await evaluateStoredAccountSafely(connection.accountId);
     return {
       ...result,
       capturedScreenshots: screenshotResult.captured,

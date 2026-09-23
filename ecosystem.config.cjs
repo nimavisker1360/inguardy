@@ -60,5 +60,13 @@ module.exports = {
         TRADELOCKER_DIRECT_SYNC_ENABLED: "true",
       },
     },
+    {
+      name: "tradivix-risk-notifications",
+      cwd: "E:/signal-forex",
+      script: "./node_modules/tsx/dist/cli.mjs",
+      args: "src/workers/risk-notification-worker.ts",
+      interpreter: "node",
+      env: { NODE_ENV: "production" },
+    },
   ],
 };

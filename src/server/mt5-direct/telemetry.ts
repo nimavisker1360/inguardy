@@ -42,12 +42,16 @@ export async function persistMt5AccountTelemetry(
       margin: input.account.margin === undefined ? null : finite(input.account.margin),
       freeMargin: input.account.margin_free === undefined ? null : finite(input.account.margin_free),
       marginLevel: input.account.margin_level === undefined ? null : finite(input.account.margin_level),
+      marginCallLevel: input.account.margin_so_mode === 0 ? positiveFiniteOrUndefined(input.account.margin_so_call) ?? null : null,
+      stopOutLevel: input.account.margin_so_mode === 0 ? positiveFiniteOrUndefined(input.account.margin_so_so) ?? null : null,
     },
     update: {
       balance, equity, floatingPnl: input.account.profit === undefined ? equity - balance : finite(input.account.profit),
       margin: input.account.margin === undefined ? null : finite(input.account.margin),
       freeMargin: input.account.margin_free === undefined ? null : finite(input.account.margin_free),
       marginLevel: input.account.margin_level === undefined ? null : finite(input.account.margin_level),
+      marginCallLevel: input.account.margin_so_mode === 0 ? positiveFiniteOrUndefined(input.account.margin_so_call) ?? null : null,
+      stopOutLevel: input.account.margin_so_mode === 0 ? positiveFiniteOrUndefined(input.account.margin_so_so) ?? null : null,
     },
   });
 

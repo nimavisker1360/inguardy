@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Edit, Eye, Plus, Trash2 } from "lucide-react";
-import { AccountConnectionWizard } from "@/components/dashboard/AccountConnectionWizard";
 import { AccountJournalConnectionPanel } from "@/components/dashboard/AccountJournalConnectionPanel";
 import { Mt5DirectConnectionPanel } from "@/components/dashboard/Mt5DirectConnectionPanel";
 import { CtraderDirectConnectionPanel } from "@/components/dashboard/CtraderDirectConnectionPanel";
@@ -31,10 +31,9 @@ export function AccountsManager({
   const [accounts, setAccounts] = useState<TradingAccountDto[]>(initialAccounts);
   const [editingAccount, setEditingAccount] = useState<TradingAccountDto | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [showConnectionWizard, setShowConnectionWizard] = useState(false);
-  const [connectionPlatform, setConnectionPlatform] = useState<string | undefined>();
   const [message, setMessage] = useState("");
   const [messageKind, setMessageKind] = useState<"error" | "success">("error");
+  const router = useRouter();
   const { language, t } = useLanguage();
 
   const loadAccounts = useCallback(async () => {
@@ -89,7 +88,6 @@ export function AccountsManager({
 
     setMessage("");
     setShowForm(false);
-    setShowConnectionWizard(false);
     setEditingAccount(null);
     await loadAccounts();
   }
@@ -119,19 +117,13 @@ export function AccountsManager({
             {t("dashboard.accounts.subtitle")}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setEditingAccount(null);
-            setMessage("");
-            setConnectionPlatform(undefined);
-            setShowConnectionWizard(true);
-          }}
+        <Link
+          href="/dashboard/accounts/new"
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
         >
           <Plus className="h-4 w-4" />
           {t("dashboard.accounts.create")}
-        </button>
+        </Link>
       </div>
 
       {message ? (
@@ -229,8 +221,7 @@ export function AccountsManager({
                 account={account}
                 onChanged={loadAccounts}
                 onReconnect={() => {
-                  setConnectionPlatform("tradelocker");
-                  setShowConnectionWizard(true);
+                  router.push("/dashboard/accounts/new?platform=tradelocker");
                 }}
               />
             ) : account.ingestionMode === "DIRECT_CTRADER" || account.ctraderConnection ? (
@@ -251,19 +242,6 @@ export function AccountsManager({
           {t("dashboard.accounts.empty")}
         </div>
       ) : null}
-
-      <AccountConnectionWizard
-        open={showConnectionWizard}
-        initialPlatformId={connectionPlatform}
-        canUseAutoSync={journalAccess.canUseJournal}
-        errorMessage={message}
-        onClose={() => {
-          setShowConnectionWizard(false);
-          setMessage("");
-        }}
-        onSaveManual={saveAccount}
-        onAccountsChanged={loadAccounts}
-      />
     </div>
   );
 }

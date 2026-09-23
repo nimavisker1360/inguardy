@@ -19,6 +19,8 @@ type FormState = {
   symbols: string;
   timeframes: string;
   direction: "BUY_ONLY" | "SELL_ONLY" | "BOTH";
+  riskPerTrade: string;
+  minRiskReward: string;
   entryRules: string;
   exitRules: string;
   riskRules: string;
@@ -64,6 +66,8 @@ type PlaybookTemplate = Pick<
   | "symbols"
   | "timeframes"
   | "direction"
+  | "riskPerTrade"
+  | "minRiskReward"
   | "entryRules"
   | "exitRules"
   | "riskRules"
@@ -75,6 +79,8 @@ const PLAYBOOK_TEMPLATES: PlaybookTemplate[] = [
     name: "EMA Pullback",
     marketType: "Forex",
     direction: "BOTH",
+    riskPerTrade: "1",
+    minRiskReward: "1.5",
     symbols: "EURUSD, GBPUSD, XAUUSD",
     timeframes: "M15, H1",
     entryRules: [
@@ -105,6 +111,8 @@ const PLAYBOOK_TEMPLATES: PlaybookTemplate[] = [
     name: "London Breakout",
     marketType: "Forex",
     direction: "BOTH",
+    riskPerTrade: "1",
+    minRiskReward: "",
     symbols: "GBPUSD, EURUSD, GBPJPY",
     timeframes: "M5, M15",
     entryRules: [
@@ -135,6 +143,8 @@ const PLAYBOOK_TEMPLATES: PlaybookTemplate[] = [
     name: "SMC / Order Block",
     marketType: "Forex",
     direction: "BOTH",
+    riskPerTrade: "1",
+    minRiskReward: "2",
     symbols: "EURUSD, GBPUSD, XAUUSD, NAS100",
     timeframes: "M15, H1, H4",
     entryRules: [
@@ -188,6 +198,8 @@ const copy = {
     entryRules: "Entry Rules",
     exitRules: "Exit Rules",
     riskRules: "Risk Rules",
+    riskPerTrade: "Maximum risk per trade (%)",
+    minRiskReward: "Minimum planned R:R",
     oneRulePerLine: "One rule per line",
     riskPlaceholder: "Risk per trade, max loss, minimum R:R, invalidation rules",
     checklistItems: "Strategy Confirmation Rules",
@@ -250,6 +262,8 @@ const copy = {
     entryRules: "قوانین ورود",
     exitRules: "قوانین خروج",
     riskRules: "قوانین ریسک",
+    riskPerTrade: "حداکثر ریسک هر معامله (٪)",
+    minRiskReward: "حداقل نسبت سود به زیان برنامه",
     oneRulePerLine: "هر قانون در یک خط",
     riskPlaceholder: "ریسک هر معامله، حداکثر ضرر، حداقل R:R، قوانین بی اعتباری",
     checklistItems: "شرایط تایید این استراتژی",
@@ -334,6 +348,8 @@ function initialForm(playbook?: PlaybookStrategyDto): FormState {
       playbook?.direction === "BUY_ONLY" || playbook?.direction === "SELL_ONLY"
         ? playbook.direction
         : "BOTH",
+    riskPerTrade: playbook?.riskPerTrade == null ? "" : String(playbook.riskPerTrade),
+    minRiskReward: playbook?.minRiskReward == null ? "" : String(playbook.minRiskReward),
     entryRules: sectionText(playbook, "ENTRY"),
     exitRules: sectionText(playbook, "EXIT"),
     riskRules: sectionText(playbook, "RISK"),
@@ -553,6 +569,8 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
             symbols: form.symbols,
             timeframes: form.timeframes,
             direction: form.direction,
+            riskPerTrade: form.riskPerTrade === "" ? null : Number(form.riskPerTrade),
+            minRiskReward: form.minRiskReward === "" ? null : Number(form.minRiskReward),
             entryRules: form.entryRules,
             exitRules: form.exitRules,
             riskRules: form.riskRules,
@@ -676,6 +694,12 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
                 <option value="SELL_ONLY">{text.sellOnly}</option>
                 <option value="BOTH">{text.both}</option>
               </select>
+            </Field>
+            <Field label={text.riskPerTrade}>
+              <input type="number" min="0.01" max="100" step="any" inputMode="decimal" value={form.riskPerTrade} onChange={(event) => setField("riskPerTrade", event.target.value)} className={inputClass} />
+            </Field>
+            <Field label={text.minRiskReward}>
+              <input type="number" min="0.01" step="any" inputMode="decimal" value={form.minRiskReward} onChange={(event) => setField("minRiskReward", event.target.value)} className={inputClass} />
             </Field>
             <Field label={text.symbols} className="md:col-span-2">
               <input

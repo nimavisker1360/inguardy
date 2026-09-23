@@ -707,8 +707,14 @@ export function buildTradeWhere(searchParams: URLSearchParams) {
   const side = searchParams.get("side") || searchParams.get("direction") || searchParams.get("type");
   const status = searchParams.get("status");
   const userId = searchParams.get("userId");
-  const dateFrom = parseDate(searchParams.get("dateFrom") || searchParams.get("from"));
-  const dateTo = parseDate(searchParams.get("dateTo") || searchParams.get("to"));
+  const rawDateFrom = searchParams.get("dateFrom") || searchParams.get("from");
+  const rawDateTo = searchParams.get("dateTo") || searchParams.get("to");
+  const dateFrom = parseDate(rawDateFrom);
+  const parsedDateTo = parseDate(rawDateTo);
+  const dateTo =
+    parsedDateTo && rawDateTo && /^\d{4}-\d{2}-\d{2}$/.test(rawDateTo)
+      ? new Date(parsedDateTo.getTime() + 24 * 60 * 60 * 1000 - 1)
+      : parsedDateTo;
 
   if (userId) {
     where.userId = userId;

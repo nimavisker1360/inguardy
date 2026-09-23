@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { EA_IMPORT_TRADE_SOURCE, MT5_TRADE_SOURCE } from "@/lib/journal/trade-source";
+import { EA_IMPORT_TRADE_SOURCE, MT4_TRADE_SOURCE, MT5_TRADE_SOURCE } from "@/lib/journal/trade-source";
 import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +39,7 @@ export async function GET() {
         where: {
           userId,
           mt5Ticket: { not: null },
-          source: { in: [MT5_TRADE_SOURCE, EA_IMPORT_TRADE_SOURCE, "MT5_EA"] },
+          source: { in: [MT4_TRADE_SOURCE, MT5_TRADE_SOURCE, EA_IMPORT_TRADE_SOURCE, "MT5_EA"] },
           account: {
             journalEnabled: true,
             OR: [

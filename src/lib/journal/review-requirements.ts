@@ -22,7 +22,6 @@ export type RequirementStepId =
   | "trade-information"
   | "psychology-review"
   | "strategy-review"
-  | "ai-review"
   | "complete-review";
 
 type Db = Prisma.TransactionClient | typeof prisma;
@@ -173,10 +172,6 @@ function requirementSteps(input: {
   strategyDone: boolean;
 }) {
   const tradeInfoDone = tradeInformationComplete(input.trade);
-  const aiDone = Boolean(
-    input.trade.aiReviewStatus === "REVIEWED" || input.trade.aiReviews.length > 0
-  );
-
   return [
     {
       id: "select-playbook",
@@ -219,14 +214,6 @@ function requirementSteps(input: {
       locked: !input.checklistComplete,
       reason: input.strategyDone ? null : "Complete Strategy Review to continue.",
       href: "#strategy-checklist",
-    },
-    {
-      id: "ai-review",
-      label: "AI Review",
-      complete: aiDone,
-      locked: input.missing.length > 0,
-      reason: input.missing.length > 0 ? REVIEW_REQUIREMENT_MESSAGE : null,
-      href: "#ai-review",
     },
     {
       id: "complete-review",
@@ -284,8 +271,7 @@ export function calculateTradeRequirements(
     psychologyDone,
     strategyDone,
   });
-  const requiredSteps = steps.filter((step) => step.id !== "ai-review");
-  const completedRequired = requiredSteps.filter((step) => step.complete).length;
+  const completedRequired = steps.filter((step) => step.complete).length;
 
   return {
     readyToTrade,
@@ -294,7 +280,7 @@ export function calculateTradeRequirements(
     progressPercent:
       readyForReview && trade.reviewStatus === "REVIEWED"
         ? 100
-        : Math.round((completedRequired / requiredSteps.length) * 100),
+        : Math.round((completedRequired / steps.length) * 100),
     missingRequirements: missing,
     firstIncompleteStep: steps.find((step) => !step.complete)?.id || null,
     steps,

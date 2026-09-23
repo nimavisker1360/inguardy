@@ -188,6 +188,8 @@ model User {
   tradingAccounts               TradingAccount[]
   trades                        Trade[]
   tradeAIReviews                TradeAIReview[]
+  tradeAIChatMessages           TradeAIChatMessage[]
+  tradeCoachCommitments         TradeCoachCommitment[]
   journalConnections            JournalConnection[]
   tradeJournalMetadata          TradeJournalMetadata[]
   tradeScreenshots              TradeScreenshot[]
@@ -217,6 +219,9 @@ model User {
   reviewedInsuranceClaims       InsuranceClaim[]           @relation("InsuranceClaimReviewer")
   insuranceLoyaltyProfiles      InsuranceLoyaltyProfile[]
   backtestSessions              BacktestSession[]
+  riskSettings                  RiskSettings[]
+  riskEvents                    RiskEvent[]
+  riskNotifications             RiskNotification[]
 }
 
 model Session {
@@ -430,12 +435,118 @@ model TradingAccount {
   insuranceClaims       InsuranceClaim[]
   insuranceLoyalty      InsuranceLoyaltyProfile?
   backtestSessions      BacktestSession[]
+  riskSettings          RiskSettings?
+  riskEvents            RiskEvent[]
+  riskNotifications     RiskNotification[]
 
   @@index([userId])
   @@index([mt5AccountNumber])
   @@index([ctraderAccountId])
   @@index([tradeLockerAccountId])
   @@index([ingestionMode])
+}
+
+enum RiskLevel {
+  SAFE
+  WARNING
+  HIGH_RISK
+  CRITICAL
+}
+
+enum RiskMode {
+  CONSERVATIVE
+  BALANCED
+  AGGRESSIVE
+  CUSTOM
+}
+
+model RiskSettings {
+  id                         String    @id @default(cuid())
+  userId                     String
+  accountId                  String    @unique
+  enabled                    Boolean   @default(true)
+  riskMode                   RiskMode  @default(BALANCED)
+  warningMarginLevel         Float     @default(300)
+  highRiskMarginLevel        Float     @default(200)
+  criticalMarginLevel        Float     @default(150)
+  marginCallLevel            Float?
+  stopOutLevel               Float?
+  maxDailyDrawdown           Float     @default(5)
+  maxTotalDrawdown           Float     @default(10)
+  maxOpenPositions           Int       @default(10)
+  maxTotalLots               Float     @default(5)
+  maxExposurePercent         Float     @default(50)
+  lossVelocityThreshold      Float     @default(10)
+  emailAlerts                Boolean   @default(true)
+  inAppAlerts                Boolean   @default(true)
+  pushAlerts                 Boolean   @default(false)
+  telegramAlerts             Boolean   @default(false)
+  notificationCooldownMinutes Int     @default(15)
+  currentLevel               RiskLevel @default(SAFE)
+  currentScore               Int       @default(0)
+  lastSnapshotAt             DateTime?
+  peakEquity                 Float?
+  lastNotifiedAt             DateTime?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model RiskEvent {
+  id             String    @id @default(cuid())
+  userId         String
+  accountId      String
+  riskLevel      RiskLevel
+  riskScore      Int
+  balance        Float?
+  equity         Float?
+  usedMargin     Float?
+  freeMargin     Float?
+  marginLevel    Float?
+  dailyDrawdown  Float?
+  totalDrawdown  Float?
+  totalLots      Float?
+  openPositions  Int?
+  reasons        Json
+  createdAt      DateTime  @default(now())
+  resolvedAt     DateTime?
+
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       TradingAccount     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  notifications RiskNotification[]
+
+  @@index([accountId, createdAt])
+  @@index([userId, createdAt])
+  @@index([riskLevel, createdAt])
+}
+
+model RiskNotification {
+  id            String   @id @default(cuid())
+  riskEventId   String
+  userId        String
+  accountId     String
+  channel       String
+  status        String
+  attempts      Int      @default(0)
+  nextAttemptAt DateTime?
+  leaseUntil    DateTime?
+  failureReason String?
+  sentAt        DateTime?
+  createdAt     DateTime @default(now())
+  readAt        DateTime?
+
+  event   RiskEvent      @relation(fields: [riskEventId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([riskEventId, channel])
+  @@index([userId, createdAt])
+  @@index([accountId, createdAt])
+  @@index([status, nextAttemptAt])
 }
 
 model TradeLockerAuthSession {
@@ -820,6 +931,9 @@ model Trade {
   checklists         TradeChecklist[]
   strategyReview     TradeStrategyReview?
   aiReviews          TradeAIReview[]
+  aiChatMessages     TradeAIChatMessage[]
+  coachSourceCommitments TradeCoachCommitment[] @relation("CoachSourceTrade")
+  coachEvaluatedCommitments TradeCoachCommitment[] @relation("CoachEvaluatedTrade")
   journalMetadata    TradeJournalMetadata?
   updateLogs         TradeUpdateLog[]
   insuranceRiskFlags InsuranceRiskFlag[]
@@ -836,6 +950,8 @@ model Trade {
   @@index([mt5Ticket])
   @@index([openedAt])
   @@index([closedAt])
+  @@index([accountId, openedAt])
+  @@index([accountId, closedAt])
   @@index([userId, createdAt])
   @@index([userId, status])
 }
@@ -1089,19 +1205,27 @@ model Playbook {
 }
 
 model PropFirmChallenge {
-  id              String    @id @default(cuid())
-  userId          String
-  accountId       String?
-  name            String
-  startingBalance Decimal   @db.Decimal(18, 2)
-  profitTarget    Decimal?  @db.Decimal(18, 2)
-  maxDailyLoss    Decimal?  @db.Decimal(18, 2)
-  maxTotalLoss    Decimal?  @db.Decimal(18, 2)
-  status          String    @default("ACTIVE")
-  startedAt       DateTime?
-  endedAt         DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                   String    @id @default(cuid())
+  userId               String
+  accountId            String?
+  name                 String
+  ruleProfile          String    @default("CUSTOM")
+  dailyResetTimeZone   String    @default("UTC")
+  warningThreshold     Int       @default(80)
+  guardEnabled         Boolean   @default(false)
+  maxDailyEntries      Int?
+  maxConsecutiveLosses Int?
+  lossCooldownMinutes  Int?
+  manualPauseUntil     DateTime?
+  startingBalance      Decimal   @db.Decimal(18, 2)
+  profitTarget         Decimal?  @db.Decimal(18, 2)
+  maxDailyLoss         Decimal?  @db.Decimal(18, 2)
+  maxTotalLoss         Decimal?  @db.Decimal(18, 2)
+  status               String    @default("ACTIVE")
+  startedAt            DateTime?
+  endedAt              DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1287,6 +1411,49 @@ model TradeAIReview {
   @@index([score])
 }
 
+model TradeAIChatMessage {
+  id        String   @id @default(cuid())
+  tradeId   String
+  userId    String
+  role      String
+  content   String   @db.Text
+  isIntro   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tradeId, userId, createdAt])
+  @@index([userId])
+}
+
+model TradeCoachCommitment {
+  id               String   @id @default(cuid())
+  userId           String
+  accountId        String
+  sourceTradeId    String   @unique
+  actionText       String   @db.Text
+  evidence         String   @db.Text
+  category         String
+  status           String   @default("PROPOSED")
+  acceptedAt       DateTime?
+  acknowledgedAt   DateTime?
+  evaluatedTradeId String?
+  verdict          String?
+  verdictReason    String?  @db.Text
+  reflection       String?  @db.Text
+  evaluatedAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceTrade    Trade  @relation("CoachSourceTrade", fields: [sourceTradeId], references: [id], onDelete: Cascade)
+  evaluatedTrade Trade? @relation("CoachEvaluatedTrade", fields: [evaluatedTradeId], references: [id], onDelete: SetNull)
+
+  @@index([userId, accountId, status, acceptedAt])
+  @@index([evaluatedTradeId])
+}
+
 model TradeStrategyRuleReview {
   id                      String   @id @default(cuid())
   tradeStrategyReviewId   String
@@ -1435,6 +1602,8 @@ model AccountEquitySnapshot {
   margin      Decimal? @db.Decimal(18, 2)
   freeMargin  Decimal? @db.Decimal(18, 2)
   marginLevel Decimal? @db.Decimal(18, 4)
+  marginCallLevel Decimal? @db.Decimal(18, 4)
+  stopOutLevel Decimal? @db.Decimal(18, 4)
   createdAt   DateTime @default(now())
 
   account TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)

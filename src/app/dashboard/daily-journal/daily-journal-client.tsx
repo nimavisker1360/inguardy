@@ -1138,6 +1138,41 @@ export function DailyJournalClient() {
   }, [accountId, date]);
 
   useEffect(() => {
+    type DailyJournalSyncPayload = {
+      date?: string;
+      endOfDayNotes?: string;
+    };
+
+    function applySync(payload: DailyJournalSyncPayload) {
+      if (payload.date !== date || typeof payload.endOfDayNotes !== "string") return;
+      setForm((current) => ({ ...current, endOfDayNotes: payload.endOfDayNotes || "" }));
+      setStatus("saved");
+    }
+
+    const channel = "BroadcastChannel" in window
+      ? new BroadcastChannel("inguardy:daily-journal-sync")
+      : null;
+    if (channel) {
+      channel.onmessage = (event: MessageEvent<DailyJournalSyncPayload>) => applySync(event.data);
+    }
+
+    function handleStorage(event: StorageEvent) {
+      if (event.key !== "inguardy:daily-journal-sync" || !event.newValue) return;
+      try {
+        applySync(JSON.parse(event.newValue) as DailyJournalSyncPayload);
+      } catch {
+        // Ignore malformed cross-tab sync payloads.
+      }
+    }
+
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      channel?.close();
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [date]);
+
+  useEffect(() => {
     if (!hydrated || !dirty) {
       return;
     }
@@ -1493,28 +1528,40 @@ export function DailyJournalClient() {
           <Field label={text.tomorrowPlan}>
             <textarea rows={4} value={form.tomorrowPlan} onChange={(event) => updateForm("tomorrowPlan", event.target.value)} className={textareaClass} />
           </Field>
+          <div className="lg:col-span-2">
+            <Field label={text.endOfDayNotes}>
+              <textarea rows={5} value={form.endOfDayNotes} onChange={(event) => updateForm("endOfDayNotes", event.target.value)} className={textareaClass} />
+            </Field>
+          </div>
         </div>
       </Section>
 
-      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-800 pt-5">
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 pt-5 dark:border-slate-800">
         {requirements && !requirements.readyToComplete ? (
-          <div className="mr-auto w-full rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100 lg:w-auto lg:max-w-2xl">
-            <div className="font-semibold">{requirements.message || text.completionBlocked}</div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {requirements.missingItems.map((item) => (
-                <Link
-                  key={`${item.code}-${item.href}`}
-                  href={item.href}
-                  className="inline-flex h-8 items-center rounded-lg border border-amber-400/30 px-3 text-xs font-semibold text-amber-50 hover:bg-amber-400/10"
-                >
-                  {item.label}
-                </Link>
-              ))}
+          <div className="mr-auto w-full rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100 lg:w-auto lg:max-w-3xl">
+            <div className="flex items-start gap-3">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">
+                <ShieldAlert className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold leading-6">{requirements.message || text.completionBlocked}</div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {requirements.missingItems.map((item) => (
+                    <Link
+                      key={`${item.code}-${item.href}`}
+                      href={item.href}
+                      className="inline-flex min-h-9 items-center rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 shadow-sm transition hover:border-amber-400 hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 dark:border-amber-400/30 dark:bg-amber-950/30 dark:text-amber-100 dark:hover:bg-amber-400/15"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         ) : null}
         {statusText ? (
-          <span className="text-sm font-medium text-slate-400" aria-live="polite">
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-400" aria-live="polite">
             {statusText}
           </span>
         ) : null}

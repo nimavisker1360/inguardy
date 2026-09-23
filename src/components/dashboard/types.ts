@@ -33,13 +33,52 @@ export type PropFirmChallengeDto = {
   userId: string;
   accountId: string | null;
   name: string;
+  ruleProfile: string;
+  dailyResetTimeZone: string;
+  warningThreshold: number;
+  guardEnabled: boolean;
+  maxDailyEntries: number | null;
+  maxConsecutiveLosses: number | null;
+  lossCooldownMinutes: number | null;
+  manualPauseUntil: string | null;
+  guard: {
+    status: "DISABLED" | "OPEN" | "CAUTION" | "LOCKED";
+    entryAllowed: boolean;
+    reasons: Array<
+      | "PROP_RULE_BREACHED"
+      | "CHALLENGE_PASSED"
+      | "MANUAL_PAUSE"
+      | "DAILY_ENTRY_LIMIT"
+      | "CONSECUTIVE_LOSS_LIMIT"
+      | "LOSS_COOLDOWN"
+      | "PROP_RISK_WARNING"
+      | "STALE_BROKER_DATA"
+    >;
+    dailyEntries: number;
+    consecutiveLosses: number;
+    cooldownUntil: string | null;
+    manualPauseUntil: string | null;
+  };
   startingBalance: string | number;
   currentBalance: number;
+  currentEquity: number;
+  floatingPnl: number;
   profitTarget: string | number | null;
   maxDailyLoss: string | number | null;
   maxTotalLoss: string | number | null;
   progress: number;
   todayPnl: number;
+  dailyLossUsed: number;
+  dailyLossUsedPercent: number;
+  dailyLossRemaining: number | null;
+  totalLossUsed: number;
+  totalLossUsedPercent: number;
+  totalLossRemaining: number | null;
+  profitTargetRemaining: number | null;
+  riskLevel: "SAFE" | "WARNING" | "BREACHED" | "PASSED";
+  syncStatus: "LIVE" | "STALE" | "NO_TELEMETRY" | "MANUAL";
+  dataAsOf: string | null;
+  dayStartedAt: string;
   computedStatus: "Active" | "Passed" | "Failed - Daily Loss" | "Failed - Max Loss";
   status: string;
   startedAt: string | null;
@@ -213,6 +252,16 @@ export type CtraderDirectConnectionDto = {
   updatedAt: string;
 };
 
+export type DashboardPerformanceTrade = {
+  id: string;
+  symbol: string;
+  direction: "BUY" | "SELL";
+  status: "OPEN" | "CLOSED" | "CANCELLED";
+  profitLoss: number;
+  openedAt: string | null;
+  closedAt: string | null;
+};
+
 export type TradeLockerConnectionDto = {
   id: string;
   tradeLockerAccountId: string;
@@ -255,6 +304,7 @@ export type DashboardOverviewData = {
   trades: TradeDto[];
   stats: DashboardOverviewStats;
   pageStats: DashboardPageStatDto[];
+  performanceTrades: DashboardPerformanceTrade[];
 };
 
 export function toNumber(value: string | number | null | undefined) {

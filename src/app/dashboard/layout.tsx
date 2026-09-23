@@ -56,6 +56,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       showAdmin={isAdminUser(user)}
       initialTheme={initialTheme}
       userId={session.user.id}
+      userName={user?.name}
+      userEmail={user?.email}
+      userImage={user?.image}
       topContent={subscriptionBanner}
     >
       {children}

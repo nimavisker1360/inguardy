@@ -3,7 +3,20 @@
 import Link from "next/link";
 import type { FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, Edit, ListChecks, Plus, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Edit,
+  ListChecks,
+  Plus,
+  RefreshCw,
+  ShieldAlert,
+  Trash2,
+  Wifi,
+  WifiOff,
+  LockKeyhole,
+  UnlockKeyhole,
+} from "lucide-react";
 import {
   formatDate,
   formatMoney,
@@ -14,6 +27,7 @@ import {
   type TradingAccountDto,
 } from "@/components/dashboard/types";
 import { useLanguage } from "@/lib/language-context";
+import { PROP_FIRM_RULE_PROFILES, PROP_FIRM_TIME_ZONES } from "@/lib/prop-firm-rule-sync";
 import { cn } from "@/lib/utils";
 
 type PropFirmsData = {
@@ -24,12 +38,15 @@ type PropFirmsData = {
 type ChallengePayload = {
   name: string;
   accountId: string;
+  ruleProfile: string;
+  dailyResetTimeZone: string;
+  warningThreshold: number;
   startingBalance: string;
   profitTarget: string;
   maxDailyLoss: string;
   maxTotalLoss: string;
   startedAt: string;
-  endedAt: string;
+  endedAt: string | null;
 };
 
 function toDateInputValue(value: string | null | undefined) {
@@ -123,6 +140,16 @@ function challengeTradesHref(challenge: PropFirmChallengeDto) {
   return `/dashboard/prop-firms/${challenge.id}`;
 }
 
+function formatSyncTime(value: string | null, language: "en" | "fa") {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat(language === "fa" ? "fa-IR" : "en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
 function ChallengeForm({
   accounts,
   challenge,
@@ -136,31 +163,78 @@ function ChallengeForm({
   onSubmit: (payload: ChallengePayload) => Promise<void>;
   onCancel: () => void;
 }) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const initialAccountId = challenge?.accountId || defaultAccountId || accounts[0]?.id || "";
+  const initialAccount = accounts.find((account) => account.id === initialAccountId) || null;
+  const [accountId, setAccountId] = useState(initialAccountId);
+  const [ruleProfile, setRuleProfile] = useState(challenge?.ruleProfile || "CUSTOM");
+  const [startingBalance, setStartingBalance] = useState(
+    challenge?.startingBalance
+      ? String(challenge.startingBalance)
+      : initialAccount?.balance
+        ? String(initialAccount.balance)
+        : ""
+  );
+  const [profitTargetPercent, setProfitTargetPercent] = useState(
+    percentInputValue(challenge?.profitTarget, challenge?.startingBalance)
+  );
+  const [maxDailyLossPercent, setMaxDailyLossPercent] = useState(
+    percentInputValue(challenge?.maxDailyLoss, challenge?.startingBalance)
+  );
+  const [maxTotalLossPercent, setMaxTotalLossPercent] = useState(
+    percentInputValue(challenge?.maxTotalLoss, challenge?.startingBalance)
+  );
+  const [dailyResetTimeZone, setDailyResetTimeZone] = useState(
+    challenge?.dailyResetTimeZone || "UTC"
+  );
+  const [warningThreshold, setWarningThreshold] = useState(
+    String(challenge?.warningThreshold ?? 80)
+  );
+
+  function selectAccount(nextAccountId: string) {
+    setAccountId(nextAccountId);
+    if (!challenge) {
+      const account = accounts.find((item) => item.id === nextAccountId);
+      if (account?.balance !== null && account?.balance !== undefined) {
+        setStartingBalance(String(account.balance));
+      }
+    }
+  }
+
+  function selectRuleProfile(nextProfileId: string) {
+    setRuleProfile(nextProfileId);
+    const profile = PROP_FIRM_RULE_PROFILES.find((item) => item.id === nextProfileId);
+    if (!profile || profile.id === "CUSTOM") return;
+    setProfitTargetPercent(String(profile.profitTargetPercent));
+    setMaxDailyLossPercent(String(profile.maxDailyLossPercent));
+    setMaxTotalLossPercent(String(profile.maxTotalLossPercent));
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const startingBalance = String(formData.get("startingBalance") || "");
 
     await onSubmit({
       name: String(formData.get("name") || ""),
-      accountId: String(formData.get("accountId") || ""),
+      accountId,
+      ruleProfile,
+      dailyResetTimeZone,
+      warningThreshold: Number(warningThreshold),
       startingBalance,
       profitTarget: amountFromPercent(
-        String(formData.get("profitTargetPercent") || ""),
+        profitTargetPercent,
         startingBalance
       ),
       maxDailyLoss: amountFromPercent(
-        String(formData.get("maxDailyLossPercent") || ""),
+        maxDailyLossPercent,
         startingBalance
       ),
       maxTotalLoss: amountFromPercent(
-        String(formData.get("maxTotalLossPercent") || ""),
+        maxTotalLossPercent,
         startingBalance
       ),
       startedAt: String(formData.get("startedAt") || ""),
-      endedAt: String(formData.get("endedAt") || ""),
+      endedAt: String(formData.get("endedAt") || "").trim() || null,
     });
   }
 
@@ -185,12 +259,28 @@ function ChallengeForm({
           <select
             name="accountId"
             required
-            defaultValue={challenge?.accountId || defaultAccountId || accounts[0]?.id || ""}
+            value={accountId}
+            onChange={(event) => selectAccount(event.target.value)}
             className={inputClass}
           >
             {accounts.map((account) => (
               <option key={account.id} value={account.id}>
                 {accountLabel(account) || t("dashboard.propFirms.unknownAccount")}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={labelClass}>
+          {t("dashboard.propFirms.ruleProfile")}
+          <select
+            name="ruleProfile"
+            value={ruleProfile}
+            onChange={(event) => selectRuleProfile(event.target.value)}
+            className={inputClass}
+          >
+            {PROP_FIRM_RULE_PROFILES.map((profile) => (
+              <option key={profile.id} value={profile.id}>
+                {language === "fa" ? profile.labelFa : profile.labelEn}
               </option>
             ))}
           </select>
@@ -202,7 +292,8 @@ function ChallengeForm({
             type="number"
             step="0.01"
             required
-            defaultValue={challenge?.startingBalance ? String(challenge.startingBalance) : ""}
+            value={startingBalance}
+            onChange={(event) => setStartingBalance(event.target.value)}
             className={inputClass}
           />
         </label>
@@ -214,7 +305,8 @@ function ChallengeForm({
             step="0.01"
             min="0"
             required
-            defaultValue={percentInputValue(challenge?.profitTarget, challenge?.startingBalance)}
+            value={profitTargetPercent}
+            onChange={(event) => setProfitTargetPercent(event.target.value)}
             className={inputClass}
           />
         </label>
@@ -226,7 +318,8 @@ function ChallengeForm({
             step="0.01"
             min="0"
             required
-            defaultValue={percentInputValue(challenge?.maxDailyLoss, challenge?.startingBalance)}
+            value={maxDailyLossPercent}
+            onChange={(event) => setMaxDailyLossPercent(event.target.value)}
             className={inputClass}
           />
         </label>
@@ -238,7 +331,8 @@ function ChallengeForm({
             step="0.01"
             min="0"
             required
-            defaultValue={percentInputValue(challenge?.maxTotalLoss, challenge?.startingBalance)}
+            value={maxTotalLossPercent}
+            onChange={(event) => setMaxTotalLossPercent(event.target.value)}
             className={inputClass}
           />
         </label>
@@ -257,12 +351,43 @@ function ChallengeForm({
           <input
             name="endedAt"
             type="date"
-            required
             defaultValue={toDateInputValue(challenge?.endedAt)}
             className={inputClass}
           />
         </label>
+        <label className={labelClass}>
+          {t("dashboard.propFirms.dailyResetTimeZone")}
+          <select
+            name="dailyResetTimeZone"
+            value={dailyResetTimeZone}
+            onChange={(event) => setDailyResetTimeZone(event.target.value)}
+            className={inputClass}
+          >
+            {PROP_FIRM_TIME_ZONES.map((timeZone) => (
+              <option key={timeZone} value={timeZone}>
+                {timeZone}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={labelClass}>
+          {t("dashboard.propFirms.warningThreshold")}
+          <input
+            name="warningThreshold"
+            type="number"
+            min="50"
+            max="100"
+            step="1"
+            required
+            value={warningThreshold}
+            onChange={(event) => setWarningThreshold(event.target.value)}
+            className={inputClass}
+          />
+        </label>
       </div>
+      <p className="rounded-xl border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-xs leading-5 text-blue-100">
+        {t("dashboard.propFirms.profileHint")}
+      </p>
       <div className="flex justify-end gap-2">
         <button
           type="button"
@@ -328,6 +453,205 @@ function RuleRow({
   );
 }
 
+function OvertradeGuardPanel({
+  challenge,
+  onSave,
+}: {
+  challenge: PropFirmChallengeDto;
+  onSave: (payload: Record<string, unknown>) => Promise<boolean>;
+}) {
+  const { t, language } = useLanguage();
+  const [enabled, setEnabled] = useState(challenge.guardEnabled);
+  const [maxDailyEntries, setMaxDailyEntries] = useState(String(challenge.maxDailyEntries ?? 3));
+  const [maxConsecutiveLosses, setMaxConsecutiveLosses] = useState(
+    String(challenge.maxConsecutiveLosses ?? 2)
+  );
+  const [lossCooldownMinutes, setLossCooldownMinutes] = useState(
+    String(challenge.lossCooldownMinutes ?? 30)
+  );
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    setEnabled(challenge.guardEnabled);
+    setMaxDailyEntries(String(challenge.maxDailyEntries ?? 3));
+    setMaxConsecutiveLosses(String(challenge.maxConsecutiveLosses ?? 2));
+    setLossCooldownMinutes(String(challenge.lossCooldownMinutes ?? 30));
+  }, [
+    challenge.guardEnabled,
+    challenge.maxDailyEntries,
+    challenge.maxConsecutiveLosses,
+    challenge.lossCooldownMinutes,
+  ]);
+
+  async function save(payload: Record<string, unknown>) {
+    setBusy(true);
+    try {
+      await onSave(payload);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const statusTone = challenge.guard.status === "LOCKED"
+    ? "border-red-500/30 bg-red-500/10 text-red-100"
+    : challenge.guard.status === "CAUTION"
+      ? "border-amber-500/30 bg-amber-500/10 text-amber-100"
+      : challenge.guard.status === "OPEN"
+        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
+        : "border-slate-700 bg-slate-800/50 text-slate-300";
+  const activePause = challenge.guard.manualPauseUntil !== null;
+
+  return (
+    <div className="mt-4 rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-semibold text-white">
+          {challenge.guard.entryAllowed ? (
+            <UnlockKeyhole className="h-4 w-4 text-cyan-300" />
+          ) : (
+            <LockKeyhole className="h-4 w-4 text-red-300" />
+          )}
+          {t("dashboard.propFirms.guardTitle")}
+        </div>
+        <span className={cn("rounded-full border px-2 py-1 text-[11px] font-semibold", statusTone)}>
+          {t(`dashboard.propFirms.guardStatus${challenge.guard.status}`)}
+        </span>
+      </div>
+
+      <p className="mt-2 text-xs leading-5 text-slate-400">
+        {t("dashboard.propFirms.guardScopeNote")}
+      </p>
+
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-2">
+          <span className="block text-slate-400">{t("dashboard.propFirms.dailyEntries")}</span>
+          <strong className="mt-1 block text-white">
+            {challenge.guard.dailyEntries} / {challenge.maxDailyEntries ?? "—"}
+          </strong>
+        </div>
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-2">
+          <span className="block text-slate-400">{t("dashboard.propFirms.consecutiveLosses")}</span>
+          <strong className="mt-1 block text-white">
+            {challenge.guard.consecutiveLosses} / {challenge.maxConsecutiveLosses ?? "—"}
+          </strong>
+        </div>
+        <div className="col-span-2 rounded-lg border border-slate-800 bg-slate-900/70 p-2 sm:col-span-1">
+          <span className="block text-slate-400">{t("dashboard.propFirms.cooldownUntil")}</span>
+          <strong className="mt-1 block text-white">
+            {formatSyncTime(challenge.guard.cooldownUntil, language)}
+          </strong>
+        </div>
+      </div>
+
+      {challenge.guard.reasons.length ? (
+        <div className="mt-3 space-y-1.5">
+          {challenge.guard.reasons.map((reason) => (
+            <div key={reason} className="flex items-start gap-2 text-xs text-amber-100">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>{t(`dashboard.propFirms.guardReason${reason}`)}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {activePause ? (
+        <p className="mt-3 text-xs text-amber-100">
+          {t("dashboard.propFirms.manualPauseUntil")}: {formatSyncTime(challenge.guard.manualPauseUntil, language)}
+        </p>
+      ) : null}
+
+      <details className="mt-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+        <summary className="cursor-pointer text-xs font-semibold text-cyan-100">
+          {t("dashboard.propFirms.guardSettings")}
+        </summary>
+        <div className="mt-3 grid gap-3 text-xs sm:grid-cols-3">
+          <label className="sm:col-span-3 flex items-center gap-2 text-slate-200">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={(event) => setEnabled(event.target.checked)}
+              className="h-4 w-4 accent-cyan-500"
+            />
+            {t("dashboard.propFirms.guardEnabled")}
+          </label>
+          <label className="space-y-1 text-slate-400">
+            <span>{t("dashboard.propFirms.maxDailyEntries")}</span>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={maxDailyEntries}
+              onChange={(event) => setMaxDailyEntries(event.target.value)}
+              className="h-9 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-sm text-white"
+            />
+          </label>
+          <label className="space-y-1 text-slate-400">
+            <span>{t("dashboard.propFirms.maxConsecutiveLosses")}</span>
+            <input
+              type="number"
+              min="1"
+              max="20"
+              value={maxConsecutiveLosses}
+              onChange={(event) => setMaxConsecutiveLosses(event.target.value)}
+              className="h-9 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-sm text-white"
+            />
+          </label>
+          <label className="space-y-1 text-slate-400">
+            <span>{t("dashboard.propFirms.lossCooldownMinutes")}</span>
+            <input
+              type="number"
+              min="1"
+              max="1440"
+              value={lossCooldownMinutes}
+              onChange={(event) => setLossCooldownMinutes(event.target.value)}
+              className="h-9 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-sm text-white"
+            />
+          </label>
+        </div>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void save({
+            guardEnabled: enabled,
+            maxDailyEntries: maxDailyEntries.trim() ? Number(maxDailyEntries) : null,
+            maxConsecutiveLosses: maxConsecutiveLosses.trim() ? Number(maxConsecutiveLosses) : null,
+            lossCooldownMinutes: lossCooldownMinutes.trim() ? Number(lossCooldownMinutes) : null,
+          })}
+          className="mt-3 h-9 rounded-lg bg-cyan-600 px-3 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
+        >
+          {t("dashboard.propFirms.saveGuard")}
+        </button>
+      </details>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void save({
+            guardEnabled: true,
+            maxDailyEntries: maxDailyEntries.trim() ? Number(maxDailyEntries) : null,
+            maxConsecutiveLosses: maxConsecutiveLosses.trim() ? Number(maxConsecutiveLosses) : null,
+            lossCooldownMinutes: lossCooldownMinutes.trim() ? Number(lossCooldownMinutes) : null,
+            manualPauseUntil: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+          })}
+          className="h-9 rounded-lg border border-red-500/30 bg-red-500/10 px-3 text-xs font-semibold text-red-100 hover:bg-red-500/20 disabled:opacity-50"
+        >
+          {t("dashboard.propFirms.pauseOneHour")}
+        </button>
+        {activePause ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void save({ manualPauseUntil: null })}
+            className="h-9 rounded-lg border border-slate-700 bg-slate-800/50 px-3 text-xs font-semibold text-slate-100 hover:bg-slate-700 disabled:opacity-50"
+          >
+            {t("dashboard.propFirms.clearManualPause")}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function PropFirmsManager({
   initialAccounts,
   initialChallenges,
@@ -347,6 +671,8 @@ export function PropFirmsManager({
   const [editingChallenge, setEditingChallenge] = useState<PropFirmChallengeDto | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const { language, t } = useLanguage();
 
   useEffect(() => {
@@ -373,23 +699,69 @@ export function PropFirmsManager({
     return t("dashboard.propFirms.statusActive");
   }
 
-  const loadData = useCallback(async () => {
-    const response = await fetch("/api/prop-firms");
-    const json = (await response.json()) as ApiResult<PropFirmsData>;
+  const loadData = useCallback(async (options: { silent?: boolean } = {}) => {
+    if (!options.silent) setIsRefreshing(true);
+    try {
+      const response = await fetch("/api/prop-firms", { cache: "no-store" });
+      const json = (await response.json()) as ApiResult<PropFirmsData>;
 
-    if (!json.success || !json.data) {
-      setMessage(json.message || t("dashboard.propFirms.loadFailed"));
-      return;
+      if (!json.success || !json.data) {
+        if (!options.silent) setMessage(json.message || t("dashboard.propFirms.loadFailed"));
+        return;
+      }
+
+      setAccounts(json.data.accounts);
+      setChallenges(json.data.challenges);
+      setLastRefreshedAt(new Date());
+      setSelectedAccountId((current) =>
+        current && json.data?.accounts.some((account) => account.id === current)
+          ? current
+          : json.data?.accounts[0]?.id || ""
+      );
+      if (!options.silent) setMessage("");
+    } catch {
+      if (!options.silent) setMessage(t("dashboard.propFirms.loadFailed"));
+    } finally {
+      if (!options.silent) setIsRefreshing(false);
     }
-
-    setAccounts(json.data.accounts);
-    setChallenges(json.data.challenges);
-    setSelectedAccountId((current) =>
-      current && json.data?.accounts.some((account) => account.id === current)
-        ? current
-        : json.data?.accounts[0]?.id || ""
-    );
   }, [t]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void loadData({ silent: true });
+    }, 30_000);
+    return () => window.clearInterval(timer);
+  }, [loadData]);
+
+  async function syncSelectedAccount() {
+    const account = accounts.find((item) => item.id === selectedAccountId);
+    if (!account) return;
+    setIsRefreshing(true);
+    setMessage("");
+    try {
+      const endpoint =
+        account.ingestionMode === "DIRECT_MT5"
+          ? `/api/trading-accounts/${account.id}/sync`
+          : account.ingestionMode === "DIRECT_CTRADER"
+            ? `/api/trading-accounts/${account.id}/ctrader-sync`
+            : account.ingestionMode === "DIRECT_TRADELOCKER"
+              ? `/api/trading-accounts/${account.id}/tradelocker-sync`
+              : null;
+
+      if (endpoint) {
+        const response = await fetch(endpoint, { method: "POST" });
+        const result = (await response.json().catch(() => null)) as ApiResult<unknown> | null;
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.message || t("dashboard.propFirms.syncFailed"));
+        }
+      }
+      await loadData({ silent: true });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : t("dashboard.propFirms.syncFailed"));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
 
   async function saveChallenge(payload: ChallengePayload) {
     const isEditing = Boolean(editingChallenge);
@@ -414,6 +786,27 @@ export function PropFirmsManager({
     await loadData();
   }
 
+  async function saveGuardSettings(challengeId: string, payload: Record<string, unknown>) {
+    try {
+      const response = await fetch(`/api/prop-firms/${challengeId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = (await response.json()) as ApiResult<unknown>;
+      if (!response.ok || !result.success) {
+        setMessage(result.message || t("dashboard.propFirms.guardSaveFailed"));
+        return false;
+      }
+      setMessage("");
+      await loadData({ silent: true });
+      return true;
+    } catch {
+      setMessage(t("dashboard.propFirms.guardSaveFailed"));
+      return false;
+    }
+  }
+
   async function deleteChallenge(challenge: PropFirmChallengeDto) {
     const response = await fetch(`/api/prop-firms/${challenge.id}`, {
       method: "DELETE",
@@ -433,29 +826,40 @@ export function PropFirmsManager({
   const visibleChallenges = selectedAccountId
     ? challenges.filter((challenge) => challenge.accountId === selectedAccountId)
     : [];
+  const activeChallenges = visibleChallenges.filter(
+    (challenge) => challenge.computedStatus === "Active"
+  );
+  const relevantChallenges = activeChallenges.length
+    ? activeChallenges
+    : visibleChallenges.slice(0, 1);
   const selectedAccount = accounts.find((account) => account.id === selectedAccountId) || null;
-  const accountFilterLabel = language === "fa" ? "حساب فعال" : "Active account";
+  const accountFilterLabel = t("dashboard.propFirms.activeAccount");
+  const selectedWarning = relevantChallenges.find((challenge) => challenge.riskLevel === "BREACHED")
+    ?? relevantChallenges.find((challenge) => challenge.riskLevel === "WARNING")
+    ?? null;
+  const selectedGuardLock = relevantChallenges.find((challenge) => challenge.guard.status === "LOCKED")
+    ?? null;
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
+      <div className="flex flex-col gap-4 min-[1800px]:flex-row min-[1800px]:items-end min-[1800px]:justify-between">
+        <div className="min-w-0">
           <h2 className="text-2xl font-semibold text-white">{t("dashboard.propFirms.title")}</h2>
           <p className="mt-1 text-sm text-slate-400">
             {t("dashboard.propFirms.subtitle")}
           </p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-          <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+        <div className="flex min-w-0 flex-wrap items-end gap-2">
+          <label className="block w-full min-w-0 space-y-1 text-xs font-medium uppercase text-slate-400 sm:w-[320px] min-[1800px]:w-[360px]">
             {accountFilterLabel}
             <select
               value={selectedAccountId}
               onChange={(event) => setSelectedAccountId(event.target.value)}
               disabled={accounts.length === 0}
-              className="h-10 min-w-[220px] rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-11 w-full min-w-0 rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {accounts.length === 0 ? (
-                <option value="">{language === "fa" ? "بدون حساب" : "No account"}</option>
+                <option value="">{t("dashboard.propFirms.noAccountOption")}</option>
               ) : (
                 accounts.map((account) => (
                   <option key={account.id} value={account.id}>
@@ -467,14 +871,23 @@ export function PropFirmsManager({
           </label>
           <button
             type="button"
+            disabled={!selectedAccount || isRefreshing}
+            onClick={() => void syncSelectedAccount()}
+            className="prop-firm-sync-button inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-cyan-500/40 bg-cyan-500/15 px-4 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-800 disabled:text-slate-300 sm:w-auto"
+          >
+            <RefreshCw className={cn("h-4 w-4 shrink-0", isRefreshing && "animate-spin")} />
+            {t("dashboard.propFirms.syncNow")}
+          </button>
+          <button
+            type="button"
             disabled={!canCreateChallenge}
             onClick={() => {
               setEditingChallenge(null);
               setShowForm(true);
             }}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="prop-firm-new-button inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300 sm:w-auto"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 shrink-0" />
             {t("dashboard.propFirms.newChallenge")}
           </button>
         </div>
@@ -491,6 +904,44 @@ export function PropFirmsManager({
           {message}
         </div>
       ) : null}
+
+      {selectedWarning ? (
+        <div
+          className={cn(
+            "flex items-start gap-3 rounded-xl border px-4 py-3 text-sm",
+            selectedWarning.riskLevel === "BREACHED"
+              ? "border-red-500/40 bg-red-500/10 text-red-100"
+              : "border-amber-500/40 bg-amber-500/10 text-amber-100"
+          )}
+        >
+          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
+          <div>
+            <div className="font-semibold">
+              {selectedWarning.riskLevel === "BREACHED"
+                ? t("dashboard.propFirms.breachAlert")
+                : t("dashboard.propFirms.warningAlert")}
+            </div>
+            <div className="mt-1 opacity-80">{selectedWarning.name}</div>
+          </div>
+        </div>
+      ) : null}
+
+      {selectedGuardLock && selectedGuardLock.riskLevel !== "BREACHED" ? (
+        <div className="flex items-start gap-3 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0" />
+          <div>
+            <div className="font-semibold">{t("dashboard.propFirms.guardLockedAlert")}</div>
+            <div className="mt-1 opacity-80">{selectedGuardLock.name}</div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
+        <span>{t("dashboard.propFirms.autoRefresh")}</span>
+        <span>
+          {t("dashboard.propFirms.lastRefresh")}: {lastRefreshedAt ? formatSyncTime(lastRefreshedAt.toISOString(), language) : t("dashboard.propFirms.initialData")}
+        </span>
+      </div>
 
       {showForm && canCreateChallenge ? (
         <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
@@ -517,43 +968,24 @@ export function PropFirmsManager({
         {visibleChallenges.map((challenge) => {
           const currency = challenge.account?.currency || "USD";
           const progress = `${formatNumber(challenge.progress, 2)}%`;
-          const startingBalance = toNumber(challenge.startingBalance) ?? 0;
-          const currentBalance = toNumber(challenge.currentBalance) ?? startingBalance;
-          const profitTarget = toNumber(challenge.profitTarget);
-          const maxDailyLoss = toNumber(challenge.maxDailyLoss);
-          const maxTotalLoss = toNumber(challenge.maxTotalLoss);
-          const challengeProfit = currentBalance - startingBalance;
-          const targetRemaining =
-            profitTarget === null ? null : Math.max(profitTarget - challengeProfit, 0);
-          const dailyLossRemaining =
-            maxDailyLoss === null ? null : Math.max(maxDailyLoss + challenge.todayPnl, 0);
-          const totalLossRemaining =
-            maxTotalLoss === null
-              ? null
-              : Math.max(currentBalance - (startingBalance - maxTotalLoss), 0);
+          const targetRemaining = challenge.profitTargetRemaining;
+          const dailyLossRemaining = challenge.dailyLossRemaining;
+          const totalLossRemaining = challenge.totalLossRemaining;
           const daysRemaining = challenge.endedAt
             ? Math.ceil(
                 (new Date(challenge.endedAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
               )
             : null;
-          const dailyLossUsed =
-            maxDailyLoss && maxDailyLoss > 0 && challenge.todayPnl < 0
-              ? Math.min((Math.abs(challenge.todayPnl) / maxDailyLoss) * 100, 100)
-              : 0;
-          const totalLossUsed =
-            maxTotalLoss && maxTotalLoss > 0 && currentBalance < startingBalance
-              ? Math.min(((startingBalance - currentBalance) / maxTotalLoss) * 100, 100)
-              : 0;
           const dailyTone =
             challenge.computedStatus === "Failed - Daily Loss"
               ? "danger"
-              : dailyLossUsed >= 80
+              : challenge.dailyLossUsedPercent >= challenge.warningThreshold
                 ? "warn"
                 : "good";
           const totalTone =
             challenge.computedStatus === "Failed - Max Loss"
               ? "danger"
-              : totalLossUsed >= 80
+              : challenge.totalLossUsedPercent >= challenge.warningThreshold
                 ? "warn"
                 : "good";
           const isClosedChallenge = challenge.computedStatus !== "Active";
@@ -575,6 +1007,23 @@ export function PropFirmsManager({
                   <p className="mt-1 text-sm text-slate-400">
                     {accountLabel(challenge.account) || t("dashboard.propFirms.unknownAccount")}
                   </p>
+                  <div
+                    className={cn(
+                      "mt-2 inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[11px] font-semibold",
+                      challenge.syncStatus === "LIVE"
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                        : challenge.syncStatus === "STALE"
+                          ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+                          : "border-slate-700 bg-slate-800/60 text-slate-300"
+                    )}
+                  >
+                    {challenge.syncStatus === "LIVE" ? (
+                      <Wifi className="h-3 w-3" />
+                    ) : (
+                      <WifiOff className="h-3 w-3" />
+                    )}
+                    {t(`dashboard.propFirms.syncStatus${challenge.syncStatus}`)}
+                  </div>
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <button
@@ -609,6 +1058,15 @@ export function PropFirmsManager({
                 <Metric
                   label={t("dashboard.propFirms.currentBalance")}
                   value={formatMoney(challenge.currentBalance, currency)}
+                />
+                <Metric
+                  label={t("dashboard.propFirms.currentEquity")}
+                  value={formatMoney(challenge.currentEquity, currency)}
+                />
+                <Metric
+                  label={t("dashboard.propFirms.floatingPnl")}
+                  value={formatMoney(challenge.floatingPnl, currency)}
+                  className={challenge.floatingPnl >= 0 ? "text-emerald-200" : "text-red-200"}
                 />
                 <Metric
                   label={t("dashboard.propFirms.profitTarget")}
@@ -657,6 +1115,16 @@ export function PropFirmsManager({
                 </div>
               </div>
 
+              <div className="mt-3 rounded-xl border border-slate-800 bg-[#111827] px-3 py-2 text-xs leading-5 text-slate-400">
+                <div className="flex flex-wrap justify-between gap-2">
+                  <span>{t("dashboard.propFirms.dailyReset")}: {challenge.dailyResetTimeZone}</span>
+                  <span>{t("dashboard.propFirms.dataAsOf")}: {formatSyncTime(challenge.dataAsOf, language)}</span>
+                </div>
+                <div className="mt-1">
+                  {t("dashboard.propFirms.lossUsage")}: {formatNumber(challenge.dailyLossUsedPercent, 1)}% {t("dashboard.propFirms.daily")} / {formatNumber(challenge.totalLossUsedPercent, 1)}% {t("dashboard.propFirms.total")}
+                </div>
+              </div>
+
               {isClosedChallenge ? (
                 <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm leading-6 text-amber-100">
                   {closedNotice}
@@ -687,7 +1155,7 @@ export function PropFirmsManager({
                   label={t("dashboard.propFirms.challengeTimeLeft")}
                   value={
                     daysRemaining === null
-                      ? "-"
+                      ? t("dashboard.propFirms.noDeadline")
                       : t("dashboard.propFirms.daysLeft").replace(
                           "{count}",
                           String(Math.max(daysRemaining, 0))
@@ -696,6 +1164,11 @@ export function PropFirmsManager({
                   tone={daysRemaining !== null && daysRemaining <= 3 ? "warn" : "good"}
                 />
               </div>
+
+              <OvertradeGuardPanel
+                challenge={challenge}
+                onSave={(payload) => saveGuardSettings(challenge.id, payload)}
+              />
 
               <Link
                 href={challengeTradesHref(challenge)}
@@ -712,9 +1185,7 @@ export function PropFirmsManager({
       {visibleChallenges.length === 0 ? (
         <div className="rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-12 text-center text-sm text-slate-400">
           {selectedAccount
-            ? language === "fa"
-              ? "برای این حساب هنوز چالش پراپ ثبت نشده است."
-              : "No prop firm challenge is linked to this account yet."
+            ? t("dashboard.propFirms.emptyForAccount")
             : t("dashboard.propFirms.empty")}
         </div>
       ) : null}

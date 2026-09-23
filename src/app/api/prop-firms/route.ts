@@ -1,8 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { getPropFirmChallengesForUser } from "@/lib/dashboard-data";
-import { apiResponse, decimalValue, parseDate } from "@/lib/journal/api-utils";
+import { apiResponse, decimalValue, parseDate, parseNullableDate } from "@/lib/journal/api-utils";
 import { prisma } from "@/lib/prisma";
 import { closeTriggeredPropFirmChallenges } from "@/lib/prop-firms";
+import { isPropFirmRuleProfile, isValidTimeZone } from "@/lib/prop-firm-rule-sync";
 import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
@@ -57,9 +58,12 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const name = String(body.name || "").trim();
+    const ruleProfile = String(body.ruleProfile || "CUSTOM").trim();
+    const dailyResetTimeZone = String(body.dailyResetTimeZone || "UTC").trim();
+    const warningThreshold = Number(body.warningThreshold ?? 80);
     const accountId = await ensureAccountBelongsToUser(body.accountId, userId);
     const startedAt = parseDate(body.startedAt);
-    const endedAt = parseDate(body.endedAt);
+    const endedAt = parseNullableDate(body.endedAt);
     const startingBalance = requiredDecimal(body.startingBalance);
     const profitTarget = requiredDecimal(body.profitTarget);
     const maxDailyLoss = requiredDecimal(body.maxDailyLoss);
@@ -69,11 +73,23 @@ export async function POST(request: Request) {
       return apiResponse({ success: false, message: "Challenge name is required" }, 400);
     }
 
+    if (!isPropFirmRuleProfile(ruleProfile)) {
+      return apiResponse({ success: false, message: "Invalid rule profile" }, 400);
+    }
+
+    if (!isValidTimeZone(dailyResetTimeZone)) {
+      return apiResponse({ success: false, message: "Invalid daily reset time zone" }, 400);
+    }
+
+    if (!Number.isInteger(warningThreshold) || warningThreshold < 50 || warningThreshold > 100) {
+      return apiResponse({ success: false, message: "Warning threshold must be between 50 and 100" }, 400);
+    }
+
     if (!accountId) {
       return apiResponse({ success: false, message: "Trading account not found" }, 404);
     }
 
-    if (startedAt === null || endedAt === null) {
+    if (!startedAt || endedAt === false) {
       return apiResponse({ success: false, message: "Invalid challenge date" }, 400);
     }
 
@@ -89,12 +105,15 @@ export async function POST(request: Request) {
         userId,
         accountId,
         name,
+        ruleProfile,
+        dailyResetTimeZone,
+        warningThreshold,
         startingBalance,
         profitTarget,
         maxDailyLoss,
         maxTotalLoss,
         startedAt,
-        endedAt,
+        endedAt: endedAt ?? null,
       },
     });
     await closeTriggeredPropFirmChallenges(userId, { challengeId: challenge.id });

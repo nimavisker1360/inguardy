@@ -25,11 +25,11 @@ import { PnlText } from "@/components/dashboard/PnlText";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { TradeDirectionBadge } from "@/components/dashboard/TradeDirectionBadge";
 import {
-  TradeReadinessGuide,
   type ReadinessSummary,
-  useTradeReadinessGuideState,
 } from "@/components/dashboard/TradeReadinessGuide";
 import { AccountConnectionWizard } from "@/components/dashboard/AccountConnectionWizard";
+import { DashboardPerformanceCalendar } from "@/components/dashboard/DashboardPerformanceCalendar";
+import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import { useLanguage } from "@/lib/language-context";
 import {
   type ApiResult,
@@ -1258,14 +1258,14 @@ function RecentTradeSummary({
           </div>
         </div>
       ) : (
-        <div className="mt-4 grid gap-3 lg:grid-cols-3">
-          {trades.slice(0, 3).map((trade) => {
+        <div className="mt-4 space-y-2">
+          {trades.slice(0, 5).map((trade) => {
             const reviewed = isTradeReviewed(trade);
 
             return (
               <div
                 key={trade.id}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]"
+                className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[#111827]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -1278,7 +1278,7 @@ function RecentTradeSummary({
                   </div>
                   <TradeDirectionBadge direction={trade.direction} />
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <div className="text-xs text-slate-500 dark:text-slate-400">PnL</div>
                     <PnlText value={trade.profitLoss} currency={trade.account?.currency || "USD"} />
@@ -1299,7 +1299,7 @@ function RecentTradeSummary({
                 </div>
                 <Link
                   href={`/journal/${trade.id}`}
-                  className="mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-500"
+                  className="mt-2 inline-flex h-8 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-500"
                 >
                   {labels.review}
                   <ArrowRight className="h-4 w-4" />
@@ -1405,6 +1405,7 @@ function ActiveAccountSelector({
 
 export function DashboardOverview({
   userId,
+  userName,
   initialAccounts,
   initialActiveAccountId,
   initialTrades,
@@ -1414,6 +1415,7 @@ export function DashboardOverview({
   showAccountConnectionWizardInitially = false,
 }: {
   userId?: string;
+  userName?: string | null;
   initialAccounts: TradingAccountDto[];
   initialActiveAccountId?: string | null;
   initialTrades: TradeDto[];
@@ -1433,7 +1435,6 @@ export function DashboardOverview({
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [journalCompleted, setJournalCompleted] = useState(false);
   const [journalLoaded, setJournalLoaded] = useState(false);
-  const [guideOpen, setGuideOpen] = useState(false);
   const [accountConnectionWizardOpen, setAccountConnectionWizardOpen] = useState(
     showAccountConnectionWizardInitially
   );
@@ -1444,10 +1445,6 @@ export function DashboardOverview({
   const { language, t } = useLanguage();
   const labels = textByLanguage[language];
   const isRtl = language === "fa";
-  const guide = useTradeReadinessGuideState({
-    highImpactEventCount: highImpactEvents.length,
-    enabled: Boolean(userId),
-  });
   const setupDismissKey = `tradivix.dashboard.setup-card.v1:${userId || "anonymous"}`;
   const activeAccountKey = `tradivix.dashboard.active-account.v1:${userId || "anonymous"}`;
   const activeAccount =
@@ -1684,130 +1681,19 @@ export function DashboardOverview({
     return () => controller.abort();
   }, [userId]);
 
-  const primaryActions = buildDashboardActions({
-    labels,
-    accounts,
-    stats,
-    trades,
-    journalCompleted,
-    journalLoaded,
-    highImpactEvents,
-    eventsLoaded,
-    language,
-    activeAccountId,
-  });
-  const setupComplete =
-    accounts.length > 0 &&
-    (hasConnectedTradingAccount(accounts) ||
-      trades.some((trade) => trade.source?.toUpperCase() === "MANUAL") ||
-      stats.totalTrades > 0) &&
-    stats.totalTrades > 0 &&
-    stats.notReviewedTrades < stats.totalTrades &&
-    journalLoaded &&
-    journalCompleted;
-  const showSetupCard = stats.totalTrades === 0 && !setupDismissed && !setupComplete;
-  const primaryAction = stats.totalTrades > 0 ? primaryActions[0] : null;
   const activeCurrency = activeAccount?.currency || "USD";
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold text-slate-950 dark:text-white">
-            {t("dashboard.overview.title")}
-          </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {t("dashboard.overview.subtitle")}
-          </p>
-        </div>
-      </div>
-
-      <SetupGuidanceCard
+    <>
+      <DashboardHome
         language={language}
-        accounts={accounts}
-        trades={trades}
+        userName={userName}
         stats={stats}
-        journalCompleted={journalCompleted}
-        journalLoaded={journalLoaded}
-        dismissed={!showSetupCard}
-        onDismiss={dismissSetupCard}
-      />
-
-      {!showSetupCard && primaryAction ? <PrimaryWorkflowAction action={primaryAction} /> : null}
-
-      <TodayTradingStatus
-        summary={guide.summary}
-        onStartCheck={() => setGuideOpen(true)}
-        labels={labels}
-        isRtl={isRtl}
-      />
-
-      <SectionCard
-        title={labels.performanceSnapshot}
-        tourId="performance"
-        action={
-          <ActiveAccountSelector
-            accounts={accounts}
-            activeAccountId={activeAccountId}
-            onChange={changeActiveAccount}
-            labels={labels}
-            isRtl={isRtl}
-          />
-        }
-      >
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label={t("dashboard.overview.totalPnl")}
-            value={formatMoney(stats.totalPnl, activeCurrency)}
-            icon={<CircleDollarSign className="h-4 w-4" />}
-            tone={stats.totalPnl >= 0 ? "green" : "red"}
-          />
-          <StatCard
-            label={t("dashboard.overview.winRate")}
-            value={`${stats.winRate}%`}
-            icon={<Percent className="h-4 w-4" />}
-            tone="green"
-          />
-          <StatCard
-            label={labels.openTrades}
-            value={String(stats.openTrades)}
-            icon={<Activity className="h-4 w-4" />}
-            tone="blue"
-          />
-          <StatCard
-            label={labels.reviewNeeded}
-            value={String(stats.notReviewedTrades)}
-            icon={<ClipboardCheck className="h-4 w-4" />}
-            tone={stats.notReviewedTrades > 0 ? "red" : "green"}
-          />
-        </div>
-      </SectionCard>
-
-      <SecondaryActionCenter
-        labels={labels}
-        accounts={accounts}
-        stats={stats}
-        trades={trades}
-        journalCompleted={journalCompleted}
-        journalLoaded={journalLoaded}
-        highImpactEvents={highImpactEvents}
-        eventsLoaded={eventsLoaded}
-        language={language}
-        excludeActionKey={primaryAction?.key}
+        activeCurrency={activeCurrency}
         activeAccountId={activeAccountId}
+        activeAccountName={activeAccount ? accountDisplayName(activeAccount) : null}
+        journalCompleted={journalCompleted}
       />
-
-      <DashboardPageStatsChart
-        pageStats={pageStats}
-        stats={stats}
-        labels={labels}
-        isRtl={isRtl}
-        language={language}
-      />
-
-      <MarketRiskCard events={highImpactEvents} loaded={eventsLoaded} labels={labels} language={language} />
-
-      <TradeReadinessGuide open={guideOpen} onClose={() => setGuideOpen(false)} guide={guide} />
 
       <AccountConnectionWizard
         open={accountConnectionWizardOpen}
@@ -1820,6 +1706,6 @@ export function DashboardOverview({
         onSaveManual={saveManualAccount}
         onAccountsChanged={() => refreshTrades()}
       />
-    </div>
+    </>
   );
 }

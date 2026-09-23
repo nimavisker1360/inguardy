@@ -22,6 +22,7 @@ import { projectTradeLockerPositions } from "@/server/tradelocker/projector";
 import { captureTradeLockerTradeScreenshots } from "@/server/tradelocker/screenshots";
 import { tradeLockerEnvironmentSchema, type TradeLockerEnvironment } from "@/server/tradelocker/schemas";
 import { decryptTradeLockerToken, encryptTradeLockerToken, jwtExpiration } from "@/server/tradelocker/token-vault";
+import { evaluateStoredAccountSafely } from "@/server/risk-guardian/service";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SYNC_BATCH_DAYS = 366;
@@ -462,6 +463,7 @@ export async function synchronizeTradeLockerConnection(connectionId: string) {
     } catch (error) {
       screenshotResult.errors.push(cleanError(error));
     }
+    await evaluateStoredAccountSafely(connection.accountId);
     return {
       ...result,
       capturedScreenshots: screenshotResult.captured,

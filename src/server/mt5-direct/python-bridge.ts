@@ -18,6 +18,9 @@ export type Mt5BridgeAccount = {
   margin?: number;
   margin_free?: number;
   margin_level?: number;
+  margin_so_call?: number;
+  margin_so_so?: number;
+  margin_so_mode?: number;
   company?: string;
   trade_mode?: number;
   margin_mode?: number;

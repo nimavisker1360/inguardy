@@ -3,6 +3,77 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.dashboard-home-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  background: #fff;
+  padding: 0.375rem 0.75rem;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.dashboard-home-chip:hover {
+  border-color: #7dd3fc;
+  color: #0369a1;
+  transform: translateY(-1px);
+}
+
+.dashboard-home-tool {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #fff;
+  padding: 0.75rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.dashboard-home-tool:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+.dashboard-home-row {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  transition: background-color 160ms ease;
+}
+
+.dashboard-home-row:hover {
+  background: #f8fafc;
+}
+
+.dark .dashboard-home-chip,
+.dark .dashboard-home-tool {
+  border-color: #334155;
+  background: #0f172a;
+  color: #cbd5e1;
+}
+
+.dark .dashboard-home-chip:hover {
+  border-color: #0369a1;
+  color: #7dd3fc;
+}
+
+.dark .dashboard-home-tool:hover {
+  border-color: #475569;
+}
+
+.dark .dashboard-home-row:hover {
+  background: rgba(30, 41, 59, 0.7);
+}
+
 /* IRANSans Font Family */
 @font-face {
   font-family: "IRANSans";
@@ -98,7 +169,7 @@
 html,
 body {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* RTL Styles */
@@ -245,7 +316,7 @@ html[data-dashboard-theme="light"] .themeable-shell [class*="divide-slate-800"] 
   border-color: #dbe5f0 !important;
 }
 
-html[data-dashboard-theme="light"] .themeable-shell [class*="text-white"]:not([class*="bg-[#2563EB]"]):not([class*="bg-blue-"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]):not([class*="bg-violet-"]):not([class*="bg-gradient"]),
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-white"]:not([class*="bg-[#2563EB]"]):not([class*="bg-blue-"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]):not([class*="bg-violet-"]):not([class*="bg-gradient"]):not(.risk-guardian-hero, .risk-guardian-hero *),
 html[data-dashboard-theme="light"] .themeable-shell [class*="text-slate-100"],
 html[data-dashboard-theme="light"] .themeable-shell [class*="text-slate-200"],
 html[data-dashboard-theme="light"] .themeable-shell [class*="text-[#E5E7EB]"],
@@ -337,6 +408,26 @@ html[data-dashboard-theme="light"] .themeable-shell button[class*="bg-blue-600"]
   transform: translateY(-1px);
 }
 
+html[data-dashboard-theme="light"] .themeable-shell .prop-firm-sync-button {
+  background: #e0f2fe !important;
+  border-color: #7dd3fc !important;
+  color: #075985 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .prop-firm-sync-button:hover:not(:disabled) {
+  background: #bae6fd !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .prop-firm-sync-button:disabled,
+html[data-dashboard-theme="light"] .themeable-shell .prop-firm-new-button:disabled {
+  background: #e2e8f0 !important;
+  background-image: none !important;
+  border-color: #cbd5e1 !important;
+  color: #475569 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
 html[data-dashboard-theme="light"] .themeable-shell [class*="hover:bg-slate-800"]:hover,
 html[data-dashboard-theme="light"] .themeable-shell [class*="hover:bg-gray-800"]:hover {
   background-color: #eef6ff !important;
@@ -344,6 +435,212 @@ html[data-dashboard-theme="light"] .themeable-shell [class*="hover:bg-gray-800"]
 
 html[data-dashboard-theme="light"] .themeable-shell [class*="hover:text-white"]:hover {
   color: #0f172a !important;
+}
+
+/* The application chrome deliberately stays dark in both themes. These
+   selectors keep the legacy light-theme compatibility rules above from
+   reducing contrast in the top bar and sidebar. */
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-topbar-control,
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-user-trigger {
+  color: #e2e8f0 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-topbar-control:hover,
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-user-trigger:hover {
+  color: #ffffff !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-user-trigger [class*="text-slate-300"] {
+  color: #cbd5e1 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-sidebar [class*="text-slate-400"] {
+  color: #aebaca !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-sidebar [class*="text-slate-500"] {
+  color: #78879b !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-sidebar a:hover {
+  color: #f8fafc !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-sidebar [aria-current="page"] {
+  color: #ffffff !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .dashboard-sidebar [aria-current="page"] svg {
+  color: #7dd3fc !important;
+}
+
+/* These elements deliberately avoid Tailwind text-color utility classes so
+   the generic light-theme remapping cannot recolor the dark app chrome. */
+.themeable-shell .dashboard-sidebar .dashboard-sidebar-item,
+.themeable-shell .dashboard-sidebar .dashboard-sidebar-label,
+.themeable-shell .dashboard-sidebar .dashboard-sidebar-group-label,
+.themeable-shell .dashboard-menu-toggle,
+.themeable-shell .dashboard-menu-toggle svg {
+  color: #ffffff !important;
+}
+
+.themeable-shell .dashboard-sidebar .dashboard-sidebar-icon {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.themeable-shell .dashboard-sidebar .dashboard-sidebar-item[aria-current="page"] .dashboard-sidebar-icon,
+.themeable-shell .dashboard-sidebar .dashboard-sidebar-icon-active {
+  color: #7dd3fc !important;
+}
+
+/* The journal calendar uses semantic surfaces so profit/loss states remain
+   visible in both themes instead of being flattened by the legacy theme
+   compatibility selectors above. */
+.journal-calendar-board {
+  --calendar-border: #1e293b;
+  --calendar-surface: #0f172a;
+  --calendar-header: #111827;
+  --calendar-cell: #0b1220;
+  --calendar-cell-hover: #151f31;
+  --calendar-muted-cell: #08111f;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--calendar-border);
+  background: var(--calendar-surface);
+}
+
+.journal-calendar-weekdays {
+  border-bottom: 1px solid var(--calendar-border);
+  background: var(--calendar-header);
+  color: #94a3b8;
+}
+
+.journal-calendar-day,
+.journal-calendar-empty-cell {
+  border-right: 1px solid var(--calendar-border);
+  border-bottom: 1px solid var(--calendar-border);
+}
+
+.journal-calendar-day {
+  position: relative;
+  background: var(--calendar-cell);
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.journal-calendar-day:hover {
+  z-index: 2;
+  background: var(--calendar-cell-hover);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.5);
+}
+
+.journal-calendar-empty-cell {
+  background-color: var(--calendar-muted-cell);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(148, 163, 184, 0.025) 8px,
+    rgba(148, 163, 184, 0.025) 9px
+  );
+}
+
+.journal-calendar-day--profit {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(11, 18, 32, 0.98) 72%);
+}
+
+.journal-calendar-day--loss {
+  background: linear-gradient(145deg, rgba(244, 63, 94, 0.15), rgba(11, 18, 32, 0.98) 72%);
+}
+
+.journal-calendar-day--today::after {
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed rgba(96, 165, 250, 0.6);
+  border-radius: 8px;
+  content: "";
+  pointer-events: none;
+}
+
+.journal-calendar-day--selected {
+  z-index: 3;
+  box-shadow: inset 0 0 0 2px #3b82f6, 0 8px 20px rgba(37, 99, 235, 0.12);
+}
+
+.journal-calendar-trend {
+  display: inline-flex;
+  width: 1.65rem;
+  height: 1.65rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #334155;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #64748b;
+}
+
+.journal-calendar-trend--profit {
+  border-color: rgba(52, 211, 153, 0.45);
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+
+.journal-calendar-trend--loss {
+  border-color: rgba(251, 113, 133, 0.45);
+  background: rgba(244, 63, 94, 0.12);
+  color: #fb7185;
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-board {
+  --calendar-border: #d8e2ee;
+  --calendar-surface: #ffffff;
+  --calendar-header: #f8fafc;
+  --calendar-cell: #ffffff;
+  --calendar-cell-hover: #f8fbff;
+  --calendar-muted-cell: #f1f5f9;
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-weekdays {
+  color: #475569;
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-empty-cell {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(100, 116, 139, 0.045) 8px,
+    rgba(100, 116, 139, 0.045) 9px
+  );
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-day--profit {
+  background: linear-gradient(145deg, #ecfdf5, #ffffff 72%);
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-day--loss {
+  background: linear-gradient(145deg, #fff1f2, #ffffff 72%);
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-day--today::after {
+  border-color: rgba(37, 99, 235, 0.42);
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-trend {
+  border-color: #d8e2ee;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-trend--profit {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+html[data-dashboard-theme="light"] .journal-calendar-trend--loss {
+  border-color: #fecdd3;
+  background: #fff1f2;
+  color: #be123c;
 }
 
 .download-attention {
@@ -451,10 +748,13 @@ html[data-dashboard-theme="light"] .themeable-shell [class*="hover:text-white"]:
 .landing-en-font,
 .landing-en-font *:not(svg):not(path) {
   font-family:
+    "Manrope",
     "Inter",
     system-ui,
     -apple-system,
     sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 .landing-fa-font [class*="uppercase"] {
@@ -600,6 +900,41 @@ html[data-dashboard-theme="light"] .themeable-shell [class*="hover:text-white"]:
   .subscription-status-banner__progress {
     padding-inline-start: 0;
   }
+}
+
+/* The Risk Guardian overview stays dark while the dashboard uses its light theme. */
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero {
+  color: #f8fafc !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-white"] {
+  color: #f8fafc !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-slate-300"],
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-slate-400"] {
+  color: #cbd5e1 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-emerald-300"],
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-emerald-100"] {
+  color: #a7f3d0 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-rose-300"] {
+  color: #fda4af !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-amber-100"] {
+  color: #fde68a !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-orange-100"] {
+  color: #fed7aa !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell .risk-guardian-hero [class*="text-rose-100"] {
+  color: #ffe4e6 !important;
 }
 
 @media (min-width: 1024px) {

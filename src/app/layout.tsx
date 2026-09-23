@@ -95,11 +95,11 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
+      <body className="min-h-screen flex flex-col overflow-x-clip bg-black text-white">
         <LanguageProvider initialLanguage={initialLanguage}>
           <Navbar />
           <main className="flex-1">{children}</main>

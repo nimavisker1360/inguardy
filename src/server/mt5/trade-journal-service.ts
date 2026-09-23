@@ -19,7 +19,11 @@ export class Mt5TradeJournalError extends Error {
   }
 }
 
-const QUICK_CONNECT_ACCOUNT_NAME = "MT5 Auto Connect";
+const QUICK_CONNECT_ACCOUNT_NAMES = new Set(["MT5 Auto Connect", "MT4 Auto Connect"]);
+
+function journalPlatform(account: VerifiedJournalAccount): "MT4" | "MT5" {
+  return account.platform === "MT4" || account.platform === "MetaTrader 4" ? "MT4" : "MT5";
+}
 
 function decimal(value: number | null | undefined, fallback?: number) {
   if (value === undefined) {
@@ -303,6 +307,9 @@ async function resolveCanonicalMt5Account(
     where: {
       userId: account.userId,
       id: { not: account.id },
+      platform: journalPlatform(account) === "MT4"
+        ? { in: ["MT4", "MetaTrader 4"] }
+        : { notIn: ["MT4", "MetaTrader 4"] },
       OR: [{ mt5AccountNumber: accountNumber }, { name: accountNumber }],
     },
     select: {
@@ -364,7 +371,7 @@ function buildAccountActivityData(
     data.mt5AccountNumber = payload.accountNumber;
   }
 
-  if (account.name === QUICK_CONNECT_ACCOUNT_NAME && payload.accountNumber) {
+  if (QUICK_CONNECT_ACCOUNT_NAMES.has(account.name) && payload.accountNumber) {
     data.name = payload.accountNumber;
   }
 
@@ -432,7 +439,8 @@ function buildOpenTradeData(
 ) {
   const direction = toDirection(payload.side);
   const openedAt = dateValue(payload.openedAt, new Date());
-  const setup = normalizeTradingSession(payload.sessionTime) ? "MT5 Import" : payload.sessionTime || "MT5 Import";
+  const platform = journalPlatform(account);
+  const setup = normalizeTradingSession(payload.sessionTime) ? `${platform} Import` : payload.sessionTime || `${platform} Import`;
 
   return defined({
     userId: account.userId,
@@ -462,14 +470,14 @@ function buildOpenTradeData(
     setup,
     session: getTradingSessionLabel(openedAt) || normalizeTradingSession(payload.sessionTime),
     emotion: payload.mood,
-    notes: "Imported from MT5 EA",
+    notes: `Imported from ${platform} EA`,
     openedAt,
-    source: "MT5",
+    source: platform,
     reviewStatus: TradeReviewStatus.NEEDS_REVIEW,
   }) satisfies Prisma.TradeUncheckedCreateInput;
 }
 
-function buildUpdateTradeData(payload: Mt5JournalPayload) {
+function buildUpdateTradeData(account: VerifiedJournalAccount, payload: Mt5JournalPayload) {
   const data: Prisma.TradeUncheckedUpdateInput = {};
 
   if (payload.symbol) {
@@ -524,7 +532,7 @@ function buildUpdateTradeData(payload: Mt5JournalPayload) {
     data.session = normalizeTradingSession(payload.sessionTime) || undefined;
   }
 
-  data.source = "MT5";
+  data.source = journalPlatform(account);
 
   return data;
 }
@@ -540,7 +548,8 @@ function buildCloseCreateData(
   const direction = toDirection(payload.side);
   const entryPrice = payload.entryPrice ?? payload.exitPrice ?? 0;
   const openedAt = dateValue(payload.openedAt);
-  const setup = normalizeTradingSession(payload.sessionTime) ? "MT5 Import" : payload.sessionTime || "MT5 Import";
+  const platform = journalPlatform(account);
+  const setup = normalizeTradingSession(payload.sessionTime) ? `${platform} Import` : payload.sessionTime || `${platform} Import`;
 
   return defined({
     userId: account.userId,
@@ -570,10 +579,10 @@ function buildCloseCreateData(
     setup,
     session: getTradingSessionLabel(openedAt || dateValue(payload.closedAt, new Date())) || normalizeTradingSession(payload.sessionTime),
     emotion: payload.mood,
-    notes: "Imported from MT5 EA",
+    notes: `Imported from ${platform} EA`,
     openedAt,
     closedAt: dateValue(payload.closedAt, new Date()),
-    source: "MT5",
+    source: platform,
     reviewStatus: TradeReviewStatus.NEEDS_REVIEW,
   }) satisfies Prisma.TradeUncheckedCreateInput;
 }
@@ -627,7 +636,7 @@ export async function saveMt5JournalTrade(input: {
         existingTrade = await tx.trade.findFirst({
           where: defined({
             accountId: activeAccount.id,
-            source: "MT5",
+            source: journalPlatform(activeAccount),
             status: TradeStatus.OPEN,
             symbol: payload.symbol,
             direction,
@@ -685,7 +694,7 @@ export async function saveMt5JournalTrade(input: {
               stopLoss,
             }),
             closedAt: dateValue(payload.closedAt, new Date()),
-            source: "MT5",
+            source: journalPlatform(activeAccount),
             reviewStatus:
               existingTrade.reviewStatus === TradeReviewStatus.REVIEWED
                 ? undefined
@@ -736,7 +745,7 @@ export async function saveMt5JournalTrade(input: {
               takeProfit,
             }),
             closedAt: null,
-            source: "MT5",
+            source: journalPlatform(activeAccount),
             reviewStatus:
               existingTrade.reviewStatus === TradeReviewStatus.REVIEWED
                 ? undefined
@@ -758,7 +767,7 @@ export async function saveMt5JournalTrade(input: {
       const updateData: Prisma.TradeUncheckedUpdateInput =
         payload.eventType === "update"
           ? {
-              source: "MT5",
+              source: journalPlatform(activeAccount),
               stopLoss: decimal(payload.stopLoss),
               takeProfit: decimal(payload.takeProfit),
               currentStopLoss: decimal(payload.stopLoss),
@@ -768,7 +777,7 @@ export async function saveMt5JournalTrade(input: {
                   ? undefined
                   : TradeReviewStatus.NEEDS_REVIEW,
             }
-          : buildUpdateTradeData(payload);
+          : buildUpdateTradeData(activeAccount, payload);
       const direction = payload.side
         ? toDirection(payload.side)
         : existingTrade.direction;

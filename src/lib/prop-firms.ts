@@ -1,6 +1,12 @@
 import { TradeStatus, type Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { PropFirmChallengeDto } from "@/components/dashboard/types";
+import {
+  calculatePropFirmRuleMetrics,
+  getPropFirmDayKey,
+  getPropFirmDayStart,
+  netTradePnl,
+} from "@/lib/prop-firm-rule-sync";
 
 export const PROP_FIRM_STATUS_ACTIVE = "ACTIVE";
 export const PROP_FIRM_STATUS_PASSED = "PASSED";
@@ -18,6 +24,8 @@ const challengeSelect = {
   id: true,
   userId: true,
   accountId: true,
+  dailyResetTimeZone: true,
+  warningThreshold: true,
   startingBalance: true,
   profitTarget: true,
   maxDailyLoss: true,
@@ -31,6 +39,10 @@ const challengeSelect = {
 const triggerTradeSelect = {
   id: true,
   profitLoss: true,
+  commission: true,
+  swap: true,
+  balanceAtClose: true,
+  equityAtClose: true,
   closedAt: true,
   createdAt: true,
 } satisfies Prisma.TradeSelect;
@@ -89,11 +101,7 @@ export function getPropFirmComputedStatus(input: {
   startingBalance: number;
   maxTotalLoss: number | null;
 }): ComputedStatus {
-  if (input.profitTarget !== null && input.profitTarget > 0 && input.profit >= input.profitTarget) {
-    return "Passed";
-  }
-
-  if (input.maxDailyLoss !== null && input.maxDailyLoss > 0 && input.todayPnl < -input.maxDailyLoss) {
+  if (input.maxDailyLoss !== null && input.maxDailyLoss > 0 && input.todayPnl <= -input.maxDailyLoss) {
     return "Failed - Daily Loss";
   }
 
@@ -103,6 +111,10 @@ export function getPropFirmComputedStatus(input: {
     input.currentBalance <= input.startingBalance - input.maxTotalLoss
   ) {
     return "Failed - Max Loss";
+  }
+
+  if (input.profitTarget !== null && input.profitTarget > 0 && input.profit >= input.profitTarget) {
+    return "Passed";
   }
 
   return "Active";
@@ -129,10 +141,6 @@ export function getPropFirmTradeWindow(
   return { start, end };
 }
 
-function localDayKey(date: Date) {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-}
-
 function findChallengeTrigger(challenge: ChallengeForEvaluation, trades: TriggerTrade[]) {
   const startingBalance = Number(challenge.startingBalance);
   const profitTarget = challenge.profitTarget === null ? null : Number(challenge.profitTarget);
@@ -146,19 +154,20 @@ function findChallengeTrigger(challenge: ChallengeForEvaluation, trades: Trigger
       continue;
     }
 
-    const pnl = Number(trade.profitLoss ?? 0);
-    const day = localDayKey(trade.closedAt);
+    const pnl = netTradePnl(trade);
+    const day = getPropFirmDayKey(trade.closedAt, challenge.dailyResetTimeZone);
     const todayPnl = (dailyPnl.get(day) ?? 0) + pnl;
     dailyPnl.set(day, todayPnl);
     closedPnl += pnl;
 
-    const currentBalance = startingBalance + closedPnl;
+    const currentBalance = Number(trade.balanceAtClose ?? startingBalance + closedPnl);
+    const currentEquity = Number(trade.equityAtClose ?? currentBalance);
     const computedStatus = getPropFirmComputedStatus({
-      profit: closedPnl,
+      profit: currentBalance - startingBalance,
       profitTarget,
       todayPnl,
       maxDailyLoss,
-      currentBalance,
+      currentBalance: currentEquity,
       startingBalance,
       maxTotalLoss,
     });
@@ -209,7 +218,70 @@ export async function closeTriggeredPropFirmChallenges(
       select: triggerTradeSelect,
       orderBy: [{ closedAt: "asc" }, { createdAt: "asc" }],
     });
-    const trigger = findChallengeTrigger(challenge, trades);
+    let trigger = findChallengeTrigger(challenge, trades);
+
+    if (!trigger) {
+      const latestSnapshot = await prisma.accountEquitySnapshot.findFirst({
+        where: {
+          accountId: challenge.accountId,
+          timestamp: { gte: start, lte: end },
+        },
+        orderBy: { timestamp: "desc" },
+      });
+
+      if (latestSnapshot) {
+        const dayStart = getPropFirmDayStart(
+          latestSnapshot.timestamp,
+          challenge.dailyResetTimeZone
+        );
+        const baselineSnapshot = await prisma.accountEquitySnapshot.findFirst({
+          where: {
+            accountId: challenge.accountId,
+            timestamp: {
+              gte: new Date(dayStart.getTime() - 36 * 60 * 60 * 1000),
+              lte: dayStart,
+            },
+          },
+          orderBy: { timestamp: "desc" },
+        });
+        const challengeClosedPnl = trades.reduce(
+          (total, trade) => total + netTradePnl(trade),
+          0
+        );
+        const snapshotDayKey = getPropFirmDayKey(
+          latestSnapshot.timestamp,
+          challenge.dailyResetTimeZone
+        );
+        const todayClosedPnl = trades.reduce(
+          (total, trade) =>
+            trade.closedAt &&
+            getPropFirmDayKey(trade.closedAt, challenge.dailyResetTimeZone) === snapshotDayKey
+              ? total + netTradePnl(trade)
+              : total,
+          0
+        );
+        const metrics = calculatePropFirmRuleMetrics({
+          startingBalance: Number(challenge.startingBalance),
+          currentBalance: Number(latestSnapshot.balance),
+          currentEquity: Number(latestSnapshot.equity),
+          floatingPnl: Number(latestSnapshot.floatingPnl),
+          challengeClosedPnl,
+          todayClosedPnl,
+          dayStartBalance: baselineSnapshot ? Number(baselineSnapshot.balance) : null,
+          profitTarget: challenge.profitTarget === null ? null : Number(challenge.profitTarget),
+          maxDailyLoss: challenge.maxDailyLoss === null ? null : Number(challenge.maxDailyLoss),
+          maxTotalLoss: challenge.maxTotalLoss === null ? null : Number(challenge.maxTotalLoss),
+          warningThreshold: challenge.warningThreshold,
+        });
+
+        if (metrics.computedStatus !== "Active") {
+          trigger = {
+            status: computedStatusToStored(metrics.computedStatus),
+            endedAt: latestSnapshot.timestamp,
+          };
+        }
+      }
+    }
 
     if (!trigger) {
       continue;

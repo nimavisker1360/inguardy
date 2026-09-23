@@ -56,6 +56,9 @@ export default async function DashboardRouteGroupLayout({ children }: { children
       showAdmin={isAdminUser(user)}
       initialTheme={initialTheme}
       userId={session.user.id}
+      userName={user?.name}
+      userEmail={user?.email}
+      userImage={user?.image}
       topContent={subscriptionBanner}
     >
       {children}

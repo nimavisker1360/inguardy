@@ -4,11 +4,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   Check,
   Copy,
+  Download,
   Eye,
   EyeOff,
   FileUp,
+  KeyRound,
   Landmark,
   PenLine,
   RefreshCw,
@@ -24,15 +27,14 @@ import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 type WizardStep = "platform" | "method" | "connect";
-type ImportMethod = "auto" | "file" | "manual";
+type ImportMethod = "auto" | "key" | "file" | "manual";
 
 type PlatformOption = {
   id: string;
   name: string;
   searchTerms: string;
   logo?: string;
-  mark?: string;
-  markClassName?: string;
+  tileClassName?: string;
   icon?: LucideIcon;
   supportsAutoSync: boolean;
 };
@@ -69,6 +71,7 @@ const platforms: PlatformOption[] = [
     name: "MetaTrader 5",
     searchTerms: "metatrader 5 mt5 metaquotes",
     logo: "/images/meta5.png",
+    tileClassName: "border-lime-100 bg-[#f7f9f3]",
     supportsAutoSync: true,
   },
   {
@@ -76,30 +79,31 @@ const platforms: PlatformOption[] = [
     name: "MetaTrader 4",
     searchTerms: "metatrader 4 mt4 metaquotes",
     logo: "/images/meta04.png",
+    tileClassName: "border-orange-100 bg-[#fff8f1]",
     supportsAutoSync: false,
   },
   {
     id: "ctrader",
     name: "cTrader",
     searchTerms: "ctrader spotware broker",
-    mark: "c",
-    markClassName: "bg-[#e31b36] text-white",
+    logo: "/images/ctrader.svg",
+    tileClassName: "border-rose-100 bg-rose-50",
     supportsAutoSync: true,
   },
   {
     id: "tradelocker",
     name: "TradeLocker",
     searchTerms: "tradelocker prop firm broker",
-    mark: "TL",
-    markClassName: "bg-slate-950 text-white",
+    logo: "/images/tradelocker.png",
+    tileClassName: "border-slate-800 bg-slate-950",
     supportsAutoSync: true,
   },
   {
     id: "tradingview",
     name: "TradingView",
     searchTerms: "tradingview broker charts",
-    mark: "TV",
-    markClassName: "bg-[#2563eb] text-white",
+    logo: "/images/tradingview.svg",
+    tileClassName: "border-blue-100 bg-blue-50",
     supportsAutoSync: false,
   },
   {
@@ -107,7 +111,7 @@ const platforms: PlatformOption[] = [
     name: "Other broker",
     searchTerms: "other broker prop firm platform",
     icon: Landmark,
-    markClassName: "bg-emerald-50 text-emerald-700",
+    tileClassName: "border-emerald-100 bg-emerald-50 text-emerald-700",
     supportsAutoSync: false,
   },
 ];
@@ -118,6 +122,7 @@ const englishText = {
   chooseSubtitle: "Select the platform that holds your trading history.",
   searchPlaceholder: "Search broker, prop firm or trading platform",
   popular: "Popular platforms",
+  noPlatforms: "No platforms found. Try a different search.",
   continue: "Continue",
   back: "Back",
   close: "Close",
@@ -131,10 +136,22 @@ const englishText = {
   tradeLockerAutoDetail: "Keep TradeLocker trades updated automatically",
   fileTitle: "File upload",
   fileDetail: "Import an MT5 report or journal file",
+  keyTitle: "Key generator",
+  keyDetailMt5: "Generate a key and connect MT5 with the Expert Advisor",
+  keyDetailMt4: "Generate a key and connect MT4 with the Expert Advisor",
+  journalRequired: "Requires access to automatic journal sync",
+  downloadExpert: "Download Expert Advisor",
+  downloadExpertHint: "The download contains the EA and setup guide. A browser cannot install files into MetaTrader automatically.",
+  setupKey: "Generate and copy the connection key above.",
+  setupDownload: "Download the EA and copy it into MetaTrader's data folder under MQL5/Experts or MQL4/Experts.",
+  setupAllow: "In MetaTrader, allow WebRequest for the journal API address shown above.",
+  setupAttach: "Attach the EA to one chart and paste the key into JOURNAL_UPLOAD_SECRET. Keep MetaTrader running to sync trades.",
+  mt4CompileHint: "The MT4 download includes a ready-to-use .ex4 file and editable .mq4 source. Copy the .ex4 file into MQL4/Experts.",
   manualTitle: "Add manually",
   manualDetail: "Create an account and enter trades yourself",
   mt5Only: "Available for MetaTrader 5, cTrader and TradeLocker",
   connectTitle: "Connect MetaTrader 5",
+  mt4ConnectTitle: "Connect MetaTrader 4",
   ctraderConnectTitle: "Connect cTrader",
   tradeLockerConnectTitle: "Connect TradeLocker",
   manualConnectTitle: "Add account details",
@@ -150,9 +167,9 @@ const englishText = {
   generate: "Generate connection key",
   generating: "Generating secure key...",
   generated: "Your connection key is ready.",
-  generateFailed: "Could not generate the MT5 connection key.",
+  generateFailed: "Could not generate the connection key.",
   apiUrl: "Journal API address",
-  secret: "MT5 connection key",
+  secret: "Connection key",
   reveal: "Reveal key",
   hide: "Hide key",
   copy: "Copy",
@@ -193,6 +210,7 @@ const persianText: typeof englishText = {
   chooseSubtitle: "پلتفرمی را انتخاب کنید که تاریخچه معاملات شما در آن قرار دارد.",
   searchPlaceholder: "جستجوی کارگزار، پراپ فرم یا پلتفرم",
   popular: "پلتفرم‌های محبوب",
+  noPlatforms: "پلتفرمی پیدا نشد. عبارت دیگری جستجو کنید.",
   continue: "ادامه",
   back: "بازگشت",
   close: "بستن",
@@ -206,10 +224,22 @@ const persianText: typeof englishText = {
   tradeLockerAutoDetail: "معاملات TradeLocker را خودکار به‌روز نگه دارید",
   fileTitle: "بارگذاری فایل",
   fileDetail: "گزارش MT5 یا فایل ژورنال را وارد کنید",
+  keyTitle: "ساخت کلید اتصال",
+  keyDetailMt5: "با ساخت کلید و نصب اکسپرت، MT5 را متصل کنید",
+  keyDetailMt4: "با ساخت کلید و نصب اکسپرت، MT4 را متصل کنید",
+  journalRequired: "به دسترسی همگام‌سازی خودکار ژورنال نیاز دارد",
+  downloadExpert: "دانلود اکسپرت",
+  downloadExpertHint: "فایل دانلودی شامل اکسپرت و راهنمای نصب است. مرورگر نمی‌تواند فایل را خودکار داخل متاتریدر نصب کند.",
+  setupKey: "کلید اتصال را با دکمهٔ بالا بسازید و کپی کنید.",
+  setupDownload: "اکسپرت را دانلود کنید و در پوشهٔ MQL5/Experts یا MQL4/Experts داخل Data Folder متاتریدر کپی کنید.",
+  setupAllow: "در تنظیمات متاتریدر، WebRequest را برای آدرس API نمایش‌داده‌شده در بالا مجاز کنید.",
+  setupAttach: "اکسپرت را روی یک چارت اجرا کنید و کلید را در JOURNAL_UPLOAD_SECRET وارد کنید. برای همگام‌سازی، متاتریدر باید باز بماند.",
+  mt4CompileHint: "بستهٔ MT4 شامل فایل آمادهٔ .ex4 و سورس .mq4 است. فایل .ex4 را داخل MQL4/Experts کپی کنید.",
   manualTitle: "ثبت دستی",
   manualDetail: "حساب را بسازید و معاملات را دستی ثبت کنید",
   mt5Only: "برای MetaTrader 5، cTrader و TradeLocker در دسترس است",
   connectTitle: "اتصال MetaTrader 5",
+  mt4ConnectTitle: "اتصال MetaTrader 4",
   ctraderConnectTitle: "اتصال cTrader",
   tradeLockerConnectTitle: "اتصال TradeLocker",
   manualConnectTitle: "اطلاعات حساب را وارد کنید",
@@ -225,9 +255,9 @@ const persianText: typeof englishText = {
   generate: "ساخت کلید اتصال",
   generating: "در حال ساخت کلید امن...",
   generated: "کلید اتصال شما آماده است.",
-  generateFailed: "ساخت کلید اتصال MT5 ناموفق بود.",
+  generateFailed: "ساخت کلید اتصال ناموفق بود.",
   apiUrl: "آدرس API ژورنال",
-  secret: "کلید اتصال MT5",
+  secret: "کلید اتصال",
   reveal: "نمایش کلید",
   hide: "پنهان کردن کلید",
   copy: "کپی",
@@ -264,27 +294,27 @@ const persianText: typeof englishText = {
 
 function PlatformMark({ platform, large = false }: { platform: PlatformOption; large?: boolean }) {
   const Icon = platform.icon;
-  const sizeClass = large ? "h-14 w-14" : "h-9 w-9";
-
-  if (platform.logo) {
-    return (
-      <div className={cn("relative shrink-0", sizeClass)}>
-        <Image src={platform.logo} alt="" fill sizes={large ? "56px" : "40px"} className="object-contain" />
-      </div>
-    );
-  }
+  const sizeClass = large ? "h-16 w-16" : "h-12 w-12";
 
   return (
-    <div
+    <span
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-lg text-sm font-black",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border",
         sizeClass,
-        platform.markClassName
+        platform.tileClassName
       )}
       aria-hidden="true"
     >
-      {Icon ? <Icon className={large ? "h-6 w-6" : "h-5 w-5"} /> : platform.mark}
-    </div>
+      {platform.id === "mt5" ? (
+        <Image src={platform.logo!} alt="" width={large ? 92 : 68} height={large ? 70 : 52} className={cn("absolute max-w-none", large ? "top-[5px]" : "top-[3px]")} style={{ clipPath: "inset(0 0 22% 0)" }} />
+      ) : platform.id === "mt4" ? (
+        <Image src={platform.logo!} alt="" width={large ? 246 : 182} height={large ? 63 : 47} className={cn("absolute left-[1px] max-w-none", large ? "top-[1px]" : "top-[2px]")} />
+      ) : platform.logo ? (
+        <Image src={platform.logo} alt="" width={large ? 42 : 32} height={large ? 42 : 32} className="object-contain" />
+      ) : Icon ? (
+        <Icon className={large ? "h-7 w-7" : "h-6 w-6"} strokeWidth={1.8} />
+      ) : null}
+    </span>
   );
 }
 
@@ -292,8 +322,8 @@ function ProgressBar({ step }: { step: WizardStep }) {
   const width = step === "platform" ? "34%" : step === "method" ? "67%" : "100%";
 
   return (
-    <div className="h-1 w-full overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
-      <div className="h-full rounded-full bg-[#6547b7] transition-[width] duration-300" style={{ width }} />
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-violet-100" aria-hidden="true">
+      <div className="h-full rounded-full bg-violet-700 transition-[width] duration-300" style={{ width }} />
     </div>
   );
 }
@@ -323,36 +353,38 @@ function MethodCard({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "relative flex min-h-40 flex-col items-center justify-center border bg-white px-5 py-6 text-center shadow-sm transition",
-        "rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6547b7] focus-visible:ring-offset-2",
-        active ? "border-[#6547b7] ring-1 ring-[#6547b7]" : "border-slate-200 hover:border-slate-300 hover:shadow-md",
-        disabled && "cursor-not-allowed opacity-45 hover:border-slate-200 hover:shadow-sm"
+        "relative flex min-h-[186px] flex-col items-start rounded-2xl border px-5 py-5 text-start transition duration-200",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2",
+        active ? "border-violet-600 bg-violet-50/60 shadow-[0_10px_28px_-18px_rgba(91,61,175,0.65)] ring-1 ring-violet-600" : "border-slate-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md",
+        disabled && "cursor-not-allowed opacity-50 hover:translate-y-0 hover:border-slate-200 hover:shadow-sm"
       )}
+      aria-pressed={active}
     >
       {recommended ? (
-        <span className="absolute start-2 top-2 rounded bg-[#6547b7] px-2 py-1 text-[10px] font-bold text-white">
+        <span className="absolute end-4 top-5 rounded-full bg-violet-100 px-2.5 py-1 text-[10px] font-bold text-violet-800">
           {recommendedLabel}
         </span>
       ) : null}
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f4f1fb] text-[#6547b7]">
-        <Icon className="h-6 w-6" />
+      <span className={cn("flex h-12 w-12 items-center justify-center rounded-xl", active ? "bg-violet-700 text-white" : "bg-violet-50 text-violet-700")}>
+        <Icon className="h-6 w-6" strokeWidth={1.8} />
       </span>
-      <strong className="mt-4 text-sm font-bold text-slate-950">{title}</strong>
-      <span className="mt-1 text-xs leading-5 text-slate-500">{detail}</span>
+      <strong className="mt-5 text-sm font-bold text-slate-950">{title}</strong>
+      <span className="mt-1.5 text-xs leading-5 text-slate-600">{detail}</span>
     </button>
   );
 }
 
-function Mt5ConnectStep({
+function MetatraderKeyConnectStep({
   labels,
+  platform,
   onCreated,
   onDone,
 }: {
   labels: typeof englishText;
+  platform: "MT4" | "MT5";
   onCreated: () => Promise<void>;
   onDone: () => void;
 }) {
-  const [historyMode, setHistoryMode] = useState("all");
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [secret, setSecret] = useState("");
@@ -373,7 +405,11 @@ function Mt5ConnectStep({
     setMessage("");
 
     try {
-      const response = await fetch("/api/trading-accounts/mt5-quick-connect", { method: "POST" });
+      const response = await fetch("/api/trading-accounts/mt5-quick-connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform }),
+      });
       const data = (await response.json()) as QuickConnectResponse;
 
       if (!response.ok || !data.ok || !data.secret) {
@@ -384,7 +420,9 @@ function Mt5ConnectStep({
       setApiUrl((data.apiUrl || apiUrl).replace(/\/api\/mt5\/journal$/, ""));
       setStatus("success");
       setMessage(labels.generated);
-      await onCreated();
+      void onCreated().catch(() => {
+        // The connection key was created even if the account list refresh fails.
+      });
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : labels.generateFailed);
@@ -400,17 +438,9 @@ function Mt5ConnectStep({
   return (
     <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.9fr)] md:gap-10">
       <div className="space-y-4">
-        <label className="block text-xs font-semibold text-slate-600">
-          {labels.history}
-          <select
-            value={historyMode}
-            onChange={(event) => setHistoryMode(event.target.value)}
-            className="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#6547b7] focus:ring-2 focus:ring-[#6547b7]/15"
-          >
-            <option value="all">{labels.allRecords}</option>
-            <option value="new">{labels.fromNow}</option>
-          </select>
-        </label>
+        <p className="rounded-xl border border-violet-100 bg-violet-50 px-4 py-3 text-sm leading-6 text-slate-700">
+          {platform === "MT4" ? labels.keyDetailMt4 : labels.keyDetailMt5}
+        </p>
 
         {status === "success" ? (
           <div className="space-y-3">
@@ -435,15 +465,26 @@ function Mt5ConnectStep({
           </div>
         ) : null}
 
-        <button
+        {status !== "success" && <button
           type="button"
-          onClick={status === "success" ? onDone : generateConnection}
+          onClick={generateConnection}
           disabled={status === "saving"}
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#5b3daf] px-4 text-sm font-bold text-white transition hover:bg-[#4e329b] disabled:cursor-not-allowed disabled:opacity-55"
         >
-          {status === "saving" ? <RefreshCw className="h-4 w-4 animate-spin" /> : status === "success" ? <Check className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
-          {status === "saving" ? labels.generating : status === "success" ? labels.done : labels.generate}
-        </button>
+          {status === "saving" ? <RefreshCw className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+          {status === "saving" ? labels.generating : labels.generate}
+        </button>}
+
+        <a
+          href={`/api/downloads/trade-journal-recorder?platform=${platform}`}
+          download={`Inguardy${platform}Expert.zip`}
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#5b3daf] bg-white px-4 text-sm font-bold text-[#5b3daf] transition hover:bg-violet-50"
+        >
+          <Download className="h-4 w-4" />
+          {labels.downloadExpert} {platform}
+        </a>
+        <p className="text-xs leading-5 text-slate-500">{labels.downloadExpertHint}</p>
+        {status === "success" && <button type="button" onClick={onDone} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#5b3daf] px-4 text-sm font-bold text-white transition hover:bg-[#4e329b]"><Check className="h-4 w-4" />{labels.done}</button>}
 
         <p
           className={cn(
@@ -459,20 +500,21 @@ function Mt5ConnectStep({
 
       <div className="border-t border-slate-200 pt-6 md:border-s md:border-t-0 md:ps-8 md:pt-0">
         <div className="flex items-center gap-3">
-          <PlatformMark platform={platforms[0]} />
+          <PlatformMark platform={platform === "MT4" ? platforms[1] : platforms[0]} />
           <div>
-            <strong className="block text-base text-slate-950">MetaTrader 5</strong>
+            <strong className="block text-base text-slate-950">MetaTrader {platform === "MT4" ? "4" : "5"}</strong>
             <span className="text-xs text-slate-500">{labels.supported}</span>
           </div>
         </div>
-        <ul className="mt-5 grid gap-3 text-sm text-slate-600">
-          {[labels.encrypted, labels.journalReady, labels.noPassword].map((item) => (
-            <li key={item} className="flex items-center gap-2">
-              <Check className="h-4 w-4 shrink-0 text-[#6547b7]" />
+        <ol className="mt-5 grid gap-3 text-sm leading-6 text-slate-600">
+          {[labels.setupKey, labels.setupDownload, labels.setupAllow, labels.setupAttach].map((item, index) => (
+            <li key={item} className="flex items-start gap-2">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-violet-100 text-[11px] font-bold text-[#6547b7]">{index + 1}</span>
               <span>{item}</span>
             </li>
           ))}
-        </ul>
+        </ol>
+        {platform === "MT4" && <p className="mt-4 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900">{labels.mt4CompileHint}</p>}
       </div>
     </div>
   );
@@ -896,6 +938,7 @@ function TradeLockerConnectStep({
 
 export function AccountConnectionWizard({
   open,
+  presentation = "overlay",
   initialPlatformId,
   canUseAutoSync,
   errorMessage,
@@ -904,6 +947,7 @@ export function AccountConnectionWizard({
   onAccountsChanged,
 }: {
   open: boolean;
+  presentation?: "overlay" | "page";
   initialPlatformId?: string;
   canUseAutoSync: boolean;
   errorMessage?: string;
@@ -920,6 +964,7 @@ export function AccountConnectionWizard({
   const [method, setMethod] = useState<ImportMethod>("auto");
   const [query, setQuery] = useState("");
   const selectedPlatform = platforms.find((platform) => platform.id === selectedPlatformId) || null;
+  const isMetatrader = selectedPlatformId === "mt4" || selectedPlatformId === "mt5";
   const filteredPlatforms = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) return platforms;
@@ -938,20 +983,20 @@ export function AccountConnectionWizard({
     if (!open) return;
     if (initialPlatformId) {
       setSelectedPlatformId(initialPlatformId);
-      setMethod("auto");
+      setMethod(canUseAutoSync ? initialPlatformId === "mt4" ? "key" : "auto" : "manual");
       setStep("connect");
     }
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (presentation === "overlay") document.body.style.overflow = "hidden";
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeWizard();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      if (presentation === "overlay") document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [closeWizard, initialPlatformId, open]);
+  }, [canUseAutoSync, closeWizard, initialPlatformId, open, presentation]);
 
   if (!open) return null;
 
@@ -976,16 +1021,21 @@ export function AccountConnectionWizard({
 
   return (
     <div
-      className="fixed inset-0 z-[100] overflow-y-auto bg-[linear-gradient(90deg,#f7f2ff_0%,#ffffff_22%,#ffffff_78%,#f5f0ff_100%)] text-slate-950"
-      role="dialog"
-      aria-modal="true"
+      className={cn(
+        "bg-[radial-gradient(circle_at_15%_12%,#f0eaff_0%,transparent_30%),radial-gradient(circle_at_88%_85%,#f2edff_0%,transparent_32%),#fbfaff] text-slate-950",
+        presentation === "overlay"
+          ? "fixed inset-0 z-[100] overflow-y-auto"
+          : "relative min-h-[calc(100dvh-140px)] overflow-hidden rounded-3xl border border-violet-100 shadow-sm"
+      )}
+      role={presentation === "overlay" ? "dialog" : undefined}
+      aria-modal={presentation === "overlay" ? true : undefined}
       aria-labelledby="account-wizard-title"
       dir={isRtl ? "rtl" : "ltr"}
     >
       <button
         type="button"
         onClick={closeWizard}
-        className="fixed end-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-white hover:text-slate-950 hover:shadow-sm sm:end-8 sm:top-7"
+        className={cn("end-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-600 shadow-sm transition hover:border-violet-200 hover:text-violet-700 sm:end-8 sm:top-7", presentation === "overlay" ? "fixed" : "absolute")}
         aria-label={labels.close}
         title={labels.close}
       >
@@ -996,7 +1046,7 @@ export function AccountConnectionWizard({
         <button
           type="button"
           onClick={goBack}
-          className="fixed start-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-white hover:text-slate-950 hover:shadow-sm sm:start-8 sm:top-7"
+          className={cn("start-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-600 shadow-sm transition hover:border-violet-200 hover:text-violet-700 sm:start-8 sm:top-7", presentation === "overlay" ? "fixed" : "absolute")}
           aria-label={labels.back}
           title={labels.back}
         >
@@ -1004,16 +1054,16 @@ export function AccountConnectionWizard({
         </button>
       ) : null}
 
-      <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col px-5 pb-4 pt-4 sm:px-10">
-        <div className="mx-auto w-[min(100%,330px)]">
+      <div className={cn("mx-auto flex w-full max-w-5xl flex-col px-5 pb-8 pt-20 sm:px-10 sm:pt-9", presentation === "overlay" ? "min-h-full" : "min-h-[calc(100dvh-140px)]")}>
+        <div className="mx-auto w-[min(100%,280px)]">
           <ProgressBar step={step} />
         </div>
 
-        <main className="mx-auto flex w-full flex-1 flex-col justify-center py-5 sm:py-6">
+        <main className="mx-auto flex w-full flex-1 flex-col justify-center py-8 sm:py-10">
           <div className="mx-auto w-full max-w-3xl">
-            <header className="mb-5 text-center">
-              <p className="text-xs font-medium text-slate-500">{labels.eyebrow}</p>
-              <h2 id="account-wizard-title" className="mt-1 text-2xl font-bold text-slate-950 sm:text-3xl">
+            <header className="mb-8 text-center">
+              <p className="mx-auto inline-flex items-center rounded-full border border-violet-100 bg-white px-3 py-1 text-xs font-semibold text-violet-700 shadow-sm">{labels.eyebrow}</p>
+              <h2 id="account-wizard-title" className="mt-3 text-2xl font-bold tracking-tight text-slate-950 sm:text-[32px]">
                 {step === "platform"
                   ? labels.chooseTitle
                   : step === "method"
@@ -1023,70 +1073,79 @@ export function AccountConnectionWizard({
                         ? labels.ctraderConnectTitle
                         : selectedPlatformId === "tradelocker"
                           ? labels.tradeLockerConnectTitle
-                        : labels.connectTitle
-                      : labels.manualConnectTitle}
+                         : labels.connectTitle
+                       : method === "key"
+                         ? selectedPlatformId === "mt4" ? labels.mt4ConnectTitle : labels.connectTitle
+                         : labels.manualConnectTitle}
               </h2>
-              {step === "platform" ? <p className="mt-1 text-sm text-slate-500">{labels.chooseSubtitle}</p> : null}
+              {step === "platform" ? <p className="mt-2 text-sm text-slate-500 sm:text-base">{labels.chooseSubtitle}</p> : null}
             </header>
 
             {step === "platform" ? (
-              <div className="mx-auto max-w-xl">
+              <div className="mx-auto max-w-2xl">
                 <label className="relative block">
-                  <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder={labels.searchPlaceholder}
-                    className="h-11 w-full rounded-lg border border-slate-200 bg-white pe-4 ps-10 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[#6547b7] focus:ring-2 focus:ring-[#6547b7]/15"
+                    className="h-13 w-full rounded-2xl border border-slate-200 bg-white pe-4 ps-12 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                   />
                 </label>
-                <p className="mb-2 mt-4 text-xs font-bold text-slate-700">{labels.popular}</p>
-                <div className="grid gap-1.5 sm:grid-cols-2">
+                <p className="mb-3 mt-6 text-xs font-bold uppercase tracking-wide text-slate-600">{labels.popular}</p>
+                <div className="grid gap-3 sm:grid-cols-2">
                   {filteredPlatforms.map((platform) => (
                     <button
                       key={platform.id}
                       type="button"
                       onClick={() => setSelectedPlatformId(platform.id)}
                       className={cn(
-                        "flex h-12 items-center gap-3 rounded-lg border bg-white px-3 text-start text-sm font-semibold shadow-sm transition",
+                        "group flex min-h-[74px] items-center gap-3 rounded-2xl border bg-white px-4 py-3 text-start text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2",
                         selectedPlatformId === platform.id
-                          ? "border-[#6547b7] text-[#4f3596] ring-1 ring-[#6547b7]"
-                          : "border-transparent text-slate-800 hover:border-slate-200 hover:bg-slate-50"
+                          ? "border-violet-600 bg-violet-50/60 text-violet-900 shadow-[0_9px_25px_-16px_rgba(91,61,175,0.7)] ring-1 ring-violet-600"
+                          : "border-slate-200 text-slate-800 shadow-sm hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md"
                       )}
+                      aria-pressed={selectedPlatformId === platform.id}
                     >
                       <PlatformMark platform={platform} />
-                      <span className="truncate">{platform.name}</span>
-                      {selectedPlatformId === platform.id ? <Check className="ms-auto h-4 w-4 shrink-0 text-[#6547b7]" /> : null}
+                      <span className="min-w-0 flex-1 truncate">{platform.name}</span>
+                      {selectedPlatformId === platform.id ? <span className="ms-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-700 text-white"><Check className="h-3.5 w-3.5" strokeWidth={2.5} /></span> : null}
                     </button>
                   ))}
                 </div>
+                {filteredPlatforms.length === 0 ? <p className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500">{labels.noPlatforms}</p> : null}
                 <button
                   type="button"
                   disabled={!selectedPlatform}
                   onClick={() => {
-                    setMethod(selectedPlatform?.supportsAutoSync && canUseAutoSync ? "auto" : "manual");
+                     setMethod(selectedPlatform?.supportsAutoSync && canUseAutoSync ? "auto" : (selectedPlatform?.id === "mt4" || selectedPlatform?.id === "mt5") && canUseAutoSync ? "key" : "manual");
                     setStep("method");
                   }}
-                  className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#5b3daf] px-4 text-sm font-bold text-white transition hover:bg-[#4e329b] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+                  className="mt-7 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-violet-700 px-4 text-sm font-bold text-white shadow-[0_10px_22px_-12px_rgba(91,61,175,0.8)] transition hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
                 >
                   {labels.continue}
+                  <ArrowRight className={cn("h-4 w-4", isRtl && "rotate-180")} />
                 </button>
               </div>
             ) : null}
 
             {step === "method" && selectedPlatform ? (
-              <div className="mx-auto max-w-2xl">
-                <div className="mb-7 flex flex-col items-center text-center">
+              <div className="mx-auto w-full max-w-3xl">
+                <div className="mb-7 flex items-center justify-between gap-4 rounded-2xl border border-violet-100 bg-white px-4 py-3 shadow-sm sm:px-5">
+                  <div className="flex min-w-0 items-center gap-3">
                   <PlatformMark platform={selectedPlatform} large />
-                  <p className="mt-3 text-xs text-slate-500">
-                    {labels.linking} <strong className="text-slate-800">{selectedPlatform.name}</strong>{" "}
-                    <button type="button" onClick={() => setStep("platform")} className="font-semibold text-[#5b3daf] underline underline-offset-2">
-                      {labels.changePlatform}
-                    </button>
-                  </p>
+                    <div className="min-w-0 text-start">
+                      <p className="text-xs text-slate-500">{labels.linking}</p>
+                      <strong className="block truncate text-sm font-bold text-slate-900 sm:text-base">{selectedPlatform.name}</strong>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setStep("platform")} className="shrink-0 rounded-lg px-2 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-50 hover:text-violet-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600">
+                    {labels.changePlatform}
+                  </button>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <MethodCard
+                 <div className={cn("grid gap-3", selectedPlatform.id === "mt4" ? "sm:grid-cols-2" : "sm:grid-cols-3")}>
+                  {selectedPlatform.id !== "mt4" && (
+                   <MethodCard
                     active={method === "auto"}
                     disabled={!autoSyncAvailable}
                     recommended={autoSyncAvailable}
@@ -1098,16 +1157,19 @@ export function AccountConnectionWizard({
                         : selectedPlatform.id === "tradelocker"
                           ? labels.tradeLockerAutoDetail
                         : labels.autoDetail
-                      : labels.mt5Only}
+                      : selectedPlatform.supportsAutoSync ? labels.journalRequired : labels.mt5Only}
                     onClick={() => setMethod("auto")}
-                    recommendedLabel={labels.recommended}
-                  />
-                  <MethodCard
-                    active={method === "file"}
-                    icon={FileUp}
-                    title={labels.fileTitle}
-                    detail={labels.fileDetail}
-                    onClick={() => setMethod("file")}
+                   recommendedLabel={labels.recommended}
+                   />
+                  )}
+                   <MethodCard
+                     active={method === (isMetatrader ? "key" : "file")}
+                     disabled={isMetatrader && !canUseAutoSync}
+                     recommended={selectedPlatform.id === "mt4" && canUseAutoSync}
+                     icon={isMetatrader ? KeyRound : FileUp}
+                     title={isMetatrader ? labels.keyTitle : labels.fileTitle}
+                     detail={isMetatrader ? !canUseAutoSync ? labels.journalRequired : selectedPlatform.id === "mt4" ? labels.keyDetailMt4 : labels.keyDetailMt5 : labels.fileDetail}
+                     onClick={() => setMethod(isMetatrader ? "key" : "file")}
                     recommendedLabel={labels.recommended}
                   />
                   <MethodCard
@@ -1122,9 +1184,10 @@ export function AccountConnectionWizard({
                 <button
                   type="button"
                   onClick={continueFromMethod}
-                  className="mt-7 inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#5b3daf] px-4 text-sm font-bold text-white transition hover:bg-[#4e329b]"
+                  className="mt-7 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-violet-700 px-4 text-sm font-bold text-white shadow-[0_10px_22px_-12px_rgba(91,61,175,0.8)] transition hover:bg-violet-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2"
                 >
                   {method === "file" ? labels.fileRedirect : labels.continue}
+                  <ArrowRight className={cn("h-4 w-4", isRtl && "rotate-180")} />
                 </button>
               </div>
             ) : null}
@@ -1136,7 +1199,9 @@ export function AccountConnectionWizard({
                     {errorMessage}
                   </div>
                 ) : null}
-                {method === "auto" ? (
+                 {method === "key" ? (
+                   <MetatraderKeyConnectStep key={selectedPlatform.id} labels={labels} platform={selectedPlatform.id === "mt4" ? "MT4" : "MT5"} onCreated={onAccountsChanged} onDone={closeWizard} />
+                 ) : method === "auto" ? (
                   selectedPlatform.id === "ctrader" ? (
                     <CtraderConnectStep labels={labels} />
                   ) : selectedPlatform.id === "tradelocker" ? (

@@ -38,6 +38,8 @@ async function deleteTradesByIds(
   await tx.tradeScreenshot.deleteMany({ where: { tradeId: { in: tradeIds } } });
   await tx.tradeUpdateLog.deleteMany({ where: { tradeId: { in: tradeIds } } });
   await tx.tradeAIReview.deleteMany({ where: { tradeId: { in: tradeIds } } });
+  await tx.tradeAIChatMessage.deleteMany({ where: { tradeId: { in: tradeIds } } });
+  await tx.tradeCoachCommitment.deleteMany({ where: { sourceTradeId: { in: tradeIds } } });
   await tx.tradeJournalMetadata.deleteMany({ where: { tradeId: { in: tradeIds } } });
   await tx.voiceMemo.deleteMany({ where: { tradeId: { in: tradeIds } } });
   await tx.tradeChecklist.deleteMany({ where: { tradeId: { in: tradeIds } } });

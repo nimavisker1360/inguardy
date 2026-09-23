@@ -4,10 +4,15 @@ import { calculateChecklistCollectionProgress } from "@/lib/checklists/calculate
 import { decryptJournalSecret } from "@/server/mt5/journal-secret-vault";
 import {
   closeTriggeredPropFirmChallenges,
-  getPropFirmComputedStatus,
   getPropFirmTradeWindow,
   propFirmStatusToComputed,
 } from "@/lib/prop-firms";
+import {
+  calculatePropFirmRuleMetrics,
+  getPropFirmDayStart,
+  netTradePnl,
+} from "@/lib/prop-firm-rule-sync";
+import { countConsecutiveLosses, evaluateOvertradeGuard } from "@/lib/overtrade-guard";
 import type {
   DashboardOverviewData,
   PropFirmChallengeDto,
@@ -105,6 +110,14 @@ export const propFirmChallengeSelect = {
   userId: true,
   accountId: true,
   name: true,
+  ruleProfile: true,
+  dailyResetTimeZone: true,
+  warningThreshold: true,
+  guardEnabled: true,
+  maxDailyEntries: true,
+  maxConsecutiveLosses: true,
+  lossCooldownMinutes: true,
+  manualPauseUntil: true,
   startingBalance: true,
   profitTarget: true,
   maxDailyLoss: true,
@@ -116,7 +129,7 @@ export const propFirmChallengeSelect = {
   updatedAt: true,
 } satisfies Prisma.PropFirmChallengeSelect;
 
-const DASHBOARD_RECENT_TRADES_LIMIT = 3;
+const DASHBOARD_RECENT_TRADES_LIMIT = 5;
 
 export const tradeListInclude = {
   account: {
@@ -268,12 +281,6 @@ export function serializeAccount(
   };
 }
 
-function startOfToday() {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
 export async function getPropFirmChallengesForUser(userId: string) {
   await closeTriggeredPropFirmChallenges(userId);
 
@@ -291,7 +298,6 @@ export async function getPropFirmChallengesForUser(userId: string) {
   ]);
 
   const accountMap = new Map(accounts.map((account) => [account.id, account]));
-  const todayStart = startOfToday();
   const now = new Date();
 
   const hydratedChallenges = await Promise.all(
@@ -301,12 +307,15 @@ export async function getPropFirmChallengesForUser(userId: string) {
       const maxDailyLoss = challenge.maxDailyLoss === null ? null : Number(challenge.maxDailyLoss);
       const maxTotalLoss = challenge.maxTotalLoss === null ? null : Number(challenge.maxTotalLoss);
       const accountId = challenge.accountId;
+      const account = accountId ? accountMap.get(accountId) ?? null : null;
       const window = getPropFirmTradeWindow(challenge, now);
-      const todayRangeStart = todayStart > window.start ? todayStart : window.start;
+      const dayStartedAt = getPropFirmDayStart(now, challenge.dailyResetTimeZone);
+      const todayRangeStart = dayStartedAt > window.start ? dayStartedAt : window.start;
+      const baselineFloor = new Date(dayStartedAt.getTime() - 36 * 60 * 60 * 1000);
 
-      const [challengePnl, todayPnl] = accountId
+      const [closedTrades, openTrades, latestSnapshot, baselineSnapshot, dailyEntries] = accountId
         ? await prisma.$transaction([
-            prisma.trade.aggregate({
+            prisma.trade.findMany({
               where: {
                 userId,
                 accountId,
@@ -316,48 +325,136 @@ export async function getPropFirmChallengesForUser(userId: string) {
                   lte: window.end,
                 },
               },
-              _sum: { profitLoss: true },
+              select: { profitLoss: true, commission: true, swap: true, closedAt: true },
             }),
-            prisma.trade.aggregate({
+            prisma.trade.findMany({
               where: {
                 userId,
                 accountId,
-                status: TradeStatus.CLOSED,
-                closedAt: {
-                  gte: todayRangeStart,
-                  lte: window.end,
+                status: TradeStatus.OPEN,
+                openedAt: { gte: window.start, lte: window.end },
+              },
+              select: { profitLoss: true, commission: true, swap: true },
+            }),
+            prisma.accountEquitySnapshot.findFirst({
+              where: {
+                accountId,
+                timestamp: { gte: window.start, lte: window.end },
+              },
+              orderBy: { timestamp: "desc" },
+            }),
+            prisma.accountEquitySnapshot.findFirst({
+              where: {
+                accountId,
+                timestamp: {
+                  gte: baselineFloor > window.start ? baselineFloor : window.start,
+                  lte: dayStartedAt,
                 },
               },
-              _sum: { profitLoss: true },
+              orderBy: { timestamp: "desc" },
+            }),
+            prisma.trade.count({
+              where: {
+                userId,
+                accountId,
+                status: { not: TradeStatus.CANCELLED },
+                openedAt: { gte: todayRangeStart, lte: window.end },
+              },
             }),
           ])
-        : [null, null];
+        : [[], [], null, null, 0];
 
-      const closedPnl = Number(challengePnl?._sum.profitLoss ?? 0);
-      const todayClosedPnl = Number(todayPnl?._sum.profitLoss ?? 0);
-      const currentBalance = startingBalance + closedPnl;
-      const profit = currentBalance - startingBalance;
-      const progress = profitTarget && profitTarget > 0 ? (profit / profitTarget) * 100 : 0;
+      const challengeClosedPnl = closedTrades.reduce(
+        (total, trade) => total + netTradePnl(trade),
+        0
+      );
+      const todayClosedPnl = closedTrades.reduce(
+        (total, trade) =>
+          trade.closedAt && trade.closedAt >= todayRangeStart
+            ? total + netTradePnl(trade)
+            : total,
+        0
+      );
+      const fallbackFloatingPnl = openTrades.reduce(
+        (total, trade) => total + netTradePnl(trade),
+        0
+      );
+      const currentBalance = latestSnapshot
+        ? Number(latestSnapshot.balance)
+        : account?.balance !== null && account?.balance !== undefined
+          ? Number(account.balance)
+          : startingBalance + challengeClosedPnl;
+      const floatingPnl = latestSnapshot
+        ? Number(latestSnapshot.floatingPnl)
+        : fallbackFloatingPnl;
+      const currentEquity = latestSnapshot
+        ? Number(latestSnapshot.equity)
+        : currentBalance + floatingPnl;
+      const dayStartBalance = baselineSnapshot
+        ? Number(baselineSnapshot.balance)
+        : window.start >= dayStartedAt
+          ? startingBalance
+          : null;
+      const calculatedMetrics = calculatePropFirmRuleMetrics({
+        startingBalance,
+        currentBalance,
+        currentEquity,
+        floatingPnl,
+        challengeClosedPnl,
+        todayClosedPnl,
+        dayStartBalance,
+        profitTarget,
+        maxDailyLoss,
+        maxTotalLoss,
+        warningThreshold: challenge.warningThreshold,
+      });
       const computedStatus =
         propFirmStatusToComputed(challenge.status) ??
-        getPropFirmComputedStatus({
-          profit,
-          profitTarget,
-          todayPnl: todayClosedPnl,
-          maxDailyLoss,
-          currentBalance,
-          startingBalance,
-          maxTotalLoss,
-        });
+        calculatedMetrics.computedStatus;
+      const dataAsOf = latestSnapshot?.timestamp ?? account?.lastSyncAt ?? null;
+      const snapshotAge = dataAsOf ? now.getTime() - dataAsOf.getTime() : null;
+      const syncStatus: PropFirmChallengeDto["syncStatus"] = latestSnapshot
+        ? snapshotAge !== null && snapshotAge <= 15 * 60 * 1000
+          ? "LIVE"
+          : "STALE"
+        : account?.ingestionMode === "MANUAL"
+          ? "MANUAL"
+          : "NO_TELEMETRY";
+      const todayClosedTrades = closedTrades
+        .filter((trade) => trade.closedAt && trade.closedAt >= todayRangeStart)
+        .sort((left, right) =>
+          (right.closedAt?.getTime() ?? 0) - (left.closedAt?.getTime() ?? 0)
+        );
+      const consecutiveLosses = countConsecutiveLosses(todayClosedTrades, netTradePnl);
+      const lastClosedTrade = todayClosedTrades[0] ?? null;
+      const lastLossAt = lastClosedTrade && netTradePnl(lastClosedTrade) < 0
+        ? lastClosedTrade.closedAt
+        : null;
+      const guard = evaluateOvertradeGuard({
+        now,
+        enabled: challenge.guardEnabled,
+        challengeStatus: computedStatus,
+        propRiskLevel: calculatedMetrics.riskLevel,
+        syncStatus,
+        maxDailyEntries: challenge.maxDailyEntries,
+        maxConsecutiveLosses: challenge.maxConsecutiveLosses,
+        lossCooldownMinutes: challenge.lossCooldownMinutes,
+        manualPauseUntil: challenge.manualPauseUntil,
+        dailyEntries,
+        consecutiveLosses,
+        lastLossAt,
+      });
 
       return serializePropFirmChallenge(
         challenge,
-        accountId ? accountMap.get(accountId) ?? null : null,
+        account,
         {
-          currentBalance,
-          progress,
-          todayPnl: todayClosedPnl,
+          ...calculatedMetrics,
           computedStatus,
+          syncStatus,
+          dataAsOf,
+          dayStartedAt,
+          guard,
         }
       );
     })
@@ -374,8 +471,22 @@ function serializePropFirmChallenge(
   account: AccountRecord | null,
   metrics: {
     currentBalance: number;
+    currentEquity: number;
+    floatingPnl: number;
     progress: number;
     todayPnl: number;
+    dailyLossUsed: number;
+    dailyLossUsedPercent: number;
+    dailyLossRemaining: number | null;
+    totalLossUsed: number;
+    totalLossUsedPercent: number;
+    totalLossRemaining: number | null;
+    profitTargetRemaining: number | null;
+    riskLevel: PropFirmChallengeDto["riskLevel"];
+    syncStatus: PropFirmChallengeDto["syncStatus"];
+    dataAsOf: Date | null;
+    dayStartedAt: Date;
+    guard: PropFirmChallengeDto["guard"];
     computedStatus: PropFirmChallengeDto["computedStatus"];
   }
 ): PropFirmChallengeDto {
@@ -384,13 +495,35 @@ function serializePropFirmChallenge(
     userId: challenge.userId,
     accountId: challenge.accountId,
     name: challenge.name,
+    ruleProfile: challenge.ruleProfile,
+    dailyResetTimeZone: challenge.dailyResetTimeZone,
+    warningThreshold: challenge.warningThreshold,
+    guardEnabled: challenge.guardEnabled,
+    maxDailyEntries: challenge.maxDailyEntries,
+    maxConsecutiveLosses: challenge.maxConsecutiveLosses,
+    lossCooldownMinutes: challenge.lossCooldownMinutes,
+    manualPauseUntil: challenge.manualPauseUntil ? serializeDate(challenge.manualPauseUntil) : null,
+    guard: metrics.guard,
     startingBalance: serializeDecimal(challenge.startingBalance) ?? "0",
     currentBalance: metrics.currentBalance,
+    currentEquity: metrics.currentEquity,
+    floatingPnl: metrics.floatingPnl,
     profitTarget: serializeDecimal(challenge.profitTarget),
     maxDailyLoss: serializeDecimal(challenge.maxDailyLoss),
     maxTotalLoss: serializeDecimal(challenge.maxTotalLoss),
     progress: metrics.progress,
     todayPnl: metrics.todayPnl,
+    dailyLossUsed: metrics.dailyLossUsed,
+    dailyLossUsedPercent: metrics.dailyLossUsedPercent,
+    dailyLossRemaining: metrics.dailyLossRemaining,
+    totalLossUsed: metrics.totalLossUsed,
+    totalLossUsedPercent: metrics.totalLossUsedPercent,
+    totalLossRemaining: metrics.totalLossRemaining,
+    profitTargetRemaining: metrics.profitTargetRemaining,
+    riskLevel: metrics.riskLevel,
+    syncStatus: metrics.syncStatus,
+    dataAsOf: metrics.dataAsOf ? serializeDate(metrics.dataAsOf) : null,
+    dayStartedAt: serializeDate(metrics.dayStartedAt),
     computedStatus: metrics.computedStatus,
     status: challenge.status,
     startedAt: challenge.startedAt ? serializeDate(challenge.startedAt) : null,
@@ -536,6 +669,7 @@ export async function getDashboardOverviewData(
     checklistTemplates,
     propFirmChallenges,
     trades,
+    performanceTrades,
   ] = await prisma.$transaction([
     prisma.trade.count({
       where: tradeWhere,
@@ -602,6 +736,19 @@ export async function getDashboardOverviewData(
       orderBy: [{ openedAt: "desc" }, { createdAt: "desc" }],
       take: DASHBOARD_RECENT_TRADES_LIMIT,
     }),
+    prisma.trade.findMany({
+      where: tradeWhere,
+      select: {
+        id: true,
+        symbol: true,
+        direction: true,
+        status: true,
+        profitLoss: true,
+        openedAt: true,
+        closedAt: true,
+      },
+      orderBy: [{ closedAt: "asc" }, { openedAt: "asc" }, { createdAt: "asc" }],
+    }),
   ]);
 
   return {
@@ -626,6 +773,15 @@ export async function getDashboardOverviewData(
       { key: "checklists", value: checklistTemplates, href: "/journal/checklists" },
       { key: "propFirms", value: propFirmChallenges, href: accountScopedHref("/dashboard/prop-firms") },
     ],
+    performanceTrades: performanceTrades.map((trade) => ({
+      id: trade.id,
+      symbol: trade.symbol,
+      direction: trade.direction,
+      status: trade.status,
+      profitLoss: Number(trade.profitLoss ?? 0),
+      openedAt: trade.openedAt ? serializeDate(trade.openedAt) : null,
+      closedAt: trade.closedAt ? serializeDate(trade.closedAt) : null,
+    })),
   };
 }
 

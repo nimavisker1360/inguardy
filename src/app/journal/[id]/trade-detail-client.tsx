@@ -1,25 +1,26 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   ArrowDown,
   ArrowLeft,
   ArrowUp,
-  Camera,
+  BarChart3,
+  BookOpenCheck,
+  Brain,
   CheckCircle2,
   ChevronDown,
   CircleDashed,
   Clock3,
   Edit3,
-  ImageOff,
   Info,
+  ListChecks,
   MoreVertical,
   Save,
+  Star,
   Trash2,
   X,
 } from "lucide-react";
@@ -32,6 +33,9 @@ import { JournalReviewForms } from "@/app/journal/[id]/journal-review-forms";
 import { TradeAIReviewPanel } from "@/components/dashboard/TradeAIReviewPanel";
 import type { TradeDto } from "@/components/dashboard/types";
 import { TradeChecklistPanel } from "@/components/journal/TradeChecklistPanel";
+import { TradeAIConversation } from "@/components/journal/TradeAIConversation";
+import { TradeCoachPanel } from "@/components/journal/TradeCoachPanel";
+import { TradeExecutionChart } from "@/components/journal/TradeExecutionChart";
 import { TradeStrategyReviewPanel } from "@/components/journal/TradeStrategyReviewPanel";
 import { isImportedTradeSource } from "@/lib/journal/trade-source";
 import type { Psychology } from "@/lib/journal/types";
@@ -156,6 +160,8 @@ function Section({
   defaultOpen = true,
   summary,
   rtl = false,
+  className,
+  titleClassName,
 }: {
   id?: string;
   title: string;
@@ -165,11 +171,13 @@ function Section({
   defaultOpen?: boolean;
   summary?: React.ReactNode;
   rtl?: boolean;
+  className?: string;
+  titleClassName?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <section id={id} className={cn("scroll-mt-24 rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]", rtl && "text-right")}>
+    <section id={id} className={cn("scroll-mt-24 rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]", rtl && "text-right", className)}>
       <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between", open && "mb-4")}>
         {collapsible ? (
           <button
@@ -182,7 +190,7 @@ function Section({
             )}
           >
             <span className="min-w-0 flex-1">
-              <span className="block text-lg font-semibold text-slate-950 dark:text-white">{title}</span>
+              <span className={cn("block text-lg font-semibold text-slate-950 dark:text-white", titleClassName)}>{title}</span>
               {!open && summary ? (
                 <span className="mt-1 block truncate text-xs font-medium text-slate-500 dark:text-slate-400">
                   {summary}
@@ -194,7 +202,7 @@ function Section({
             />
           </button>
         ) : (
-          <h2 className="text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
+          <h2 className={cn("text-lg font-semibold text-slate-950 dark:text-white", titleClassName)}>{title}</h2>
         )}
         {open ? actions : null}
       </div>
@@ -207,17 +215,43 @@ function Metric({
   label,
   value,
   className,
+  tone = "default",
 }: {
   label: string;
   value: string;
   className?: string;
+  tone?: "default" | "blue" | "cyan" | "violet" | "rose" | "amber";
 }) {
+  const toneClass =
+    tone === "blue"
+      ? "border-blue-200 bg-blue-50/90 dark:border-blue-500/25 dark:bg-blue-500/10"
+      : tone === "cyan"
+        ? "border-cyan-200 bg-cyan-50/90 dark:border-cyan-500/25 dark:bg-cyan-500/10"
+        : tone === "violet"
+          ? "border-violet-200 bg-violet-50/90 dark:border-violet-500/25 dark:bg-violet-500/10"
+          : tone === "rose"
+            ? "border-rose-200 bg-rose-50/90 dark:border-rose-500/25 dark:bg-rose-500/10"
+            : tone === "amber"
+              ? "border-amber-200 bg-amber-50/90 dark:border-amber-500/25 dark:bg-amber-500/10"
+              : "border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-[#111827]";
+
   return (
-    <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[#111827]">
+    <div className={cn("min-w-0 rounded-lg border p-3", toneClass)}>
       <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{label}</div>
       <div className={cn("mt-1 truncate text-sm font-semibold text-slate-950 dark:text-white", className)}>
         {value}
       </div>
+    </div>
+  );
+}
+
+type WorkspaceTab = "stats" | "strategy" | "executions" | "checklist" | "playbook" | "psychology";
+
+function InspectorRow({ label, value, valueClassName }: { label: string; value: React.ReactNode; valueClassName?: string }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] items-center gap-3 py-1.5 text-sm">
+      <span className="truncate font-medium text-slate-500 dark:text-slate-400">{label}</span>
+      <span className={cn("truncate font-semibold text-slate-900 dark:text-slate-100", valueClassName)}>{value}</span>
     </div>
   );
 }
@@ -259,6 +293,7 @@ function hasText(value: string | null | undefined) {
 function sourceLabel(trade: PrismaTradeDto, manualLabel: string) {
   if (trade.source?.trim().toUpperCase() === "CTRADER_DIRECT") return "cTrader";
   if (trade.source?.trim().toUpperCase() === "TRADELOCKER_DIRECT") return "TradeLocker";
+  if (trade.source?.trim().toUpperCase() === "MT4") return "MT4";
   return isImportedTradeSource(trade.source, trade.setup) ? "MT5" : manualLabel;
 }
 
@@ -309,6 +344,10 @@ const detailCopy = {
     importedTitle: "MT5 imported trade",
     importedDescription:
       "Market execution data was imported automatically from MT5. Add your own screenshots, psychology notes, playbook review, checklist answers, tags, and AI review when you are ready.",
+    importedCompleteDescription:
+      "MT5 imported the execution data automatically. This trade now has all the review context needed for a complete journal analysis.",
+    importedRemainingDescription:
+      "MT5 imported the execution data automatically. Based on the information currently saved, this trade still needs: {items}. Complete these items to get an accurate journal analysis.",
     importedNoteReplacement:
       "This trade was imported automatically from MT5. Add personal review context here instead of treating the import note as your journal analysis.",
     manualSourceDescription:
@@ -400,6 +439,10 @@ const detailCopy = {
     importedTitle: "معامله واردشده از MT5",
     importedDescription:
       "داده‌های اجرای بازار به صورت خودکار از MT5 وارد شده‌اند. هر زمان آماده بودید اسکرین‌شات، یادداشت روانشناسی، بررسی پلی‌بوک، پاسخ چک‌لیست، تگ و بررسی AI خودتان را اضافه کنید.",
+    importedCompleteDescription:
+      "اطلاعات اجرای معامله به‌صورت خودکار از MT5 دریافت شده و اکنون تمام اطلاعات لازم برای تحلیل کامل این معامله ثبت شده است.",
+    importedRemainingDescription:
+      "اطلاعات اجرای معامله به‌صورت خودکار از MT5 دریافت شده است. بر اساس اطلاعات فعلی، این موارد هنوز ناقص‌اند: {items}. برای تحلیل دقیق ژورنال، آن‌ها را تکمیل کنید.",
     importedNoteReplacement:
       "این معامله به صورت خودکار از MT5 وارد شده است. به جای یادداشت فنی واردسازی، زمینه بررسی شخصی خود را اینجا اضافه کنید.",
     manualSourceDescription:
@@ -494,12 +537,15 @@ export function TradeDetailClient({
   const [trade, setTrade] = useState(initialTrade);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [savingScreenshot, setSavingScreenshot] = useState(false);
   const [savingTags, setSavingTags] = useState(false);
+  const [newTag, setNewTag] = useState("");
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [completingReview, setCompletingReview] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [progressHighlighted, setProgressHighlighted] = useState(false);
+  const [workspaceTab, setWorkspaceTab] = useState<WorkspaceTab>("stats");
+  const legacySectionsVisible = false;
   const account = tradeAccount(trade);
   const activeAccountId = searchParams.get("accountId") || "";
   const backToTradesHref = activeAccountId
@@ -510,6 +556,18 @@ export function TradeDetailClient({
     () => trade.tags?.map((item) => item.tag.name).join(", ") || "",
     [trade.tags]
   );
+  const selectedTagNames = useMemo(() => trade.tags?.map((item) => item.tag.name) || [], [trade.tags]);
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/tags").then(async (response) => {
+      if (!response.ok) return;
+      const result = await response.json();
+      if (active && Array.isArray(result.data)) {
+        setAvailableTags(result.data.map((tag: { name: string }) => tag.name));
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
   const screenshots = trade.screenshots || [];
   const updateLogs = trade.updateLogs || [];
   const importedTrade = isImportedTradeSource(trade.source, trade.setup);
@@ -532,14 +590,6 @@ export function TradeDetailClient({
       lessonLearned: trade.journalMetadata?.lessonLearned || null,
     };
   }, [trade]);
-  const groupedScreenshots = {
-    ENTRY: screenshots.filter((screenshot) => screenshot.type.toUpperCase() === "ENTRY"),
-    EXIT: screenshots.filter((screenshot) => screenshot.type.toUpperCase() === "EXIT"),
-  };
-  const additionalScreenshots = screenshots.filter(
-    (screenshot) =>
-      !["ENTRY", "EXIT"].includes(screenshot.type.toUpperCase())
-  );
   const displayedNotes = hasMt5PlaceholderNote(trade)
     ? copy.importedNoteReplacement
     : trade.notes || "-";
@@ -554,18 +604,21 @@ export function TradeDetailClient({
   const reviewItems = [
     {
       label: copy.tradeInfoAvailable,
+      missingLabel: language === "fa" ? "اطلاعات اصلی معامله" : "core trade details",
       complete: hasText(trade.symbol) && Boolean(trade.direction) && Boolean(trade.status),
       importance: copy.required,
       optional: false,
     },
     {
       label: copy.screenshotAttached,
+      missingLabel: language === "fa" ? "اسکرین‌شات ورود یا خروج" : "an entry or exit screenshot",
       complete: screenshots.length > 0,
       importance: copy.optional,
       optional: true,
     },
     {
       label: copy.psychologyCompleted,
+      missingLabel: language === "fa" ? "بررسی روانشناسی" : "psychology review",
       complete: Boolean(
         journalPsychology?.emotionBefore ||
           journalPsychology?.emotionAfter ||
@@ -578,31 +631,29 @@ export function TradeDetailClient({
     },
     {
       label: copy.playbookSelected,
+      missingLabel: language === "fa" ? "انتخاب پلی‌بوک" : "a selected playbook",
       complete: Boolean(trade.strategyReview?.strategyId || trade.strategyReview?.strategyNameSnapshot),
       importance: copy.recommended,
       optional: false,
     },
     {
       label: copy.checklistCompleted,
+      missingLabel: language === "fa" ? "پاسخ کامل چک‌لیست" : "completed checklist answers",
       complete: checklistComplete,
       importance: copy.recommended,
       optional: false,
     },
     {
       label: copy.strategyCompleted,
+      missingLabel: language === "fa" ? "بررسی استراتژی" : "strategy review",
       complete: strategyReviewed,
       importance: copy.recommended,
       optional: false,
     },
     {
       label: copy.notesAdded,
+      missingLabel: language === "fa" ? "یادداشت معامله" : "trade notes",
       complete: hasText(trade.notes) && !hasMt5PlaceholderNote(trade),
-      importance: copy.optional,
-      optional: true,
-    },
-    {
-      label: copy.aiReviewGenerated,
-      complete: Boolean(trade.aiReview || trade.aiReviewStatus === "REVIEWED"),
       importance: copy.optional,
       optional: true,
     },
@@ -633,13 +684,26 @@ export function TradeDetailClient({
     trade.reviewRequirements?.steps.find((step) => !step.complete)?.href ||
     "#strategy-checklist";
   const sectionLinks = [
+    { id: "execution-chart", label: language === "fa" ? "داستان معامله" : "Trade story" },
     { id: "summary", label: copy.sections.summary },
-    { id: "screenshots", label: copy.sections.screenshots },
     { id: "psychology", label: copy.sections.psychology },
     { id: "strategy-checklist", label: copy.sections.strategy },
     { id: "ai-review", label: copy.sections.ai },
     { id: "notes-tags", label: copy.sections.notes },
   ];
+  const missingContextItems = reviewItems
+    .filter((item) => !item.complete)
+    .map((item) => item.missingLabel);
+  const importedSourceDescription = missingContextItems.length === 0
+    ? copy.importedCompleteDescription
+    : copy.importedRemainingDescription.replace(
+        "{items}",
+        language === "fa"
+          ? missingContextItems.join("، ")
+          : missingContextItems.length === 1
+            ? missingContextItems[0]
+            : `${missingContextItems.slice(0, -1).join(", ")}, and ${missingContextItems.at(-1)}`
+      );
   const directionLabel = (direction: string | null | undefined) => {
     if (direction === "BUY") {
       return t("journal.tradeDetail.buy");
@@ -666,17 +730,6 @@ export function TradeDetailClient({
 
     return status || "-";
   };
-  const screenshotTypeLabel = (type: string) => {
-    if (type.toUpperCase() === "ENTRY") {
-      return t("journal.tradeDetail.entryScreenshot");
-    }
-
-    if (type.toUpperCase() === "EXIT") {
-      return t("journal.tradeDetail.exitScreenshot");
-    }
-
-    return t("journal.tradeDetail.additionalScreenshot");
-  };
   const requirementStepLabel = (label: string) =>
     (copy.requirementSteps as Record<string, string>)[label] || label;
   const requirementReasonLabel = (reason: string | null) =>
@@ -701,14 +754,14 @@ export function TradeDetailClient({
   }
 
   function completeRequirements() {
-    const target = document.querySelector(firstIncompleteHref);
-
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-
-    window.location.hash = firstIncompleteHref;
+    const targetTab: WorkspaceTab = firstIncompleteHref.includes("psychology")
+      ? "psychology"
+      : firstIncompleteHref.includes("checklist")
+        ? "checklist"
+        : firstIncompleteHref.includes("playbook") || firstIncompleteHref.includes("strategy")
+          ? "playbook"
+          : "stats";
+    setWorkspaceTab(targetTab);
   }
 
   async function completeReview() {
@@ -812,74 +865,22 @@ export function TradeDetailClient({
     }
   }
 
-  async function addScreenshot(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSavingScreenshot(true);
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const payload = {
-      screenshotUrl: formValue(formData.get("screenshotUrl")),
-      type: formValue(formData.get("type")),
-      caption: formValue(formData.get("caption")),
-    };
-
-    try {
-      const response = await fetch(`/api/journal/trades/${trade.id}/screenshots`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(
-          Array.isArray(data.errors) ? data.errors.join(", ") : data.message
-        );
-        return;
-      }
-
-      if (data.trade) {
-        showReviewProgress(data.trade);
-      }
-
-      toast.success(t("journal.tradeDetail.screenshotAdded"));
-      form.reset();
-    } catch {
-      toast.error(t("journal.tradeDetail.addScreenshotFailed"));
-    } finally {
-      setSavingScreenshot(false);
-    }
-  }
-
-  async function saveTags(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function persistTags(names: string[]) {
+    if (savingTags) return false;
     setSavingTags(true);
-
-    const formData = new FormData(event.currentTarget);
-    const tags = Array.from(
-      new Set(
-        String(formData.get("tags") || "")
-          .split(",")
-          .map((tag) => tag.trim().toLowerCase())
-          .filter(Boolean)
-      )
-    );
-    const payload = {
-      tags,
-    };
+    const normalizedTags = Array.from(new Set(names.map((name) => name.trim().toLowerCase()).filter(Boolean)));
 
     try {
       const response = await fetch(`/api/journal/trades/${trade.id}/tags`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ tags: normalizedTags }),
       });
       const data = await response.json();
 
       if (!response.ok) {
         toast.error(data.message || t("journal.tradeDetail.saveTagsFailed"));
-        return;
+        return false;
       }
 
       if (Array.isArray(data.tags)) {
@@ -899,15 +900,30 @@ export function TradeDetailClient({
             },
           })),
         }));
+        setAvailableTags((current) => Array.from(new Set([...current, ...data.tags])));
       }
 
       toast.success(t("journal.tradeDetail.tagsSaved"));
-      showReviewProgress();
+      return true;
     } catch {
       toast.error(t("journal.tradeDetail.saveTagsFailed"));
+      return false;
     } finally {
       setSavingTags(false);
     }
+  }
+
+  async function saveTags(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    await persistTags(String(formData.get("tags") || "").split(","));
+  }
+
+  async function addTag(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = newTag.trim();
+    if (!name) return;
+    if (await persistTags([...selectedTagNames, name])) setNewTag("");
   }
 
   async function deleteTrade() {
@@ -931,21 +947,40 @@ export function TradeDetailClient({
     }
   }
 
+  const workspaceTabs: Array<{ id: WorkspaceTab; label: string; icon: typeof BarChart3 }> = [
+    { id: "stats", label: "Stats", icon: BarChart3 },
+    { id: "strategy", label: "Strategy", icon: Star },
+    { id: "executions", label: "Executions", icon: Clock3 },
+    { id: "checklist", label: "Trade Checklist", icon: ListChecks },
+    { id: "playbook", label: "Playbook", icon: BookOpenCheck },
+    { id: "psychology", label: "Psychology Review", icon: Brain },
+  ];
+  const pnlValue = Number(trade.profitLoss || 0);
+  const commissionValue = Number(trade.commission || 0);
+  const swapValue = Number(trade.swap || 0);
+  const riskValue = Number(trade.riskAmount || 0);
+  const entryValue = Number(trade.entryPrice || 0);
+  const exitValue = Number(trade.exitPrice || 0);
+  const signedMove = entryValue && exitValue
+    ? (trade.direction === "BUY" ? exitValue - entryValue : entryValue - exitValue)
+    : 0;
+  const estimatedPips = signedMove * (trade.symbol.toUpperCase().includes("JPY") ? 100 : 10000);
+
   return (
-    <div className="space-y-5">
+    <div className="min-h-0 flex-1 space-y-5 overflow-y-auto pb-10">
       <Link
         href={backToTradesHref}
-        className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-950 dark:text-gray-300 dark:hover:text-white"
+        className="inline-flex h-8 items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 hover:text-slate-950 dark:border-slate-800 dark:bg-[#0F172A] dark:text-gray-300 dark:hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
         {t("journal.tradeDetail.backToTrades")}
       </Link>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
+      <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
         <div className={cn("flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between", isRtl && "text-right")}>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold text-slate-950 dark:text-white">{trade.symbol}</h1>
+              <h1 className="text-lg font-semibold text-slate-950 dark:text-white">{trade.symbol}</h1>
               <span
                 className={cn(
                   "inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold",
@@ -968,7 +1003,7 @@ export function TradeDetailClient({
                 {statusLabel(trade.status)}
               </span>
             </div>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               {language === "fa" ? "شماره حساب" : "Account"} {accountNumber} /{" "}
               {account?.broker || "-"} / {account?.platform || "-"}
             </p>
@@ -977,24 +1012,255 @@ export function TradeDetailClient({
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setEditing((value) => !value)}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+              onClick={() => {
+                setEditing((value) => !value);
+                setWorkspaceTab("executions");
+              }}
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-md bg-[#6946b8] px-3 text-xs font-semibold text-white hover:bg-[#5c3da5]"
             >
               {editing ? <X className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}
               {editing ? t("journal.tradeDetail.cancel") : t("journal.tradeDetail.edit")}
             </button>
-            <a
-              href="#danger-zone"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+            <button
+              type="button"
+              onClick={() => {
+                setDeleteConfirmation("");
+                setDeleteConfirmOpen(true);
+              }}
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-md border border-slate-200 px-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
               aria-label={copy.dangerTitle}
               title={copy.dangerTitle}
             >
               <MoreVertical className="h-4 w-4" />
-            </a>
+            </button>
           </div>
         </div>
       </div>
 
+      <div className="grid min-h-[690px] gap-3 xl:grid-cols-[440px_minmax(0,1fr)]">
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
+          <nav className="grid shrink-0 grid-cols-3 gap-1 border-b border-slate-200 p-2 dark:border-slate-800" aria-label="Trade detail categories">
+            {workspaceTabs.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setWorkspaceTab(id)}
+                title={label}
+                aria-pressed={workspaceTab === id}
+                className={cn(
+                  "flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-md px-2 text-[10px] font-semibold transition",
+                  workspaceTab === id
+                    ? "bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-200"
+                    : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
+                  ["checklist", "playbook", "psychology"].includes(id) && "border border-violet-200 dark:border-violet-500/30"
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="min-h-0 flex-1 overflow-y-auto p-4" dir={isRtl ? "rtl" : "ltr"}>
+            {workspaceTab === "stats" ? (
+              <>
+                <div className="border-s-4 border-red-500 ps-4">
+                  <div className="text-sm font-medium text-slate-500 dark:text-slate-400">Net P&amp;L</div>
+                  <div className={cn("mt-1 text-3xl font-medium", pnlValue >= 0 ? "text-emerald-500" : "text-red-500")} dir="ltr">
+                    {pnlValue >= 0 ? "+" : "-"}${Math.abs(pnlValue).toLocaleString("en-US", { maximumFractionDigits: 2 })}
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <InspectorRow label="Side" value={directionLabel(trade.direction)} valueClassName={trade.direction === "BUY" ? "text-emerald-500" : "text-red-500"} />
+                  <InspectorRow label="Account" value={account?.name || accountNumber || "-"} />
+                  <InspectorRow label="Volume traded" value={formatNumber(trade.lotSize, 2)} />
+                  <InspectorRow label="Pips" value={estimatedPips ? estimatedPips.toFixed(1) : "-"} valueClassName={estimatedPips >= 0 ? "text-emerald-500" : "text-red-500"} />
+                  <InspectorRow label="Return / Pip" value={estimatedPips ? `$${Math.abs(pnlValue / estimatedPips).toFixed(2)}` : "-"} />
+                  <InspectorRow label="Commissions & Fees" value={`$${Math.abs(commissionValue).toFixed(2)}`} />
+                  <InspectorRow label="Total Swap" value={`$${swapValue.toFixed(2)}`} />
+                  <InspectorRow label="Net ROI" value={riskValue ? `${((pnlValue / riskValue) * 100).toFixed(2)}%` : "-"} />
+                  <InspectorRow label="Gross P&L" value={`$${(pnlValue + Math.abs(commissionValue) + Math.abs(swapValue)).toFixed(2)}`} />
+                  <InspectorRow label="Risk Amount" value={riskValue ? `$${riskValue.toLocaleString("en-US")}` : "-"} />
+                  <InspectorRow label="Strategy" value={trade.strategyReview?.strategyNameSnapshot || trade.strategy || "Select Strategy"} valueClassName={!trade.strategyReview?.strategyNameSnapshot ? "text-violet-500" : undefined} />
+                </div>
+                <section id="notes-tags" className="mt-4 scroll-mt-4 rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{isRtl ? "تگ‌های این معامله" : "Trade tags"}</h2>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{isRtl ? "تگ انتخاب کن یا تگ جدید بساز؛ تغییرات همان لحظه ذخیره می‌شوند." : "Choose an existing tag or add a new one. Changes save immediately."}</p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {selectedTagNames.length ? selectedTagNames.map((name) => (
+                      <span key={name} className="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-800 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200">
+                        {name}
+                        <button type="button" onClick={() => void persistTags(selectedTagNames.filter((tag) => tag !== name))} disabled={savingTags} aria-label={isRtl ? `حذف تگ ${name}` : `Remove tag ${name}`} className="rounded-full p-0.5 hover:bg-violet-100 disabled:opacity-50 dark:hover:bg-violet-500/20"><X className="h-3 w-3" /></button>
+                      </span>
+                    )) : <span className="text-xs text-slate-500">{isRtl ? "هنوز تگی ثبت نشده است." : "No tags yet."}</span>}
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    <select value="" onChange={(event) => { if (event.target.value) void persistTags([...selectedTagNames, event.target.value]); }} disabled={savingTags || availableTags.every((name) => selectedTagNames.includes(name))} className={inputClass} aria-label={isRtl ? "انتخاب تگ موجود" : "Choose an existing tag"}>
+                      <option value="">{isRtl ? "انتخاب تگ موجود" : "Choose an existing tag"}</option>
+                      {availableTags.filter((name) => !selectedTagNames.includes(name)).map((name) => <option key={name} value={name}>{name}</option>)}
+                    </select>
+                    <form onSubmit={addTag} className="flex gap-2">
+                      <input value={newTag} onChange={(event) => setNewTag(event.target.value)} maxLength={80} placeholder={isRtl ? "نام تگ جدید" : "New tag name"} className={inputClass} aria-label={isRtl ? "نام تگ جدید" : "New tag name"} />
+                      <button type="submit" disabled={savingTags || !newTag.trim()} className="shrink-0 rounded-lg bg-violet-600 px-3 text-xs font-semibold text-white disabled:opacity-50">{isRtl ? "افزودن" : "Add tag"}</button>
+                    </form>
+                  </div>
+                </section>
+
+                <div
+                  id="review-progress"
+                  className={cn(
+                    "mt-5 rounded-lg border border-blue-200 bg-blue-50 p-3 transition dark:border-blue-500/30 dark:bg-blue-500/10",
+                    progressHighlighted && "ring-2 ring-blue-400"
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-semibold text-slate-950 dark:text-white">{copy.progressTitle}</div>
+                    <div className="text-sm font-bold text-blue-700 dark:text-blue-200">{reviewProgressPercent}%</div>
+                  </div>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-blue-100 dark:bg-slate-900">
+                    <div className="h-full rounded-full bg-blue-600" style={{ width: `${reviewProgressPercent}%` }} />
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {requirementSteps.map((item) => (
+                      <span key={item.label} className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-semibold", progressTone(item.complete, item.optional))}>
+                        {item.complete ? <CheckCircle2 className="h-3 w-3" /> : <CircleDashed className="h-3 w-3" />}
+                        {requirementStepLabel(item.label)}
+                      </span>
+                    ))}
+                  </div>
+                  {missingRequirements.length ? <p className="mt-2 text-[11px] font-medium text-amber-700 dark:text-amber-200">{missingRequirements.map(missingRequirementLabel).join(", ")}</p> : null}
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button type="button" onClick={completeRequirements} className="h-9 rounded-md border border-blue-300 text-xs font-semibold text-blue-700 dark:border-blue-500/40 dark:text-blue-200">{copy.completeRequirements}</button>
+                    <button type="button" onClick={completeReview} disabled={!canCompleteReview || completingReview} className="h-9 rounded-md bg-blue-600 text-xs font-semibold text-white disabled:opacity-50">{completingReview ? t("journal.tradeDetail.saving") : copy.completeReview}</button>
+                  </div>
+                </div>
+
+                <TradeCoachPanel trade={trade} enabled={aiAnalysisEnabled} />
+                <TradeAIConversation trade={trade} enabled={aiAnalysisEnabled} />
+
+              </>
+            ) : workspaceTab === "strategy" ? (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-violet-50 text-violet-600 dark:bg-violet-500/10"><Star className="h-6 w-6" /></div>
+                  <h2 className="mt-3 text-base font-semibold text-slate-950 dark:text-white">{trade.strategyReview?.strategyNameSnapshot || "Add a Strategy"}</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">Connect this trade to a repeatable setup and track what works.</p>
+                  <button type="button" onClick={() => setWorkspaceTab("playbook")} className="mt-3 h-9 rounded-md bg-violet-600 px-4 text-xs font-semibold text-white">Pick from your strategy library</button>
+                </div>
+                <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-3 dark:border-blue-500/25 dark:bg-blue-500/10">
+                  <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100">{t("journal.tradeDetail.tradeReview")}</h3>
+                  <div className="mt-3 space-y-1">
+                    <InspectorRow label={t("journal.tradeDetail.strategy")} value={toDisplay(trade.strategyReview?.strategyNameSnapshot)} />
+                    <InspectorRow label={t("journal.tradeDetail.setup")} value={toDisplay(trade.setup)} />
+                    <InspectorRow label={t("journal.tradeDetail.mistakes")} value={toDisplay(trade.mistakes || trade.mistake)} />
+                  </div>
+                  <div className="mt-3 rounded-md border border-indigo-200 bg-white/70 p-3 text-sm text-indigo-950 dark:border-indigo-500/25 dark:bg-slate-900/50 dark:text-indigo-100">
+                    <div className="text-[10px] font-semibold uppercase text-indigo-600 dark:text-indigo-300">{t("journal.tradeDetail.notes")}</div>
+                    <p className="mt-1 whitespace-pre-wrap leading-6">{displayedNotes}</p>
+                  </div>
+                </div>
+                <TradeAIReviewPanel trade={trade as unknown as TradeDto} aiAnalysisEnabled={aiAnalysisEnabled} onReviewUpdated={showReviewProgress} />
+              </div>
+            ) : workspaceTab === "executions" ? (
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-base font-semibold text-slate-950 dark:text-white">Execution details</h2>
+                  <div className="mt-3 rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+                    <InspectorRow label="Entry" value={formatNumber(trade.entryPrice, 5)} />
+                    <InspectorRow label="Exit" value={formatNumber(trade.exitPrice, 5)} />
+                    <InspectorRow label="Stop loss" value={formatNumber(levelValue(trade, "initialStopLoss", "stopLoss"), 5)} />
+                    <InspectorRow label="Profit target" value={formatNumber(levelValue(trade, "initialTakeProfit", "takeProfit"), 5)} />
+                    <InspectorRow label="Entry time" value={formatDate(trade.openedAt || trade.entryTime)} />
+                    <InspectorRow label="Exit time" value={formatDate(trade.closedAt || trade.exitTime)} />
+                  </div>
+                </div>
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-500/30 dark:bg-blue-500/10">
+                  <div className="text-xs font-semibold text-slate-950 dark:text-white">{copy.source}: {sourceLabel(trade, copy.manual)}</div>
+                  <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">{importedTrade ? importedSourceDescription : copy.manualSourceDescription}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-950 dark:text-white">{copy.slTpTimeline}</h3>
+                  <div className="mt-2 space-y-2">
+                    {updateLogs.length ? updateLogs.map((log) => (
+                      <div key={log.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs dark:border-slate-800 dark:bg-slate-900">
+                        <div className="font-semibold text-slate-900 dark:text-white">{log.type === "SL_CHANGED" ? copy.stopLossChanged : copy.takeProfitChanged}</div>
+                        <div className="mt-1 text-slate-500">{changedFromToLabel(formatNumber(log.oldValue, 5), formatNumber(log.newValue, 5))}</div>
+                        <div className="mt-1 text-[10px] text-slate-400">{formatDate(log.createdAt)}</div>
+                      </div>
+                    )) : <div className="rounded-lg border border-dashed border-slate-300 p-4 text-center text-xs text-slate-500 dark:border-slate-700">{copy.noLevelUpdates}</div>}
+                  </div>
+                </div>
+                {editing ? (
+                  <form id="journal-trade-edit-form" onSubmit={saveTrade} className="space-y-3 rounded-lg border border-violet-200 bg-violet-50/50 p-3 dark:border-violet-500/25 dark:bg-violet-500/10">
+                    <h3 className="text-sm font-semibold text-slate-950 dark:text-white">{t("journal.tradeDetail.editTrade")}</h3>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label={t("journal.tradeDetail.symbol")}><input name="symbol" defaultValue={trade.symbol} className={inputClass} /></Field>
+                      <Field label={t("journal.tradeDetail.side")}><select name="side" defaultValue={trade.direction} className={inputClass}><option value="BUY">{t("journal.tradeDetail.buy")}</option><option value="SELL">{t("journal.tradeDetail.sell")}</option></select></Field>
+                      <Field label={t("journal.tradeDetail.status")}><select name="status" defaultValue={trade.status} className={inputClass}><option value="OPEN">{t("journal.tradeDetail.open")}</option><option value="CLOSED">{t("journal.tradeDetail.closed")}</option><option value="CANCELLED">{t("journal.tradeDetail.cancelled")}</option></select></Field>
+                      <Field label={t("journal.tradeDetail.account")}><select name="accountId" defaultValue={trade.accountId} className={inputClass}>{accounts.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
+                      <Field label={t("journal.tradeDetail.entryPrice")}><input name="entryPrice" type="number" step="any" defaultValue={toDisplay(trade.entryPrice) === "-" ? "" : toDisplay(trade.entryPrice)} className={inputClass} /></Field>
+                      <Field label={t("journal.tradeDetail.exitPrice")}><input name="exitPrice" type="number" step="any" defaultValue={toDisplay(trade.exitPrice) === "-" ? "" : toDisplay(trade.exitPrice)} className={inputClass} /></Field>
+                      <Field label={t("journal.tradeDetail.stopLoss")}><input name="stopLoss" type="number" step="any" defaultValue={toDisplay(levelValue(trade, "currentStopLoss", "stopLoss")) === "-" ? "" : toDisplay(levelValue(trade, "currentStopLoss", "stopLoss"))} className={inputClass} /></Field>
+                      <Field label={t("journal.tradeDetail.takeProfit")}><input name="takeProfit" type="number" step="any" defaultValue={toDisplay(levelValue(trade, "currentTakeProfit", "takeProfit")) === "-" ? "" : toDisplay(levelValue(trade, "currentTakeProfit", "takeProfit"))} className={inputClass} /></Field>
+                      <Field label={t("journal.tradeDetail.lotSize")}><input name="lotSize" type="number" step="any" defaultValue={toDisplay(trade.lotSize) === "-" ? "" : toDisplay(trade.lotSize)} className={inputClass} /></Field>
+                      <Field label={t("journal.tradeDetail.riskAmount")}><input name="riskAmount" type="number" step="any" defaultValue={toDisplay(trade.riskAmount) === "-" ? "" : toDisplay(trade.riskAmount)} className={inputClass} /></Field>
+                      <Field label={copy.profitLoss}><input name="profitLoss" type="number" step="any" defaultValue={toDisplay(trade.profitLoss) === "-" ? "" : toDisplay(trade.profitLoss)} className={inputClass} /></Field>
+                      <Field label={t("journal.tradeDetail.setup")}><input name="setup" defaultValue={trade.setup || ""} className={inputClass} /></Field>
+                    </div>
+                    <Field label={t("journal.tradeDetail.notes")}><textarea name="notes" rows={3} defaultValue={trade.notes || ""} className={textareaClass} /></Field>
+                    <button type="submit" disabled={saving} className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-violet-600 text-xs font-semibold text-white disabled:opacity-60"><Save className="h-3.5 w-3.5" />{saving ? t("journal.tradeDetail.saving") : t("journal.tradeDetail.save")}</button>
+                  </form>
+                ) : null}
+              </div>
+            ) : workspaceTab === "checklist" ? (
+              <div id="trade-checklist-panel" className="space-y-4">
+                <div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10"><ListChecks className="h-5 w-5" /></div><div><h2 className="font-semibold text-slate-950 dark:text-white">Trade Checklist</h2><p className="text-xs text-slate-500">{checklistCompletedCount} of {checklistTotalCount} complete</p></div></div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div className="h-full rounded-full bg-blue-500" style={{ width: `${checklistTotalCount ? Math.round((checklistCompletedCount / checklistTotalCount) * 100) : 0}%` }} /></div>
+                <TradeChecklistPanel tradeId={trade.id} onTradeUpdated={showReviewProgress} compact />
+              </div>
+            ) : workspaceTab === "playbook" ? (
+              <div id="playbook-review-panel" className="space-y-4">
+                <div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-500/10"><BookOpenCheck className="h-5 w-5" /></div><div><h2 className="font-semibold text-slate-950 dark:text-white">Playbook</h2><p className="text-xs text-slate-500">{trade.strategyReview?.strategyNameSnapshot || "Not selected"}</p></div></div>
+                <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800"><InspectorRow label="Plan status" value={trade.strategyReview?.followedPlan || "Not reviewed"} /><InspectorRow label="Compliance" value={trade.strategyReview ? `${trade.strategyReview.compliancePercent}%` : "-"} /><InspectorRow label="Rules followed" value={trade.strategyReview ? `${trade.strategyReview.followedRules}/${trade.strategyReview.totalRules}` : "-"} /></div>
+                <TradeStrategyReviewPanel tradeId={trade.id} onReviewUpdated={handleStrategyReviewUpdated} />
+              </div>
+            ) : (
+              <div id="psychology-review-panel" className="space-y-4">
+                <div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10"><Brain className="h-5 w-5" /></div><div><h2 className="font-semibold text-slate-950 dark:text-white">Psychology Review</h2><p className="text-xs text-slate-500">Review emotion, discipline and mistakes</p></div></div>
+                <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800"><InspectorRow label="Emotion" value={trade.emotion || "-"} /><InspectorRow label="Mistake" value={trade.mistakes || trade.mistake || "-"} /><InspectorRow label="Followed plan" value={journalPsychology?.followedPlan === true ? "Yes" : journalPsychology?.followedPlan === false ? "No" : journalPsychology?.followedPlan === "partially" ? "Partially" : "-"} /></div>
+                <div className="rounded-lg border border-fuchsia-200 bg-fuchsia-50/80 p-3 dark:border-fuchsia-500/25 dark:bg-fuchsia-500/10">
+                  <div className="text-[10px] font-semibold uppercase text-fuchsia-600 dark:text-fuchsia-300">{t("journal.tradeDetail.psychologyNotes")}</div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-fuchsia-950 dark:text-fuchsia-100">{displayedPsychologyNotes}</p>
+                </div>
+                <JournalReviewForms tradeId={trade.id} psychology={journalPsychology} showImportedMt5ReviewHint={importedTrade && hasMt5PlaceholderNote(trade)} onTradeUpdated={showReviewProgress} />
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <TradeExecutionChart
+          tradeId={trade.id}
+          symbol={trade.symbol}
+          direction={trade.direction}
+          status={trade.status}
+          entryPrice={trade.entryPrice}
+          exitPrice={trade.exitPrice}
+          stopLoss={levelValue(trade, "initialStopLoss", "stopLoss")}
+          takeProfit={levelValue(trade, "initialTakeProfit", "takeProfit")}
+          profitLoss={trade.profitLoss}
+          riskReward={trade.rr}
+          openedAt={trade.openedAt || trade.entryTime || null}
+          closedAt={trade.closedAt || trade.exitTime || null}
+          language={language}
+          notes={hasMt5PlaceholderNote(trade) ? "" : trade.notes}
+          commission={trade.commission}
+          swap={trade.swap}
+          onNotesSaved={(nextNotes) => setTrade((current) => ({ ...current, notes: nextNotes }))}
+        />
+      </div>
+
+      {legacySectionsVisible ? (
+        <>
       <div
         id="review-progress"
         className={cn(
@@ -1003,7 +1269,7 @@ export function TradeDetailClient({
           isRtl && "text-right"
         )}
       >
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <nav className="flex min-w-0 flex-wrap gap-2" aria-label="Trade review sections">
             {sectionLinks.map((section) => (
               <a
@@ -1015,74 +1281,63 @@ export function TradeDetailClient({
               </a>
             ))}
           </nav>
-          <div className="min-w-[220px] rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-500/30 dark:bg-blue-500/10">
-            <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-2 dark:border-blue-500/30 dark:bg-blue-500/10">
+            <div className="min-w-[150px] flex-1">
+              <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-semibold text-slate-950 dark:text-white">{copy.progressTitle}</div>
               <div className="text-sm font-bold text-blue-700 dark:text-blue-200">{reviewProgressPercent}%</div>
-            </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-blue-100 dark:bg-slate-900">
-              <div
-                className="h-full rounded-full bg-[#2563EB]"
-                style={{ width: `${reviewProgressPercent}%` }}
-              />
-            </div>
-            <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
-              {copy.progressHint}
-            </p>
-            {missingRequirements.length > 0 ? (
-              <div className="mt-3 rounded-lg border border-amber-300/60 bg-amber-100/70 px-3 py-2 text-xs font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-                {copy.blockedRequirements}
-                <div className="mt-1 font-medium">{missingRequirements.map(missingRequirementLabel).join(", ")}</div>
               </div>
-            ) : null}
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={completeRequirements}
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-blue-500/30 px-3 text-xs font-semibold text-blue-700 hover:bg-blue-500/10 dark:text-blue-200"
-              >
-                <ArrowDown className="h-3.5 w-3.5" />
-                {copy.completeRequirements}
-              </button>
-              <button
-                type="button"
-                onClick={completeReview}
-                disabled={!canCompleteReview || completingReview}
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-3 text-xs font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                {completingReview ? t("journal.tradeDetail.saving") : copy.completeReview}
-              </button>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-blue-100 dark:bg-slate-900">
+                <div
+                  className="h-full rounded-full bg-[#2563EB]"
+                  style={{ width: `${reviewProgressPercent}%` }}
+                />
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={completeRequirements}
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-blue-500/30 px-3 text-xs font-semibold text-blue-700 hover:bg-blue-500/10 dark:text-blue-200"
+            >
+              <ArrowDown className="h-3.5 w-3.5" />
+              {copy.completeRequirements}
+            </button>
+            <button
+              type="button"
+              onClick={completeReview}
+              disabled={!canCompleteReview || completingReview}
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-3 text-xs font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {completingReview ? t("journal.tradeDetail.saving") : copy.completeReview}
+            </button>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        {missingRequirements.length > 0 ? (
+          <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-amber-300/60 bg-amber-100/70 px-3 py-2 text-xs font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+            <span>{copy.blockedRequirements}</span>
+            <span className="font-medium">{missingRequirements.map(missingRequirementLabel).join(", ")}</span>
+          </div>
+        ) : null}
+
+        <div className="mt-3 flex flex-wrap gap-2">
           {requirementSteps.map((item) => (
             <div
               key={item.label}
+              title={item.reason && !item.complete ? requirementReasonLabel(item.reason) || undefined : undefined}
               className={cn(
-                "flex items-start gap-2 rounded-lg border px-3 py-2 text-xs font-semibold",
+                "inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold",
                 progressTone(item.complete, item.optional),
                 item.locked && "opacity-70"
               )}
             >
               {item.complete ? (
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
               ) : (
-                <CircleDashed className="mt-0.5 h-4 w-4 shrink-0" />
+                <CircleDashed className="h-3.5 w-3.5 shrink-0" />
               )}
-              <span className="min-w-0">
-                <span className="block">{requirementStepLabel(item.label)}</span>
-                <span className="mt-0.5 block opacity-75">
-                  {item.importance} / {item.complete ? copy.complete : copy.incomplete}
-                </span>
-                {item.reason && !item.complete ? (
-                  <span className="mt-1 block text-[11px] font-medium leading-4 opacity-80">
-                    {requirementReasonLabel(item.reason)}
-                  </span>
-                ) : null}
-              </span>
+              <span>{requirementStepLabel(item.label)}</span>
             </div>
           ))}
         </div>
@@ -1096,7 +1351,7 @@ export function TradeDetailClient({
               {copy.source}: {sourceLabel(trade, copy.manual)}
             </div>
             <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              {importedTrade ? copy.importedDescription : copy.manualSourceDescription}
+              {importedTrade ? importedSourceDescription : copy.manualSourceDescription}
             </p>
           </div>
         </div>
@@ -1255,7 +1510,14 @@ export function TradeDetailClient({
         </Section>
       ) : null}
 
-      <Section id="summary" title={t("journal.tradeDetail.tradeOverview")} rtl={isRtl}>
+      <Section
+        id="summary"
+        title={t("journal.tradeDetail.tradeOverview")}
+        rtl={isRtl}
+        collapsible
+        defaultOpen={false}
+        summary={`${directionLabel(trade.direction)} · ${formatNumber(trade.entryPrice, 5)} → ${formatNumber(trade.exitPrice, 5)}`}
+      >
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Metric label={t("journal.tradeDetail.symbol")} value={trade.symbol} />
           <Metric label={t("journal.tradeDetail.directionSide")} value={directionLabel(trade.direction)} />
@@ -1327,28 +1589,69 @@ export function TradeDetailClient({
       </Section>
 
       <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <Section title={t("journal.tradeDetail.tradeReview")} rtl={isRtl}>
+        <Section
+          title={t("journal.tradeDetail.tradeReview")}
+          rtl={isRtl}
+          className="border-blue-200 bg-gradient-to-br from-blue-50 via-sky-50/70 to-cyan-50 dark:border-blue-500/25 dark:from-blue-950/45 dark:via-slate-900 dark:to-cyan-950/30"
+          titleClassName="text-blue-900 dark:text-blue-100"
+        >
           <div className="grid gap-3 md:grid-cols-2">
-            <Metric label={t("journal.tradeDetail.strategy")} value={toDisplay(trade.strategyReview?.strategyNameSnapshot)} />
-            <Metric label={t("journal.tradeDetail.setup")} value={toDisplay(trade.setup)} />
-            <Metric label={t("journal.tradeDetail.mistakes")} value={toDisplay(trade.mistakes || trade.mistake)} />
-            <Metric label={t("journal.tradeDetail.emotionPsychologyState")} value={toDisplay(trade.emotion)} />
+            <Metric
+              label={t("journal.tradeDetail.strategy")}
+              value={toDisplay(trade.strategyReview?.strategyNameSnapshot)}
+              tone="blue"
+              className="text-blue-800 dark:text-blue-200"
+            />
+            <Metric
+              label={t("journal.tradeDetail.setup")}
+              value={toDisplay(trade.setup)}
+              tone="cyan"
+              className="text-cyan-800 dark:text-cyan-200"
+            />
+            <Metric
+              label={t("journal.tradeDetail.mistakes")}
+              value={toDisplay(trade.mistakes || trade.mistake)}
+              tone="amber"
+              className="text-amber-800 dark:text-amber-200"
+            />
+            <Metric
+              label={t("journal.tradeDetail.emotionPsychologyState")}
+              value={toDisplay(trade.emotion)}
+              tone="rose"
+              className="text-rose-800 dark:text-rose-200"
+            />
           </div>
-          <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[#111827]">
-            <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{t("journal.tradeDetail.notes")}</div>
-            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">
+          <div className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50/90 p-3 dark:border-indigo-500/25 dark:bg-indigo-500/10">
+            <div className="text-xs font-medium uppercase text-indigo-600 dark:text-indigo-300">{t("journal.tradeDetail.notes")}</div>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-indigo-950 dark:text-indigo-100">
               {displayedNotes}
             </p>
           </div>
         </Section>
 
-        <Section id="psychology" title={t("journal.tradeDetail.psychology")} rtl={isRtl}>
+        <Section
+          id="psychology"
+          title={t("journal.tradeDetail.psychology")}
+          rtl={isRtl}
+          className="border-violet-200 bg-gradient-to-br from-violet-50 via-fuchsia-50/60 to-rose-50 dark:border-violet-500/25 dark:from-violet-950/40 dark:via-slate-900 dark:to-rose-950/30"
+          titleClassName="text-violet-900 dark:text-violet-100"
+        >
           <div className="grid gap-3">
-            <Metric label={t("journal.tradeDetail.emotion")} value={toDisplay(trade.emotion)} />
-            <Metric label={t("journal.tradeDetail.mistakeType")} value={toDisplay(trade.mistakes || trade.mistake)} />
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[#111827]">
-              <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{t("journal.tradeDetail.psychologyNotes")}</div>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">
+            <Metric
+              label={t("journal.tradeDetail.emotion")}
+              value={toDisplay(trade.emotion)}
+              tone="violet"
+              className="text-violet-800 dark:text-violet-200"
+            />
+            <Metric
+              label={t("journal.tradeDetail.mistakeType")}
+              value={toDisplay(trade.mistakes || trade.mistake)}
+              tone="amber"
+              className="text-amber-800 dark:text-amber-200"
+            />
+            <div className="rounded-lg border border-fuchsia-200 bg-fuchsia-50/90 p-3 dark:border-fuchsia-500/25 dark:bg-fuchsia-500/10">
+              <div className="text-xs font-medium uppercase text-fuchsia-600 dark:text-fuchsia-300">{t("journal.tradeDetail.psychologyNotes")}</div>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-fuchsia-950 dark:text-fuchsia-100">
                 {displayedPsychologyNotes}
               </p>
             </div>
@@ -1356,20 +1659,45 @@ export function TradeDetailClient({
         </Section>
       </div>
 
-      <JournalReviewForms
-        tradeId={trade.id}
-        psychology={journalPsychology}
-        showImportedMt5ReviewHint={importedTrade && hasMt5PlaceholderNote(trade)}
-        onTradeUpdated={showReviewProgress}
-      />
+      <div id="psychology-review-panel" className="scroll-mt-24">
+        <JournalReviewForms
+          tradeId={trade.id}
+          psychology={journalPsychology}
+          showImportedMt5ReviewHint={importedTrade && hasMt5PlaceholderNote(trade)}
+          onTradeUpdated={showReviewProgress}
+        />
+      </div>
 
       <div id="strategy-checklist" className="scroll-mt-24 space-y-5">
-        <TradeChecklistPanel tradeId={trade.id} onTradeUpdated={showReviewProgress} />
+        <div
+          dir="ltr"
+          className="rounded-xl border border-blue-200 bg-blue-50 p-5 text-left shadow-sm dark:border-blue-500/30 dark:bg-blue-500/10"
+        >
+          <div className="flex items-start gap-3">
+            <Info className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-300" />
+            <div>
+              <h2 className="text-base font-semibold text-slate-950 dark:text-white">
+                Complete every section for a full journal analysis
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Fill in all the details on this page—including your psychology, playbook, checklist,
+                strategy review, and notes. Complete trade records help your journal identify real
+                patterns, measure your discipline, and show exactly what to improve in your next trade.
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <TradeStrategyReviewPanel
-          tradeId={trade.id}
-          onReviewUpdated={handleStrategyReviewUpdated}
-        />
+        <div id="trade-checklist-panel" className="scroll-mt-24">
+          <TradeChecklistPanel tradeId={trade.id} onTradeUpdated={showReviewProgress} />
+        </div>
+
+        <div id="playbook-review-panel" className="scroll-mt-24">
+          <TradeStrategyReviewPanel
+            tradeId={trade.id}
+            onReviewUpdated={handleStrategyReviewUpdated}
+          />
+        </div>
       </div>
 
       <div id="ai-review" className="scroll-mt-24">
@@ -1379,99 +1707,6 @@ export function TradeDetailClient({
           onReviewUpdated={showReviewProgress}
         />
       </div>
-
-      <Section
-        id="screenshots"
-        title={t("journal.tradeDetail.screenshots")}
-        rtl={isRtl}
-        collapsible
-        defaultOpen={false}
-        summary={`${screenshots.length} ${t("journal.tradeDetail.screenshots")}`}
-      >
-        <div className="grid gap-4">
-          {Object.entries(groupedScreenshots).map(([type, items]) => (
-            <div key={type} className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-[#111827]">
-              <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-950 dark:border-slate-800 dark:text-white">
-                <Camera className="h-4 w-4 text-blue-400" />
-                {screenshotTypeLabel(type)}
-              </div>
-              {items.length > 0 ? (
-                <div className="grid gap-3 p-3">
-                  {items.map((screenshot) => (
-                    <a
-                      key={screenshot.id}
-                      href={screenshot.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block overflow-hidden rounded-lg border border-slate-800"
-                    >
-                      <img
-                        src={screenshot.url}
-                        alt={screenshotTypeLabel(type)}
-                        className="aspect-video w-full bg-[#020617] object-contain"
-                      />
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex aspect-video flex-col items-center justify-center gap-2 bg-white p-6 text-center text-sm text-slate-500 dark:bg-[#0F172A] dark:text-slate-400">
-                  <ImageOff className="h-8 w-8 text-slate-600" />
-                  <div>{t("journal.tradeDetail.noScreenshot")}</div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {additionalScreenshots.length > 0 ? (
-          <div className="mt-4 grid gap-4 lg:grid-cols-3">
-            {additionalScreenshots.map((screenshot) => (
-              <a
-                key={screenshot.id}
-                href={screenshot.url}
-                target="_blank"
-                rel="noreferrer"
-                className="block overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-[#111827]"
-              >
-                <img
-                  src={screenshot.url}
-                  alt={t("journal.tradeDetail.additionalScreenshot")}
-                  className="aspect-video w-full object-contain"
-                />
-              </a>
-            ))}
-          </div>
-        ) : null}
-
-        <form onSubmit={addScreenshot} className="mt-4 grid gap-3 md:grid-cols-[1fr_160px_1fr_auto]">
-          <Field label={t("journal.tradeDetail.screenshotUrl")}>
-            <input
-              name="screenshotUrl"
-              required
-              type="url"
-              placeholder="https://example.com/chart.png"
-              className={inputClass}
-            />
-          </Field>
-          <Field label={t("journal.tradeDetail.type")}>
-            <select name="type" defaultValue="ENTRY" className={inputClass}>
-              <option value="ENTRY">{t("journal.tradeDetail.entry")}</option>
-              <option value="EXIT">{t("journal.tradeDetail.exit")}</option>
-            </select>
-          </Field>
-          <Field label={t("journal.tradeDetail.caption")}>
-            <input name="caption" className={inputClass} />
-          </Field>
-          <button
-            type="submit"
-            disabled={savingScreenshot}
-            className="inline-flex h-10 items-center justify-center gap-2 self-end rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
-          >
-            <Camera className="h-4 w-4" />
-            {savingScreenshot ? t("journal.tradeDetail.adding") : t("journal.tradeDetail.add")}
-          </button>
-        </form>
-      </Section>
 
       <Section
         id="notes-tags"
@@ -1534,6 +1769,9 @@ export function TradeDetailClient({
           </div>
         </div>
       </Section>
+
+        </>
+      ) : null}
 
       {deleteConfirmOpen ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-4 backdrop-blur-sm">

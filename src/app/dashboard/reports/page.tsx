@@ -103,9 +103,9 @@ async function loadReport(params: Record<string, string | string[] | undefined>)
 
 export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const params = (await searchParams) || {};
-  const reportType = normalizeReportType(first(params.reportType));
+  const reportType = normalizeReportType(first(params.reportType)) || "monthly-performance";
 
-  if (!reportType) {
+  if (first(params.choose) === "1") {
     const userId = await getCurrentUserId();
 
     if (!userId) {
@@ -115,7 +115,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
     return <ReportsIntentSelection />;
   }
 
-  if (!hasAppliedFilters(params)) {
+  if (first(params.reportType) && !hasAppliedFilters(params)) {
     const userId = await getCurrentUserId();
 
     if (!userId) {

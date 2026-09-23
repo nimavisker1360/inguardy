@@ -152,6 +152,8 @@ export async function GET(request: Request) {
         where.source = "MANUAL";
       } else if (normalizedSource === "MT5") {
         where.source = { in: ["MT5", "MT5_EA", "EA_IMPORT", "MT5_DIRECT"] };
+      } else if (normalizedSource === "MT4") {
+        where.source = "MT4";
       } else if (normalizedSource === "CTRADER") {
         where.source = "CTRADER_DIRECT";
       } else {

@@ -24,7 +24,7 @@ function getStoredTheme() {
   }
 }
 
-export function useDashboardTheme(initialTheme: DashboardTheme = "dark") {
+export function useDashboardTheme(initialTheme: DashboardTheme = "light") {
   const [theme, setTheme] = useState<DashboardTheme>(() => parseDashboardTheme(initialTheme));
 
   const applyTheme = useCallback((nextTheme: DashboardTheme) => {

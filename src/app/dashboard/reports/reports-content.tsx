@@ -19,6 +19,7 @@ import {
   Target,
 } from "lucide-react";
 import { ReportActions } from "@/app/dashboard/reports/report-actions";
+import { ReportVisualView, type ReportView } from "@/app/dashboard/reports/report-views";
 import type {
   JournalReport,
   JournalReportFilterOptions,
@@ -754,7 +755,7 @@ function ReportFilters({
           <div className="rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs text-slate-300">
             {isFa ? `حساب فعال: ${selectedAccount} · بازه: ${rangeLabel}` : `Active account: ${selectedAccount} · Date range: ${rangeLabel}`}
           </div>
-          <Link href="/dashboard/reports" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-blue-500 bg-blue-600 px-5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(37,99,235,0.3)] transition hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-500">
+          <Link href="/dashboard/reports?choose=1" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-blue-500 bg-blue-600 px-5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(37,99,235,0.3)] transition hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-500">
             <FileText className="h-4 w-4" />
             {isFa ? "انتخاب نوع دیگر" : "Select another report"}
           </Link>
@@ -872,6 +873,7 @@ function ReportFilters({
         <select name="source" defaultValue={filters.source} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm normal-case text-slate-100 outline-none focus:border-blue-500">
           <option value="">{copy.filters.all}</option>
           <option value="MANUAL">{filterText.manual || ui.manual}</option>
+          <option value="MT4">MT4</option>
           <option value="MT5">{filterText.mt5 || ui.mt5}</option>
           <option value="CTRADER">{filterText.ctrader || ui.ctrader}</option>
         </select>
@@ -2077,6 +2079,17 @@ export function ReportsContent({
   const ui = REPORT_UI[language];
   const summary = report.summary;
   const showAccountAiSummary = false;
+  const [activeView, setActiveView] = useState<ReportView>("performance");
+  const viewTabs: Array<[ReportView, string, string]> = [
+    ["performance", "Performance", "عملکرد"],
+    ["overview", "Overview", "نمای کلی"],
+    ["symbols", "Symbols", "نمادها"],
+    ["time", "Time", "زمان"],
+    ["strategies", "Strategies", "استراتژی‌ها"],
+    ["compare", "Compare", "مقایسه"],
+    ["calendar", "Calendar", "تقویم"],
+    ["details", "Recaps & details", "جمع‌بندی و جزئیات"],
+  ];
 
   return (
     <div
@@ -2088,25 +2101,31 @@ export function ReportsContent({
     >
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div data-dashboard-tour="reports-title">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-200 print:border-slate-300 print:bg-white print:text-slate-600">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-200 print:border-slate-300 print:bg-white print:text-slate-600">
             <FileText className="h-3.5 w-3.5" />
             {copy.badge}
           </div>
-          <h1 className="mt-3 text-2xl font-semibold text-white print:text-slate-950">{copy.title}</h1>
-          <p className="mt-1 text-sm text-slate-400 print:text-slate-600">{copy.subtitle}</p>
+          <h1 className="mt-3 text-2xl font-semibold text-slate-950 dark:text-white print:text-slate-950">{copy.title}</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 print:text-slate-600">{copy.subtitle}</p>
         </div>
         <div data-dashboard-tour="reports-actions">
+          <Link href="/dashboard/reports?choose=1" className="mb-2 inline-flex h-9 items-center rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-200 print:hidden">{language === "fa" ? "انواع دیگر گزارش" : "Other report types"}</Link>
           <ReportActions csvHref={csvHref} />
         </div>
       </div>
 
-      <ReportFilters
-        report={report}
-        copy={copy}
-        language={language}
-        selectedReportType={selectedReportType}
-        hasGeneratedReport
-      />
+      <div className="flex gap-2 overflow-x-auto border-b border-slate-200 pb-2 dark:border-slate-800 print:hidden" role="tablist" aria-label={language === "fa" ? "بخش‌های گزارش" : "Report sections"}>
+        {viewTabs.map(([id, en, fa]) => <button key={id} type="button" role="tab" aria-selected={activeView === id} onClick={() => setActiveView(id)} className={cn("shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition", activeView === id ? "bg-violet-600 text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800")}>{language === "fa" ? fa : en}</button>)}
+      </div>
+
+      <details className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-[#0F172A] print:hidden">
+        <summary className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-100">{language === "fa" ? "حساب، تاریخ و فیلترها" : "Account, date range and filters"} <span className="ms-2 font-normal text-slate-500 dark:text-slate-400">· {report.filterOptions.accounts.find((account) => account.id === report.filters.accountId)?.name || (language === "fa" ? "همه حساب‌ها" : "All accounts")} · {report.filters.dateRange === "custom" ? `${report.filters.dateFrom} – ${report.filters.dateTo}` : report.filters.dateRange}</span></summary>
+        <div className="mt-3"><ReportFilters report={report} copy={copy} language={language} selectedReportType={selectedReportType} hasGeneratedReport /></div>
+      </details>
+
+      <ReportVisualView report={report} view={activeView} />
+
+      <div className={cn("space-y-5", activeView !== "details" && "hidden print:block")}>
 
       <div className="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm text-slate-300 print:hidden">
         {summary.totalTrades > 0
@@ -2240,6 +2259,7 @@ export function ReportsContent({
       <Panel title={copy.notes.title} subtitle={copy.notes.subtitle} icon={CalendarDays} tourId="reports-final">
         <DailyNotes report={report} copy={copy} language={language} />
       </Panel>
+      </div>
     </div>
   );
 }

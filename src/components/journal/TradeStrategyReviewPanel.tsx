@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookOpenCheck, ChevronDown, Save, Trash2 } from "lucide-react";
+import { ArrowRight, BookOpenCheck, ChevronDown, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { PrismaTradeDto } from "@/app/journal/_lib/journal-api";
 import { useLanguage } from "@/lib/language-context";
@@ -35,6 +36,7 @@ const copy = {
     saving: "Saving...",
     emptyTitle: "No playbooks available",
     emptyDescription: "Create a playbook first, then return to review this trade.",
+    createPlaybook: "Create a playbook",
     selectedPlaybook: "Selected playbook",
     checklist: "Confirmation Rules",
     checked: "checked",
@@ -69,6 +71,7 @@ const copy = {
     saving: "در حال ذخیره...",
     emptyTitle: "هنوز پلی‌بوکی وجود ندارد",
     emptyDescription: "ابتدا یک پلی‌بوک بسازید و بعد برای بررسی این معامله برگردید.",
+    createPlaybook: "ساخت پلی‌بوک",
     selectedPlaybook: "پلی‌بوک انتخاب‌شده",
     checklist: "شرایط تایید",
     checked: "تیک خورده",
@@ -375,6 +378,14 @@ export function TradeStrategyReviewPanel({
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 {text.emptyDescription}
               </p>
+              <Link
+                href="/journal/playbooks/new"
+                className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white transition hover:bg-blue-500"
+              >
+                <BookOpenCheck className="h-4 w-4" />
+                {text.createPlaybook}
+                <ArrowRight className={cn("h-4 w-4", isRtl && "rotate-180")} />
+              </Link>
             </div>
           ) : null}
 

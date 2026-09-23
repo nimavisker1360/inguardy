@@ -1,5 +1,6 @@
 export const MANUAL_TRADE_SOURCE = "MANUAL";
 export const MT5_TRADE_SOURCE = "MT5";
+export const MT4_TRADE_SOURCE = "MT4";
 export const EA_IMPORT_TRADE_SOURCE = "EA_IMPORT";
 export const MT5_HTML_IMPORT_SOURCE = "MT5_HTML";
 export const EXCEL_JOURNAL_IMPORT_SOURCE = "EXCEL_JOURNAL";
@@ -11,6 +12,7 @@ const LEGACY_MT5_SOURCE = "MT5_EA";
 const MT5_SETUP_PREFIX = "MT5:";
 
 export const IMPORTED_TRADE_SOURCES = new Set([
+  MT4_TRADE_SOURCE,
   MT5_TRADE_SOURCE,
   EA_IMPORT_TRADE_SOURCE,
   MT5_HTML_IMPORT_SOURCE,
@@ -47,6 +49,7 @@ export const BROKER_DATA_FIELDS = [
 
 export type TradeSource =
   | typeof MANUAL_TRADE_SOURCE
+  | typeof MT4_TRADE_SOURCE
   | typeof MT5_TRADE_SOURCE
   | typeof EA_IMPORT_TRADE_SOURCE
   | typeof MT5_HTML_IMPORT_SOURCE
@@ -59,6 +62,10 @@ export function normalizeTradeSource(
   setup?: string | null
 ): TradeSource {
   const normalized = String(source || "").trim().toUpperCase();
+
+  if (normalized === MT4_TRADE_SOURCE) {
+    return MT4_TRADE_SOURCE;
+  }
 
   if (
     normalized === MT5_TRADE_SOURCE ||

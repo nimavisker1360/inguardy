@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Check, ChevronDown, Layers3, Link2, ListChecks, RefreshCw, Save, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Check, ChevronDown, Layers3, Link2, ListChecks, RefreshCw, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { PrismaTradeDto } from "@/app/journal/_lib/journal-api";
 import { useLanguage } from "@/lib/language-context";
@@ -52,6 +53,7 @@ type TradeChecklist = {
 type TradeChecklistPanelProps = {
   tradeId: string;
   onTradeUpdated?: (trade: PrismaTradeDto) => void;
+  compact?: boolean;
 };
 
 const inputClass =
@@ -160,7 +162,7 @@ function checklistProgress(checklist: TradeChecklist) {
   };
 }
 
-export function TradeChecklistPanel({ tradeId, onTradeUpdated }: TradeChecklistPanelProps) {
+export function TradeChecklistPanel({ tradeId, onTradeUpdated, compact = false }: TradeChecklistPanelProps) {
   const { t, language } = useLanguage();
   const isRtl = language === "fa";
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
@@ -200,6 +202,9 @@ export function TradeChecklistPanel({ tradeId, onTradeUpdated }: TradeChecklistP
   const loadTemplatesFailedText = t("journal.checklistPanel.loadTemplatesFailed");
   const loadTradeChecklistsFailedText = t("journal.checklistPanel.loadTradeChecklistsFailed");
   const loadChecklistsFailedText = t("journal.checklistPanel.loadChecklistsFailed");
+  const manageChecklistsLabel = isRtl
+    ? "ساخت یا مدیریت چک‌لیست‌ها"
+    : "Create or manage checklists";
 
   const loadPanelData = useCallback(async () => {
     setLoading(true);
@@ -443,19 +448,24 @@ export function TradeChecklistPanel({ tradeId, onTradeUpdated }: TradeChecklistP
   }
 
   return (
-    <section className={cn("rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]", isRtl && "text-right")}>
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
+    <section className={cn(
+      compact
+        ? "min-w-0 bg-transparent"
+        : "rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]",
+      isRtl && "text-right"
+    )}>
+      <div className={cn("mb-4 flex flex-col gap-3", !compact && "lg:flex-row lg:items-center lg:justify-between")}>
+        {!compact ? <div className="min-w-0">
           <h2 className="text-lg font-semibold text-slate-950 dark:text-white">{t("journal.checklistPanel.title")}</h2>
           <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
             {t("journal.checklistPanel.subtitle")}
           </p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        </div> : null}
+        <div className={cn("flex min-w-0 flex-col gap-2", !compact && "sm:flex-row sm:items-center")}>
           <select
             value={selectedTemplateId}
             onChange={(event) => setSelectedTemplateId(event.target.value)}
-            className={cn(inputClass, "min-w-[260px]", isRtl && "text-right")}
+            className={cn(inputClass, compact ? "min-w-0" : "min-w-[260px]", isRtl && "text-right")}
             disabled={loading || templates.length === 0}
           >
             <option value="">{selectPlaceholder}</option>
@@ -472,7 +482,7 @@ export function TradeChecklistPanel({ tradeId, onTradeUpdated }: TradeChecklistP
             type="button"
             onClick={addChecklist}
             disabled={adding || !selectedTemplateId}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
+            className={cn("inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60", compact && "w-full")}
           >
             <Link2 className="h-4 w-4" />
             {adding
@@ -497,6 +507,14 @@ export function TradeChecklistPanel({ tradeId, onTradeUpdated }: TradeChecklistP
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {t("journal.checklistPanel.emptyDescription")}
           </p>
+          <Link
+            href="/journal/checklists"
+            className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white transition hover:bg-blue-500"
+          >
+            <ListChecks className="h-4 w-4" />
+            {manageChecklistsLabel}
+            <ArrowRight className={cn("h-4 w-4", isRtl && "rotate-180")} />
+          </Link>
         </div>
       ) : null}
 
@@ -526,7 +544,7 @@ export function TradeChecklistPanel({ tradeId, onTradeUpdated }: TradeChecklistP
               className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-[#111827]"
             >
               <div className={cn("bg-white p-4 dark:bg-[#0F172A]", isExpanded && "border-b border-slate-200 dark:border-slate-800")}>
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className={cn("flex flex-col gap-3", !compact && "lg:flex-row lg:items-center lg:justify-between")}>
                   <button
                     type="button"
                     onClick={() => toggleChecklist(checklist.id)}

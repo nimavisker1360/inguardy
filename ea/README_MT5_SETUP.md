@@ -5,12 +5,12 @@
 ## پیش‌نیازها
 
 1. در سایت وارد حساب کاربری خود شوید.
-2. از بخش داشبورد، یک Trading Account بسازید یا از گزینه MT5 Quick Connect استفاده کنید.
+2. در بخش افزودن حساب، MetaTrader 5 و سپس «ساخت کلید» را انتخاب کنید.
 3. برای حساب معاملاتی، یک `JOURNAL_UPLOAD_SECRET` بسازید. این کلید فقط یک بار نمایش داده می‌شود؛ همان لحظه آن را داخل تنظیمات EA وارد کنید.
 4. آدرس سایت برای اتصال MT5 این مقدار است:
 
 ```text
-https://tradivix.com
+https://inguardy.com
 ```
 
 ## نصب فایل EA
@@ -22,12 +22,8 @@ https://tradivix.com
 MQL5 > Experts
 ```
 
-3. فایل `TradeJournalRecorder.mq5` را داخل این پوشه کپی کنید.
-4. برنامه MetaEditor را باز کنید.
-5. از داخل MetaEditor فایل `TradeJournalRecorder.mq5` را باز کنید.
-6. دکمه `Compile` را بزنید.
-7. اگر Compile بدون خطا انجام شد، به MT5 برگردید.
-8. در پنجره Navigator، بخش `Expert Advisors` را Refresh کنید تا `TradeJournalRecorder` نمایش داده شود.
+3. فایل آمادهٔ `TradeJournalRecorder.ex5` را از بستهٔ دانلودی داخل این پوشه کپی کنید. نیازی به کامپایل نیست؛ فایل `TradeJournalRecorder.mq5` فقط برای دیدن یا تغییر کد منبع همراه بسته است.
+4. به MT5 برگردید و در پنجره Navigator، بخش `Expert Advisors` را Refresh کنید تا `TradeJournalRecorder` نمایش داده شود.
 
 ## فعال کردن WebRequest در MT5
 
@@ -43,7 +39,7 @@ Allow WebRequest for listed URL
 4. آدرس زیر را دقیقاً به لیست URLهای مجاز اضافه کنید:
 
 ```text
-https://tradivix.com
+https://inguardy.com
 ```
 
 نکته: آدرس را با `/api/mt5/journal` وارد نکنید. فقط دامنه بالا کافی است.
@@ -57,7 +53,7 @@ https://tradivix.com
 5. مقدارها را به شکل زیر تنظیم کنید:
 
 ```text
-JOURNAL_API_BASE_URL = https://tradivix.com
+JOURNAL_API_BASE_URL = https://inguardy.com
 JOURNAL_UPLOAD_SECRET = کلید ساخته‌شده در سایت
 JOURNAL_ENABLED = true
 DEBUG_MODE = true
@@ -101,7 +97,7 @@ Tools > Options > Expert Advisors > Allow WebRequest for listed URL
 و این آدرس را اضافه کنید:
 
 ```text
-https://tradivix.com
+https://inguardy.com
 ```
 
 ### خطای secret یا Unauthorized
@@ -113,7 +109,7 @@ https://tradivix.com
 این موارد را بررسی کنید:
 
 1. `JOURNAL_ENABLED` باید `true` باشد.
-2. `JOURNAL_API_BASE_URL` باید دقیقاً `https://tradivix.com` باشد.
+2. `JOURNAL_API_BASE_URL` باید دقیقاً `https://inguardy.com` باشد.
 3. EA باید فقط روی یک چارت فعال باشد.
 4. حساب کاربری سایت باید اجازه استفاده از ژورنال MT5 را داشته باشد.
 5. تب `Experts` در MT5 را برای پیام خطا بررسی کنید.

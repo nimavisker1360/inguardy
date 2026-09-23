@@ -14,13 +14,18 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const QUICK_CONNECT_ACCOUNT_NAME = "MT5 Auto Connect";
-
 export async function POST(request: Request) {
   try {
     const user = await requireUser();
 
     await assertUserCanUseJournal(user.id);
+
+    const body = await request.json().catch(() => null) as { platform?: unknown } | null;
+    const platform = body?.platform === undefined ? "MT5" : body.platform;
+    if (platform !== "MT4" && platform !== "MT5") {
+      return NextResponse.json({ ok: false, error: "Unsupported MetaTrader platform" }, { status: 400 });
+    }
+    const pendingAccountName = `${platform} Auto Connect`;
 
     const secret = generateJournalSecret();
     const secretData = {
@@ -32,7 +37,8 @@ export async function POST(request: Request) {
     const existingAccount = await prisma.tradingAccount.findFirst({
       where: {
         userId: user.id,
-        name: QUICK_CONNECT_ACCOUNT_NAME,
+        name: pendingAccountName,
+        platform,
         mt5AccountNumber: null,
       },
       orderBy: { createdAt: "desc" },
@@ -51,9 +57,9 @@ export async function POST(request: Request) {
       : await prisma.tradingAccount.create({
           data: {
             userId: user.id,
-            name: QUICK_CONNECT_ACCOUNT_NAME,
+            name: pendingAccountName,
             broker: null,
-            platform: "MT5",
+            platform,
             currency: "USD",
             ...secretData,
           },
@@ -69,6 +75,7 @@ export async function POST(request: Request) {
         account,
         secret,
         apiUrl: getMt5JournalApiUrl(request),
+        platform,
       },
       { status: 201 }
     );

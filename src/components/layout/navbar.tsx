@@ -459,14 +459,14 @@ export function Navbar() {
         <Link
           href="/"
           className="flex shrink-0 items-center"
-          aria-label="Tradivix home"
+          aria-label="Inguardy home"
           onMouseEnter={() => closeMenuWithIntent(140)}
         >
           <Image
-            src="/images/tradivix_logo_dark.png"
-            alt="Tradivix"
-            width={180}
-            height={78}
+            src="/images/logo.png"
+            alt="Inguardy"
+            width={517}
+            height={109}
             priority
             className="h-11 w-auto object-contain"
           />

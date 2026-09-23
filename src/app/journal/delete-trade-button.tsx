@@ -15,10 +15,12 @@ export function DeleteTradeButton({
   tradeId,
   symbol,
   language,
+  compact = false,
 }: {
   tradeId: string;
   symbol: string;
   language: Language;
+  compact?: boolean;
 }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
@@ -64,7 +66,9 @@ export function DeleteTradeButton({
       type="button"
       onClick={deleteTrade}
       disabled={deleting}
-      className="inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-red-500/30 px-3 text-xs font-semibold text-red-300 hover:bg-red-500/10 disabled:opacity-60"
+      className={compact
+        ? "inline-flex h-8 w-8 items-center justify-center rounded-lg text-[0px] text-slate-400 transition hover:bg-red-50 hover:text-red-500 disabled:opacity-60 dark:hover:bg-red-500/10 [&_svg]:h-4 [&_svg]:w-4"
+        : "inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-red-500/30 px-3 text-xs font-semibold text-red-300 hover:bg-red-500/10 disabled:opacity-60"}
       aria-label={isFa ? "حذف معامله" : "Delete trade"}
       title={isFa ? "حذف معامله" : "Delete trade"}
     >

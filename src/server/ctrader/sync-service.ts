@@ -14,6 +14,7 @@ import { refreshCtraderAccessToken } from "@/server/ctrader/oauth-client";
 import { projectCtraderPositions, persistCtraderDeals } from "@/server/ctrader/projector";
 import { captureCtraderTradeScreenshots } from "@/server/ctrader/screenshots";
 import { decryptCtraderToken, encryptCtraderToken } from "@/server/ctrader/token-vault";
+import { evaluateStoredAccountSafely } from "@/server/risk-guardian/service";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SYNC_BATCH_DAYS = 366;
@@ -157,6 +158,13 @@ export async function synchronizeCtraderConnection(connectionId: string) {
           persisted.positionIds
         );
         const values = accountValues(snapshot, connection);
+        const floatingPnl = snapshot.positionPnls.reduce((sum, row) => sum + normalizedMoney(row.netUnrealizedPnL, snapshot.positionPnlMoneyDigits), 0);
+        const balance = Number(values.balance);
+        await tx.accountEquitySnapshot.upsert({
+          where: { accountId_timestamp: { accountId: connection.accountId, timestamp: now } },
+          create: { accountId: connection.accountId, timestamp: now, balance, equity: balance + floatingPnl, floatingPnl },
+          update: { balance, equity: balance + floatingPnl, floatingPnl },
+        });
         await tx.tradingAccount.update({
           where: { id: connection.accountId },
           data: {
@@ -199,6 +207,7 @@ export async function synchronizeCtraderConnection(connectionId: string) {
     } catch (error) {
       screenshotResult.errors.push(errorMessage(error));
     }
+    await evaluateStoredAccountSafely(connection.accountId);
     return {
       ...result,
       capturedScreenshots: screenshotResult.captured,

@@ -79,6 +79,8 @@ const enCopy = {
   waitingPlaybook: "Today's playbook is set to wait.",
   newsRisk: "High-impact news is nearby.",
   aligned: "Core checks are aligned for today's plan.",
+  guardLocked: "Overtrade Guard recommends no new entry for the selected account.",
+  guardCaution: "Review the prop-firm warning or broker data before taking new risk.",
   mindsetTitle: "Today's Mindset",
   mindsetSubtitle: "Check your daily state before looking for an entry.",
   playbookTitle: "Today's Playbook",
@@ -140,6 +142,8 @@ const faCopy = {
   waitingPlaybook: "پلی‌بوک امروز روی حالت صبر تنظیم شده است.",
   newsRisk: "خبر پراثر نزدیک است.",
   aligned: "چک‌های اصلی با برنامه امروز هماهنگ هستند.",
+  guardLocked: "محافظ بیش‌معامله‌گری برای حساب انتخاب‌شده ورود جدید را توصیه نمی‌کند.",
+  guardCaution: "پیش از پذیرش ریسک جدید، هشدار پراپ یا داده بروکر را بررسی کنید.",
   mindsetTitle: "وضعیت ذهنی امروز",
   mindsetSubtitle: "قبل از جست‌وجوی ورود، وضعیت ذهنی روزانه خود را بررسی کنید.",
   playbookTitle: "پلی‌بوک امروز",
@@ -216,15 +220,75 @@ function normalizeGuideState(value: Partial<GuideState>) {
 
 export function useTradeReadinessGuideState({
   highImpactEventCount,
+  accountId,
   enabled = true,
 }: {
   highImpactEventCount: number;
+  accountId?: string;
   enabled?: boolean;
 }) {
   const { language } = useLanguage();
   const text = copy[language];
   const [state, setState] = useState<GuideState>(defaultState);
   const [hydrated, setHydrated] = useState(false);
+  const [guardState, setGuardState] = useState<"CLEAR" | "CAUTION" | "LOCKED" | "CHECKING">(
+    accountId ? "CHECKING" : "CLEAR"
+  );
+
+  useEffect(() => {
+    if (!enabled || !accountId) {
+      setGuardState("CLEAR");
+      return;
+    }
+
+    let active = true;
+    const refreshGuard = async () => {
+      try {
+        const response = await fetch("/api/prop-firms", { cache: "no-store" });
+        if (!response.ok) throw new Error("Guard status unavailable");
+        const payload = (await response.json()) as {
+          success?: boolean;
+          data?: {
+            challenges?: Array<{
+              accountId: string | null;
+              computedStatus?: "Active" | "Passed" | "Failed - Daily Loss" | "Failed - Max Loss";
+              guard?: { status: "DISABLED" | "OPEN" | "CAUTION" | "LOCKED" };
+            }>;
+          };
+        };
+        if (!payload.success) throw new Error("Guard status unavailable");
+        const accountChallenges = (payload.data?.challenges || []).filter(
+          (challenge) => challenge.accountId === accountId
+        );
+        const activeChallenges = accountChallenges.filter(
+          (challenge) => challenge.computedStatus === "Active"
+        );
+        const relevantChallenges = activeChallenges.length
+          ? activeChallenges
+          : accountChallenges.slice(0, 1);
+        if (!active) return;
+        setGuardState(
+          relevantChallenges.some((challenge) => challenge.guard?.status === "LOCKED")
+            ? "LOCKED"
+            : relevantChallenges.some((challenge) => challenge.guard?.status === "CAUTION")
+              ? "CAUTION"
+              : "CLEAR"
+        );
+      } catch {
+        if (active) setGuardState("CAUTION");
+      }
+    };
+
+    setGuardState("CHECKING");
+    void refreshGuard();
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refreshGuard();
+    }, 30_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [accountId, enabled]);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(todayStorageKey());
@@ -283,14 +347,23 @@ export function useTradeReadinessGuideState({
         Math.round(mindsetScore * 0.4 + checklistScore * 0.35 + scenarioScore * 0.25 - newsPenalty)
       )
     );
-    const decision: DecisionId =
+    const baseDecision: DecisionId =
       state.scenario === "wait" || missingRequired || mindsetScore < 50
         ? "wait"
         : readinessScore >= 80 && highImpactEventCount === 0
           ? "ready"
           : "caution";
+    const decision: DecisionId = guardState === "LOCKED"
+      ? "wait"
+      : (guardState === "CAUTION" || guardState === "CHECKING") && baseDecision === "ready"
+        ? "caution"
+        : baseDecision;
     const mainReason =
-      mindsetScore < 50
+      guardState === "LOCKED"
+        ? text.guardLocked
+        : (guardState === "CAUTION" || guardState === "CHECKING") && baseDecision === "ready"
+          ? text.guardCaution
+          : mindsetScore < 50
         ? text.missingMindset
         : missingRequired
           ? text.missingEntry
@@ -319,7 +392,7 @@ export function useTradeReadinessGuideState({
       selectedPlaybookDescription: text.scenarios[state.scenario].description,
       mainReason,
     };
-  }, [highImpactEventCount, state, text]);
+  }, [guardState, highImpactEventCount, state, text]);
 
   useEffect(() => {
     if (!enabled || !hydrated) {
