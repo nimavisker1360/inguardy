@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/server-auth";
+import { normalizeStoredRiskAlert } from "@/lib/risk-guardian/history";
 
 export const dynamic = "force-dynamic";
 
@@ -23,12 +24,14 @@ export async function GET() {
     prisma.riskNotification.count({ where: { ...where, readAt: null } }),
   ]);
 
-  return NextResponse.json({ notifications: rows.map(row => ({
+  return NextResponse.json({ notifications: rows.map(row => {
+    const event = normalizeStoredRiskAlert(row.event);
+    return {
     id: row.id, accountId: row.accountId, accountName: row.account.name,
     createdAt: row.createdAt, readAt: row.readAt,
-    riskLevel: row.event.riskLevel, riskScore: row.event.riskScore,
-    reasons: row.event.reasons, marginLevel: row.event.marginLevel,
-  })), unreadCount }, { headers: { "Cache-Control": "no-store" } });
+    riskLevel: event.riskLevel, riskScore: event.riskScore,
+    reasons: event.reasons, marginLevel: event.marginLevel,
+  }; }), unreadCount }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function PATCH(request: Request) {

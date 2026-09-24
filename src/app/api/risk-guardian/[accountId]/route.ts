@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/server-auth";
 import { PRESETS, simulateLoss } from "@/lib/risk-guardian/engine";
+import { normalizeStoredRiskAlert } from "@/lib/risk-guardian/history";
 import { evaluateStoredAccountSafely, ownedRiskAccount, readRisk } from "@/server/risk-guardian/service";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +37,14 @@ export async function GET(_request: Request, context: Context) {
     prisma.riskNotification.findMany({ where: { accountId: auth.accountId, userId: auth.userId, channel: "IN_APP" }, orderBy: { createdAt: "desc" }, take: 20,
       select: { id: true, riskEventId: true, sentAt: true, readAt: true, event: { select: { riskLevel: true, riskScore: true, reasons: true } } } }),
   ]);
-  return NextResponse.json({ ...state, history, notifications });
+  return NextResponse.json({
+    ...state,
+    history: history.map(normalizeStoredRiskAlert),
+    notifications: notifications.map(notification => ({
+      ...notification,
+      event: normalizeStoredRiskAlert(notification.event),
+    })),
+  });
 }
 
 export async function PATCH(request: Request, context: Context) {
