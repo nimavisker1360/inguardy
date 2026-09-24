@@ -12,6 +12,16 @@ test("legacy behavioural high risk events are shown as warnings", () => {
   assert.equal(event.reasons[0]?.severity, "WARNING");
 });
 
+test("legacy rapid margin changes do not stay high risk on their own", () => {
+  const event = normalizeStoredRiskAlert({
+    riskLevel: "HIGH_RISK", riskScore: 51,
+    reasons: [{ code: "RAPID_MARGIN_DECLINE", severity: "HIGH_RISK", currentValue: 2_420, changePercent: -12 }],
+  });
+  assert.equal(event.riskLevel, "WARNING");
+  assert.equal(event.riskScore, 31);
+  assert.equal(event.reasons[0]?.severity, "WARNING");
+});
+
 test("a material high-risk reason keeps the historical event high risk", () => {
   const event = normalizeStoredRiskAlert({
     riskLevel: "HIGH_RISK", riskScore: 62,

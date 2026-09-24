@@ -153,7 +153,11 @@ export function evaluateRisk(input: {
   const averageOpenRisk = openRiskAmounts.length ? openRiskAmounts.reduce((sum, value) => sum + value, 0) / openRiskAmounts.length : null;
   if (input.averageRiskPerTrade != null && input.averageRiskPerTrade > 0 && averageOpenRisk != null && averageOpenRisk >= input.averageRiskPerTrade * 3) add({ code: "RISK_PER_TRADE_ABOVE_NORMAL", severity: "WARNING", currentValue: averageOpenRisk, baselineValue: input.averageRiskPerTrade, multiplier: averageOpenRisk / input.averageRiskPerTrade });
   if (rapidEquity) add({ code: "RAPID_EQUITY_LOSS", severity: "HIGH_RISK", currentValue: current.equity, previousValue: current.equity - (trend?.equity ?? 0), changePercent: trend?.equityPercent ?? undefined, periodMinutes: changes[1] ? 15 : changes[2] ? 30 : 5 });
-  if (rapidMargin && marginLevel !== null) add({ code: "RAPID_MARGIN_DECLINE", severity: "HIGH_RISK", currentValue: marginLevel, previousValue: trend?.previousMargin ?? undefined, changePercent: trend?.marginPercent ?? undefined, periodMinutes: changes[1] ? 15 : changes[2] ? 30 : 5 });
+  // A fast percentage change can happen while the absolute margin level is
+  // still very safe (for example 4,800% to 3,900%). Keep the velocity signal
+  // visible as a warning; the absolute margin rules above promote the account
+  // when it actually crosses a high-risk or critical threshold.
+  if (rapidMargin && marginLevel !== null) add({ code: "RAPID_MARGIN_DECLINE", severity: "WARNING", currentValue: marginLevel, previousValue: trend?.previousMargin ?? undefined, changePercent: trend?.marginPercent ?? undefined, periodMinutes: changes[1] ? 15 : changes[2] ? 30 : 5 });
   const level = reasons.reduce<RiskLevel>((acc, reason) => RANK[reason.severity] > RANK[acc] ? reason.severity : acc, "SAFE");
   const marginRisk = marginLevel === null ? 0 : clamp((settings.warningMarginLevel - marginLevel) / Math.max(1, settings.warningMarginLevel - stopOutLevel));
   const score = Math.round(

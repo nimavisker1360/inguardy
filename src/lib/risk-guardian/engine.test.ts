@@ -34,7 +34,8 @@ test("broker margin call creates distinct approach and reached reasons only with
 });
 test("rapid margin decline with a valid 15 minute baseline", () => {
   const result = run({ current: { ...current, margin: 3_800 }, history: [at(15, 10_000, 2_000)] });
-  assert.ok(result.reasons.some(reason => reason.code === "RAPID_MARGIN_DECLINE"));
+  assert.ok(result.reasons.some(reason => reason.code === "RAPID_MARGIN_DECLINE" && reason.severity === "WARNING"));
+  assert.equal(result.level, "WARNING");
 });
 test("rapid equity decline", () => {
   const result = run({ current: { ...current, equity: 8_000 }, history: [at(15, 10_000, 2_000)] });

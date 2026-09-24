@@ -14,6 +14,7 @@ const CURRENT_WARNING_CODES = new Set([
   "TRADING_FREQUENCY_ABOVE_NORMAL",
   "DAILY_LOSS_ABOVE_NORMAL",
   "RISK_PER_TRADE_ABOVE_NORMAL",
+  "RAPID_MARGIN_DECLINE",
 ]);
 
 function isRiskLevel(value: unknown): value is RiskLevel {
