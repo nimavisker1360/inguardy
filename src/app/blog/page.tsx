@@ -10,7 +10,6 @@ import {
   LineChart,
   PlayCircle,
   ShieldCheck,
-  Sparkles,
   Tag,
   User,
   type LucideIcon,
@@ -188,39 +187,9 @@ export default function BlogPage() {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_16%,rgba(59,130,246,0.16),transparent_30%),radial-gradient(circle_at_78%_12%,rgba(168,85,247,0.14),transparent_30%),radial-gradient(circle_at_88%_70%,rgba(16,185,129,0.11),transparent_28%),radial-gradient(circle_at_18%_86%,rgba(244,114,182,0.09),transparent_28%)]" />
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.22] [background-image:radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:22px_22px]" />
 
-      <section className="mx-auto w-full max-w-[1320px] overflow-hidden px-5 pb-14 pt-14 sm:px-8 lg:px-12 lg:pb-16 lg:pt-[4.5rem]">
-        <div
-          dir={isRtl ? "rtl" : "ltr"}
-          className="mx-auto max-w-3xl text-center"
-        >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 shadow-[0_12px_30px_rgba(37,99,235,0.09)] backdrop-blur">
-            <Sparkles className="h-4 w-4" />
-            {copy.eyebrow}
-          </div>
-
-          <h1 className="mx-auto max-w-[22rem] break-words text-[2.15rem] font-semibold leading-tight tracking-normal text-[#071034] sm:max-w-3xl sm:text-[3.35rem] sm:leading-[1.08]">
-            {copy.title}
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-            {copy.subtitle}
-          </p>
-        </div>
-
-        <div className="mt-12 grid min-w-0 gap-6 lg:grid-cols-2">
-          {copy.cards.map((card, index) => (
-            <ResourceCard
-              key={card.title}
-              card={card}
-              index={index}
-              isRtl={isRtl}
-            />
-          ))}
-        </div>
-      </section>
-
       <section
         id="latest-posts"
-        className="relative overflow-hidden border-t border-slate-200/70 bg-[#f8fbff] py-14 lg:py-16"
+        className="relative overflow-hidden bg-[#f8fbff] py-14 lg:py-16"
       >
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_58%,#ffffff_100%)]" />
         <div className="relative mx-auto w-full max-w-[1320px] overflow-hidden px-5 sm:px-8 lg:px-12">
