@@ -5,14 +5,10 @@ import {
   ArrowRight,
   BookOpen,
   Calendar,
-  FileText,
-  GraduationCap,
   LineChart,
-  PlayCircle,
   ShieldCheck,
   Tag,
   User,
-  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/lib/language-context";
@@ -27,85 +23,18 @@ interface NewsItem {
   imageUrl?: string | null;
 }
 
-type FeatureCard = {
-  title: string;
-  eyebrow: string;
-  description: string;
-  href: string;
-  action: string;
-  icon: LucideIcon;
-  accent: string;
-  stats: readonly string[];
-};
-
 const blogCopy = {
   en: {
-    eyebrow: "Tradivix Resources",
-    title: "Blog & Trading Education",
-    subtitle:
-      "Read practical market notes, improve your trading process, and follow structured lessons for forex and gold traders.",
     latestTitle: "Latest Market Notes",
     latestSubtitle:
       "Fresh market context and educational reads collected in one clean resource hub.",
     loading: "Loading latest posts...",
-    cards: [
-      {
-        title: "Blog",
-        eyebrow: "Market insights",
-        description:
-          "Practical posts about trading journals, discipline, risk, analytics, and market context.",
-        href: "#latest-posts",
-        action: "Read the blog",
-        icon: FileText,
-        accent: "from-blue-600 to-cyan-500",
-        stats: ["Market notes", "Risk ideas", "Journal tips"],
-      },
-      {
-        title: "Education",
-        eyebrow: "Trading lessons",
-        description:
-          "Step-by-step guidance for MT5 sync, journaling workflows, trade review, and better execution habits.",
-        href: "/dashboard",
-        action: "Start learning",
-        icon: GraduationCap,
-        accent: "from-violet-600 to-fuchsia-500",
-        stats: ["Dashboard guide", "MT5 setup", "Trade review"],
-      },
-    ],
   },
   fa: {
-    eyebrow: "منابع تریدیویکس",
-    title: "بلاگ و آموزش معامله‌گری",
-    subtitle:
-      "مطالب کاربردی بازار، نکات مدیریت ریسک و آموزش‌های مرحله‌به‌مرحله برای معامله‌گران فارکس و طلا.",
     latestTitle: "آخرین مطالب بازار",
     latestSubtitle:
       "یادداشت‌های تازه و محتوای آموزشی در یک بخش مرتب و خوانا.",
     loading: "در حال بارگذاری مطالب...",
-    cards: [
-      {
-        title: "بلاگ",
-        eyebrow: "تحلیل و نکته‌های بازار",
-        description:
-          "مطالب کاربردی درباره ژورنال معاملاتی، نظم، مدیریت ریسک، تحلیل عملکرد و شرایط بازار.",
-        href: "#latest-posts",
-        action: "مشاهده بلاگ",
-        icon: FileText,
-        accent: "from-blue-600 to-cyan-500",
-        stats: ["اخبار بازار", "مدیریت ریسک", "نکات ژورنال"],
-      },
-      {
-        title: "آموزش",
-        eyebrow: "مسیر یادگیری",
-        description:
-          "راهنمای مرحله‌به‌مرحله برای اتصال MT5، ثبت ژورنال، مرور معامله و ساخت عادت‌های بهتر.",
-        href: "/dashboard",
-        action: "شروع آموزش",
-        icon: GraduationCap,
-        accent: "from-violet-600 to-fuchsia-500",
-        stats: ["راهنمای داشبورد", "اتصال MT5", "مرور معامله"],
-      },
-    ],
   },
 } as const;
 
@@ -293,83 +222,6 @@ export default function BlogPage() {
         </div>
       </section>
     </main>
-  );
-}
-
-function ResourceCard({
-  card,
-  index,
-  isRtl,
-}: {
-  card: FeatureCard;
-  index: number;
-  isRtl: boolean;
-}) {
-  const Icon = card.icon;
-
-  return (
-    <Link
-      href={card.href}
-      dir={isRtl ? "rtl" : "ltr"}
-      className="group relative block min-h-[360px] w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_26px_80px_rgba(15,23,42,0.10)] transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_34px_95px_rgba(37,99,235,0.16)] sm:p-8"
-    >
-      <div
-        className={`pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${card.accent}`}
-      />
-      <div
-        className={`pointer-events-none absolute -top-24 h-72 w-72 rounded-full bg-gradient-to-br ${card.accent} opacity-10 blur-3xl ${
-          isRtl ? "-left-24" : "-right-24"
-        }`}
-      />
-      <div className="relative flex h-full min-w-0 flex-col">
-        <div
-          className={`flex items-start justify-between gap-5 ${
-            isRtl ? "flex-row-reverse" : ""
-          }`}
-        >
-          <span
-            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${card.accent} text-white shadow-[0_16px_32px_rgba(59,130,246,0.24)]`}
-          >
-            <Icon className="h-6 w-6" />
-          </span>
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-black text-slate-500">
-            0{index + 1}
-          </span>
-        </div>
-
-        <div className="mt-7">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">
-            {card.eyebrow}
-          </p>
-          <h2 className="mt-2 break-words text-3xl font-bold tracking-normal text-slate-950">
-            {card.title}
-          </h2>
-          <p className="mt-4 break-words text-sm leading-7 text-slate-600">
-            {card.description}
-          </p>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-2">
-          {card.stats.map((item) => (
-            <span
-              key={item}
-              className="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-600"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-
-        <span className="mt-auto inline-flex items-center gap-2 pt-8 text-sm font-bold text-blue-600 transition-colors group-hover:text-blue-800">
-          {card.action}
-          {card.href === "/dashboard" ? (
-            <PlayCircle className="h-4 w-4" />
-          ) : (
-            <ArrowRight className={`h-4 w-4 ${isRtl ? "rotate-180" : ""}`} />
-          )}
-        </span>
-      </div>
-    </Link>
   );
 }
 
