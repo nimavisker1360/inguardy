@@ -1,8 +1,9 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { emailOTP } from "better-auth/plugins";
 import { getConfiguredSiteUrl, PRODUCTION_SITE_URL } from "@/lib/deployment-url";
 import {
-  sendEmailVerificationEmail,
+  sendEmailVerificationCodeEmail,
   sendPasswordResetEmail,
 } from "@/lib/auth-email";
 import prisma from "@/lib/prisma";
@@ -39,19 +40,14 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
-    expiresIn: 60 * 60 * 24,
-    sendVerificationEmail: async ({ user, url }) => {
-      await sendEmailVerificationEmail({
-        to: user.email,
-        name: user.name,
-        verificationUrl: url,
-      });
-    },
+    // The email OTP plugin sends the code after sign-up. Disabling the core
+    // link email prevents users from receiving two different verification emails.
+    sendOnSignUp: false,
   },
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
+    requireEmailVerification: true,
     resetPasswordTokenExpiresIn: 60 * 60,
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
@@ -69,4 +65,33 @@ export const auth = betterAuth({
       prompt: "select_account",
     },
   },
+  plugins: [
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 10 * 60,
+      allowedAttempts: 5,
+      storeOTP: "hashed",
+      sendVerificationOnSignUp: true,
+      rateLimit: {
+        window: 60,
+        max: 3,
+      },
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        if (type !== "email-verification") {
+          return;
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email },
+          select: { name: true },
+        });
+
+        await sendEmailVerificationCodeEmail({
+          to: email,
+          name: user?.name,
+          code: otp,
+        });
+      },
+    }),
+  ],
 });

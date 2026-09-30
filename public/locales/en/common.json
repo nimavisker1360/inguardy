@@ -5,7 +5,7 @@
   "premium": "Premium",
   "blog": "Blog",
   "contact": "Contact",
-  "welcome": "Welcome to Tradivix",
+  "welcome": "Welcome to Inguardy",
   "description": "Get structured forex signals with professional analysis and risk-first levels",
   "getStarted": "Get Started",
   "learnMore": "Learn More",
@@ -182,14 +182,14 @@
   ],
 
   "footer": {
-    "signalForex": "Tradivix",
+    "signalForex": "Inguardy",
     "providerDescription": "Provider of structured forex signals with clear risk levels and transparent tracking",
     "quickLinks": "Quick Links",
     "information": "Information",
     "contactUs": "Contact Us",
     "address": "Address: Turkey",
-    "email": "Email: info@tradivix.com",
-    "copyright": "© {year} Tradivix. All rights reserved."
+    "email": "Email: info@inguardy.com",
+    "copyright": "© {year} Inguardy. All rights reserved."
   },
 
   "contactPage": {
@@ -226,10 +226,10 @@
 
   "aboutPage": {
     "title": "About Us",
-    "introduction": "Tradivix was established with the goal of providing better trading journal analytics and accurate review of financial markets",
-    "teamImageAlt": "Tradivix Team",
+    "introduction": "Inguardy was established with the goal of providing better trading journal analytics and accurate review of financial markets",
+    "teamImageAlt": "Inguardy Team",
     "whoWeAreTitle": "Who We Are",
-    "whoWeAreText1": "Tradivix is a team of product builders, analysts, and experienced traders focused on helping traders journal, review, and improve their decisions with clearer data.",
+    "whoWeAreText1": "Inguardy is a team of product builders, analysts, and experienced traders focused on helping traders journal, review, and improve their decisions with clearer data.",
     "whoWeAreText2": "We provide the best entry and exit points for traders using advanced technical and fundamental analysis techniques. Our team consists of specialists in various areas of financial markets who monitor markets around the clock.",
     "viewSignalsButton": "Open Dashboard",
     "ourMissionTitle": "Our Mission",
@@ -247,10 +247,10 @@
     "successRate": "Signal Success Rate",
     "support": "Support",
     "joinUsTitle": "Join Us",
-    "joinUsText": "By signing up on Tradivix, organize your trades, review your performance, and improve your trading discipline with structured analytics.",
+    "joinUsText": "By signing up on Inguardy, organize your trades, review your performance, and improve your trading discipline with structured analytics.",
     "getStartedButton": "Get Started",
     "heroTitle": "Everything a Trader Needs Inside One Smart Dashboard",
-    "heroText": "Tradivix brings your trade journal, MT5 sync, AI trade reviews, checklists, playbooks, analytics, reports, prop firm tracking, market tools, and latest signals into one organized workspace.",
+    "heroText": "Inguardy brings your trade journal, account sync, AI trade reviews, checklists, playbooks, analytics, reports, prop firm tracking, market tools, and latest signals into one organized workspace.",
     "builtForUsersTitle": "Built for Active Traders",
     "builtForUsersText1": "A useful trading dashboard should make the full routine visible: accounts, trades, screenshots, notes, risk, psychology, strategy rules, analytics, and reports.",
     "builtForUsersText2": "The dashboard is designed for repeated daily use: import trades, review behavior, follow prop firm rules, manage strategies, read market context, and keep decisions easy to audit.",

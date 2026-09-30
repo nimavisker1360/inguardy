@@ -72,7 +72,7 @@ function fallbackNews(): BlogNewsItem[] {
       title: "Market risk update for forex and gold traders",
       description:
         "Review upcoming market drivers, volatility risk, and trade planning before entering new positions.",
-      source: "Tradivix",
+      source: "Inguardy",
       publishTime: new Date().toISOString(),
       url: "https://inguardy.com/blog",
       imageUrl:
@@ -83,7 +83,7 @@ function fallbackNews(): BlogNewsItem[] {
       title: "EUR/USD session watch and risk management notes",
       description:
         "Track session volatility, important levels, and position sizing discipline before trading major pairs.",
-      source: "Tradivix",
+      source: "Inguardy",
       publishTime: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
       url: "https://inguardy.com/blog",
       imageUrl:
@@ -94,7 +94,7 @@ function fallbackNews(): BlogNewsItem[] {
       title: "Gold trading volatility checklist",
       description:
         "Use a simple checklist to avoid chasing moves around high-impact news and fast gold market swings.",
-      source: "Tradivix",
+      source: "Inguardy",
       publishTime: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
       url: "https://inguardy.com/blog",
       imageUrl:

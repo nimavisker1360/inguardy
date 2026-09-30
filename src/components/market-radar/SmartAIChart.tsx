@@ -379,7 +379,7 @@ export function SmartAIChart({
       </div>
 
       <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-800 dark:text-amber-100">
-        این چارت بر اساس داده‌های دریافتی سیستم Tradivix ساخته شده و ممکن است با چارت TradingView اختلاف جزئی داشته باشد.
+        این چارت بر اساس داده‌های دریافتی سیستم Inguardy ساخته شده و ممکن است با چارت TradingView اختلاف جزئی داشته باشد.
       </p>
     </div>
   );

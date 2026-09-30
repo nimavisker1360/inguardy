@@ -3,7 +3,7 @@ type EmailAction = {
   href: string;
 };
 
-type RenderTradivixEmailInput = {
+type RenderInguardyEmailInput = {
   preheader: string;
   title: string;
   greetingName?: string | null;
@@ -26,7 +26,7 @@ function safeName(name?: string | null) {
   return name?.trim() || "there";
 }
 
-export function renderTradivixEmail({
+export function renderInguardyEmail({
   preheader,
   title,
   greetingName,
@@ -34,11 +34,11 @@ export function renderTradivixEmail({
   action,
   code,
   footerNote,
-}: RenderTradivixEmailInput) {
+}: RenderInguardyEmailInput) {
   const plainName = safeName(greetingName);
   const footer =
     footerNote ||
-    "This email was sent by Tradivix for an account-related action.";
+    "This email was sent by Inguardy for an account-related action.";
 
   const bodyHtml = body
     .map(
@@ -95,7 +95,7 @@ export function renderTradivixEmail({
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#ffffff;border:1px solid #e2e8f0;border-collapse:collapse;border-radius:8px;max-width:600px;overflow:hidden;width:100%">
             <tr>
               <td style="background:#0f172a;padding:22px 24px">
-                <p style="margin:0;color:#ffffff;font-size:22px;font-weight:800;line-height:1">Tradivix</p>
+                <p style="margin:0;color:#ffffff;font-size:22px;font-weight:800;line-height:1">Inguardy</p>
                 <p style="margin:8px 0 0;color:#99f6e4;font-size:13px;line-height:1.4">Trading intelligence and journal automation</p>
               </td>
             </tr>
@@ -133,7 +133,7 @@ export function renderTradivixEmail({
 </html>`;
 
   const text = [
-    "Tradivix",
+    "Inguardy",
     "",
     title,
     "",
@@ -159,12 +159,12 @@ export function buildPasswordResetEmail({
   name?: string | null;
   resetUrl: string;
 }) {
-  return renderTradivixEmail({
-    preheader: "Reset your Tradivix password securely.",
-    title: "Reset your Tradivix password",
+  return renderInguardyEmail({
+    preheader: "Reset your Inguardy password securely.",
+    title: "Reset your Inguardy password",
     greetingName: name,
     body: [
-      "We received a request to reset the password for your Tradivix account.",
+      "We received a request to reset the password for your Inguardy account.",
       "This link expires in 1 hour. If you did not request it, you can ignore this email.",
     ],
     action: {
@@ -172,7 +172,7 @@ export function buildPasswordResetEmail({
       href: resetUrl,
     },
     footerNote:
-      "For your security, Tradivix will never ask for your password or secret keys by email.",
+      "For your security, Inguardy will never ask for your password or secret keys by email.",
   });
 }
 
@@ -183,18 +183,38 @@ export function buildEmailVerificationEmail({
   name?: string | null;
   verificationUrl: string;
 }) {
-  return renderTradivixEmail({
-    preheader: "Confirm your email address for Tradivix.",
+  return renderInguardyEmail({
+    preheader: "Confirm your email address for Inguardy.",
     title: "Confirm your email address",
     greetingName: name,
     body: [
-      "Please confirm this email address so we can keep your Tradivix account secure.",
-      "If you did not create a Tradivix account, you can ignore this email.",
+      "Please confirm this email address so we can keep your Inguardy account secure.",
+      "If you did not create an Inguardy account, you can ignore this email.",
     ],
     action: {
       label: "Confirm email",
       href: verificationUrl,
     },
+  });
+}
+
+export function buildEmailVerificationCodeEmail({
+  name,
+  code,
+}: {
+  name?: string | null;
+  code: string;
+}) {
+  return renderInguardyEmail({
+    preheader: `${code} is your Inguardy verification code.`,
+    title: "Verify your email address",
+    greetingName: name,
+    body: [
+      "Enter this code on the Inguardy sign-up page to verify your email address.",
+      "This code expires in 10 minutes. If you did not create an Inguardy account, you can ignore this email.",
+    ],
+    code,
+    footerNote: "For your security, never share this one-time code with anyone.",
   });
 }
 
@@ -205,12 +225,12 @@ export function buildOtpEmail({
   name?: string | null;
   code: string;
 }) {
-  return renderTradivixEmail({
-    preheader: "Your Tradivix login code.",
-    title: "Your Tradivix login code",
+  return renderInguardyEmail({
+    preheader: "Your Inguardy login code.",
+    title: "Your Inguardy login code",
     greetingName: name,
     body: [
-      "Use this code to continue signing in to Tradivix.",
+      "Use this code to continue signing in to Inguardy.",
       "If you did not request this code, you can safely ignore this email.",
     ],
     code,
@@ -219,7 +239,7 @@ export function buildOtpEmail({
 }
 
 export function buildTestEmail() {
-  return renderTradivixEmail({
+  return renderInguardyEmail({
     preheader: "SMTP test email from Inguardy.",
     title: "Inguardy email test",
     greetingName: "there",

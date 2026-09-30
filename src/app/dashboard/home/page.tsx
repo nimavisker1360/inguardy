@@ -2,6 +2,7 @@ import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { redirect } from "next/navigation";
 import { getDashboardOverviewData } from "@/lib/dashboard-data";
 import { getSession } from "@/lib/server-auth";
+import { getSubscriptionDashboardState } from "@/lib/subscription";
 import { getJournalAccessState } from "@/server/mt5/subscription-service";
 
 type HomePageProps = {
@@ -18,10 +19,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>)
   );
   if (getSingleParam(params.addAccount) === "1") redirect("/dashboard/accounts/new");
-  const [data, journalAccess] = session?.user.id
+  const [data, journalAccess, subscription] = session?.user.id
     ? await Promise.all([
         getDashboardOverviewData(session.user.id),
         getJournalAccessState(session.user.id),
+        getSubscriptionDashboardState(session.user.id),
       ])
     : [{
         activeAccountId: null,
@@ -34,7 +36,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         canUseJournal: false,
         status: "Subscription Required",
         message: null,
-      }];
+      }, null];
 
   return (
     <DashboardOverview
@@ -46,6 +48,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       initialStats={data.stats}
       initialPageStats={data.pageStats}
       canUseAutoSync={journalAccess.canUseJournal}
+      subscription={subscription}
     />
   );
 }

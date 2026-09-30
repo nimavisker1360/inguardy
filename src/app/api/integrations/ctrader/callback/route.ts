@@ -24,7 +24,11 @@ export const maxDuration = 120;
 
 const EARLIEST_HISTORY_DATE = new Date("2000-01-01T00:00:00.000Z");
 
-function destination(request: Request, parameters: Record<string, string>) {
+function destination(
+  request: Request,
+  parameters: Record<string, string>,
+  pathname = "/dashboard/accounts"
+) {
   const requestUrl = new URL(request.url);
   // `0.0.0.0` is a bind address for the server, not an address a browser can
   // navigate to. It can appear in a local OAuth callback when Next is started
@@ -39,7 +43,7 @@ function destination(request: Request, parameters: Record<string, string>) {
   const baseUrl = process.env.NODE_ENV !== "production" && isLocalRequest
     ? requestUrl
     : getConfiguredSiteUrl();
-  const url = new URL("/dashboard/accounts", baseUrl);
+  const url = new URL(pathname, baseUrl);
   for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value);
   return url;
 }
@@ -236,7 +240,15 @@ export async function GET(request: Request) {
     );
 
     response = NextResponse.redirect(
-      destination(request, { ctrader: "connected", accounts: String(accounts.length) })
+      destination(
+        request,
+        {
+          ctrader: "connected",
+          accounts: String(accounts.length),
+          ...(accounts[0]?.id ? { accountId: accounts[0].id } : {}),
+        },
+        "/dashboard"
+      )
     );
   } catch (error) {
     console.error("cTrader OAuth callback failed", {

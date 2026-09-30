@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { authErrorResponse, requireUser } from "@/lib/server-auth";
 import { assertUserCanUseJournal, JournalSubscriptionError } from "@/server/mt5/subscription-service";
-import { authenticateTradeLocker, getTradeLockerAccounts, safeTradeLockerMessage } from "@/server/tradelocker/client";
+import {
+  authenticateTradeLocker,
+  getTradeLockerAccounts,
+  safeTradeLockerMessage,
+  TradeLockerApiError,
+} from "@/server/tradelocker/client";
 import { connectTradeLockerSchema } from "@/server/tradelocker/schemas";
 import { encryptTradeLockerToken, jwtExpiration } from "@/server/tradelocker/token-vault";
 
@@ -73,7 +78,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: error.message }, { status: error.status });
     }
     return NextResponse.json(
-      { success: false, message: safeTradeLockerMessage(error) },
+      {
+        success: false,
+        message: safeTradeLockerMessage(error),
+        code: error instanceof TradeLockerApiError ? error.code : "REQUEST_FAILED",
+      },
       { status: 422 }
     );
   }

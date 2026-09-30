@@ -44,8 +44,28 @@ export function tradeLockerBaseUrl(environment: TradeLockerEnvironment) {
     : "https://demo.tradelocker.com/backend-api";
 }
 
-function classifyStatus(status: number, authenticationRequest: boolean): TradeLockerApiError {
+function classifyStatus(
+  status: number,
+  authenticationRequest: boolean,
+  providerMessage = ""
+): TradeLockerApiError {
+  const normalizedMessage = providerMessage.toLowerCase();
   if (status === 429) return new TradeLockerApiError("RATE_LIMITED", status);
+  if (
+    authenticationRequest &&
+    normalizedMessage.includes("server") &&
+    (normalizedMessage.includes("not found") || normalizedMessage.includes("server exists"))
+  ) {
+    return new TradeLockerApiError("SERVER_NOT_FOUND", status);
+  }
+  if (
+    authenticationRequest &&
+    (normalizedMessage.includes("credential") ||
+      normalizedMessage.includes("password") ||
+      normalizedMessage.includes("email"))
+  ) {
+    return new TradeLockerApiError("INVALID_CREDENTIALS", status);
+  }
   if (status === 401 || status === 403) return new TradeLockerApiError("AUTH_FAILED", status);
   if (authenticationRequest && status === 404) {
     return new TradeLockerApiError("SERVER_NOT_FOUND", status);
@@ -55,6 +75,19 @@ function classifyStatus(status: number, authenticationRequest: boolean): TradeLo
   }
   if (status >= 500) return new TradeLockerApiError("UNAVAILABLE", status);
   return new TradeLockerApiError("REQUEST_FAILED", status);
+}
+
+async function providerErrorMessage(response: Response) {
+  try {
+    const text = await response.text();
+    if (!text) return "";
+    const parsed = JSON.parse(text) as { message?: unknown; error?: unknown };
+    if (typeof parsed.message === "string") return parsed.message.slice(0, 500);
+    if (typeof parsed.error === "string") return parsed.error.slice(0, 500);
+  } catch {
+    // Provider error bodies are optional and may not be JSON.
+  }
+  return "";
 }
 
 async function requestJson<T>(input: {
@@ -85,7 +118,11 @@ async function requestJson<T>(input: {
       });
 
       if (!response.ok) {
-        const classified = classifyStatus(response.status, Boolean(input.authenticationRequest));
+        const classified = classifyStatus(
+          response.status,
+          Boolean(input.authenticationRequest),
+          await providerErrorMessage(response)
+        );
         if ((classified.code === "RATE_LIMITED" || classified.code === "UNAVAILABLE") && attempt < MAX_RETRIES) {
           const retryAfter = Number(response.headers.get("retry-after"));
           await new Promise((resolve) => setTimeout(resolve, Number.isFinite(retryAfter) ? retryAfter * 1000 : 400 * 2 ** attempt));
@@ -236,9 +273,9 @@ export function rowsToRecords(columns: Array<{ id: string }>, rows: unknown[][])
 export function safeTradeLockerMessage(error: unknown) {
   if (!(error instanceof TradeLockerApiError)) return "Unable to connect to TradeLocker.";
   switch (error.code) {
-    case "INVALID_CREDENTIALS": return "Invalid TradeLocker credentials.";
-    case "SERVER_NOT_FOUND": return "TradeLocker server was not found.";
-    case "AUTH_FAILED": return "TradeLocker authentication failed.";
+    case "INVALID_CREDENTIALS": return "The TradeLocker email or password is incorrect.";
+    case "SERVER_NOT_FOUND": return "TradeLocker server was not found. Copy the exact Server from your broker email and verify LIVE or DEMO.";
+    case "AUTH_FAILED": return "TradeLocker rejected the login. Verify the email, password, exact Server, and LIVE or DEMO environment.";
     case "RATE_LIMITED": return "TradeLocker is receiving too many requests. Please try again shortly.";
     default: return "Unable to connect to TradeLocker.";
   }

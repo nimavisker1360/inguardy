@@ -22,12 +22,12 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Product - Tradivix",
+      title: "Product - Inguardy",
     };
   }
 
   return {
-    title: `${product.title} - Tradivix`,
+    title: `${product.title} - Inguardy`,
     description: product.summary.en,
   };
 }

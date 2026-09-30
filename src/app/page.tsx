@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -54,10 +54,10 @@ const landingCopy = {
       titleLine2: "Journal for Smarter",
       titleLine3: "Decisions",
       description:
-        "Tradivix automatically syncs your MT5 trades, organizes your trading journal, reviews your setups, tracks mistakes, and helps you improve discipline with AI-powered insights.",
+        "Inguardy automatically syncs your trades, organizes your trading journal, reviews your setups, tracks mistakes, and helps you improve discipline with AI-powered insights.",
       primaryCta: "Get Started",
       toolsLabel: "Everything in one place - 6 tools",
-      imageAlt: "Tradivix trading journal dashboard",
+      imageAlt: "Inguardy trading journal dashboard",
     },
     heroTools: [
       "MT5 Auto Sync",
@@ -202,43 +202,58 @@ const landingCopy = {
       },
     },
     faq: {
+      eyebrow: "Built around your dashboard",
       title: "Frequently Asked Questions",
+      description:
+        "Explore the real tools available inside Inguardy, from connected accounts and daily review to risk controls and market preparation.",
       items: [
         {
-          question: "What can I manage inside the dashboard?",
+          question: "Which trading accounts can I connect to Inguardy?",
           answer:
-            "You can track trades, accounts, daily journal notes, screenshots, playbooks, checklists, analytics, and reports from one clean workspace.",
-          tag: "Dashboard",
+            "You can manage MT4, MT5, cTrader, and TradeLocker accounts from Trading Accounts. Synced trades feed the journal, dashboard metrics, calendar, and reports.",
+          tag: "Accounts",
         },
         {
-          question: "Does Tradivix sync MT5 trades automatically?",
+          question: "What can I review in Trades, Day View, and Daily Journal?",
           answer:
-            "Yes. The MT5 journal recorder can send your closed trades into the dashboard so entries, exits, symbols, account history, and screenshots stay organized without manual typing.",
-          tag: "MT5 sync",
+            "Review entries and exits, symbols, profit and loss, screenshots, notes, emotions, mistakes, and strategy context. Day View and Daily Journal keep each trading session connected to its trades and reflections.",
+          tag: "Journal",
         },
         {
-          question: "What does the AI trade review check?",
+          question: "How do Playbooks and Checklists improve discipline?",
           answer:
-            "AI review looks at the trade context, setup notes, psychology, exit reason, discipline, and repeated mistakes, then gives practical feedback you can use before the next session.",
+            "Playbooks define your repeatable setups, while Checklists turn entry and management rules into a pre-trade routine. Together they help compare what you planned with what you actually executed.",
+          tag: "Discipline",
+        },
+        {
+          question: "What does Inguardy AI analyze?",
+          answer:
+            "Inguardy AI uses journal context such as setup notes, psychology, exit reasons, discipline, performance, and repeated mistakes to turn closed trades into practical review points.",
           tag: "AI review",
         },
         {
-          question: "What is included in the free plan?",
+          question: "What does Risk Guardian monitor?",
           answer:
-            "The free plan is built for testing the workflow with limited journal capacity: manual trades, screenshots, one playbook, one checklist, and basic dashboard access.",
-          tag: "Free plan",
+            "Risk Guardian keeps daily loss, drawdown, exposure, and account limits visible. It works alongside Position Sizing and Prop Firm Tracker so risk rules stay part of the workflow.",
+          tag: "Risk",
         },
         {
-          question: "What do I unlock with Pro Monthly?",
+          question: "Can I practice and review backtests inside the dashboard?",
           answer:
-            "Pro unlocks unlimited trades and screenshots, unlimited playbooks and checklists, AI trade review, advanced analytics, exports, and the full monthly dashboard workflow.",
-          tag: "Pro access",
+            "Yes. Market Replay lets you rehearse decisions away from live markets, and Backtest Reports organize historical results so you can compare setups and refine rules.",
+          tag: "Practice",
         },
         {
-          question: "Can I export my journal and reports?",
+          question: "Which performance insights are available in Analytics and Reports?",
           answer:
-            "Yes. Pro users can export reports and review performance history, which is useful for funded accounts, monthly reviews, and keeping a clean record of progress.",
-          tag: "Reports",
+            "Track net P&L, win rate, profit factor, drawdown, session and symbol performance, strategy results, habits, and account history through focused reports and analytics views.",
+          tag: "Analytics",
+        },
+        {
+          question: "Which market-preparation tools are included?",
+          answer:
+            "Use Market Scanner, Economic Calendar, Position Sizing, and the dashboard's market tools to find context, prepare for volatility, and plan risk before opening a trade.",
+          tag: "Market tools",
         },
       ],
     },
@@ -252,10 +267,10 @@ const landingCopy = {
       titleLine2: "برای تصمیم‌های",
       titleLine3: "هوشمندتر",
       description:
-        "Tradivix معاملات MT5 شما را خودکار همگام‌سازی می‌کند، ژورنال معاملاتی را مرتب نگه می‌دارد، ستاپ‌ها را بررسی می‌کند، اشتباهات را ردیابی می‌کند و با بینش‌های هوش مصنوعی به تقویت نظم معاملاتی کمک می‌کند.",
+        "Inguardy معاملات شما را خودکار همگام‌سازی می‌کند، ژورنال معاملاتی را مرتب نگه می‌دارد، ستاپ‌ها را بررسی می‌کند، اشتباهات را ردیابی می‌کند و با بینش‌های هوش مصنوعی به تقویت نظم معاملاتی کمک می‌کند.",
       primaryCta: "شروع کنید",
       toolsLabel: "همه چیز در یک جا - ۶ ابزار",
-      imageAlt: "داشبورد ژورنال معاملاتی Tradivix",
+      imageAlt: "داشبورد ژورنال معاملاتی Inguardy",
     },
     heroTools: [
       "همگام‌سازی خودکار MT5",
@@ -400,43 +415,58 @@ const landingCopy = {
       },
     },
     faq: {
+      eyebrow: "براساس ابزارهای واقعی داشبورد",
       title: "سوالات متداول",
+      description:
+        "پاسخ‌های روشن درباره ابزارهای واقعی Inguardy؛ از اتصال حساب و ژورنال روزانه تا کنترل ریسک و آماده‌سازی بازار.",
       items: [
         {
-          question: "داخل داشبورد چه چیزهایی را می‌توانم مدیریت کنم؟",
+          question: "چه حساب‌های معاملاتی را می‌توانم به Inguardy متصل کنم؟",
           answer:
-            "می‌توانید معاملات، حساب‌ها، یادداشت‌های روزانه، اسکرین‌شات‌ها، پلی‌بوک‌ها، چک‌لیست‌ها، تحلیل‌ها و گزارش‌ها را در یک فضای کاری مرتب دنبال کنید.",
-          tag: "داشبورد",
+            "از بخش حساب‌های معاملاتی می‌توانید حساب‌های MT4، MT5، cTrader و TradeLocker را مدیریت کنید. معاملات همگام‌شده وارد ژورنال، آمار داشبورد، تقویم و گزارش‌ها می‌شوند.",
+          tag: "حساب‌ها",
         },
         {
-          question: "آیا Tradivix معاملات MT5 را خودکار همگام‌سازی می‌کند؟",
+          question: "در Trades، Day View و Daily Journal چه چیزهایی را می‌توانم بررسی کنم؟",
           answer:
-            "بله. ضبط‌کننده ژورنال MT5 می‌تواند معاملات بسته‌شده را به داشبورد بفرستد تا ورود، خروج، نماد، تاریخچه حساب و اسکرین‌شات‌ها بدون تایپ دستی مرتب شوند.",
-          tag: "همگام‌سازی MT5",
+            "ورود و خروج، نماد، سود و زیان، اسکرین‌شات، یادداشت، احساسات، اشتباهات و زمینه استراتژی را مرور کنید. نمای روزانه و ژورنال روزانه هر جلسه را به معاملات و یادداشت‌های همان روز متصل نگه می‌دارند.",
+          tag: "ژورنال",
         },
         {
-          question: "بررسی معامله با AI چه چیزهایی را بررسی می‌کند؟",
+          question: "پلی‌بوک‌ها و چک‌لیست‌ها چطور نظم معاملاتی را بهتر می‌کنند؟",
           answer:
-            "AI زمینه معامله، یادداشت‌های ستاپ، روان‌شناسی، دلیل خروج، نظم و اشتباهات تکراری را بررسی می‌کند و بازخورد کاربردی برای جلسه بعد می‌دهد.",
+            "پلی‌بوک‌ها ستاپ‌های تکرارپذیر شما را تعریف می‌کنند و چک‌لیست‌ها قوانین ورود و مدیریت معامله را به یک روتین قبل از معامله تبدیل می‌کنند؛ بنابراین اجرای واقعی با برنامه شما قابل مقایسه می‌شود.",
+          tag: "نظم",
+        },
+        {
+          question: "هوش مصنوعی Inguardy چه چیزهایی را تحلیل می‌کند؟",
+          answer:
+            "هوش مصنوعی Inguardy از اطلاعات ژورنال مانند ستاپ، روان‌شناسی، دلیل خروج، نظم، عملکرد و اشتباهات تکراری استفاده می‌کند تا هر معامله بسته را به نکات عملی برای مرور تبدیل کند.",
           tag: "بررسی AI",
         },
         {
-          question: "در پلن رایگان چه چیزی وجود دارد؟",
+          question: "Risk Guardian چه مواردی را کنترل می‌کند؟",
           answer:
-            "پلن رایگان برای تست جریان کاری ساخته شده است: معاملات دستی، اسکرین‌شات، یک پلی‌بوک، یک چک‌لیست و دسترسی پایه به داشبورد.",
-          tag: "پلن رایگان",
+            "Risk Guardian زیان روزانه، افت سرمایه، میزان درگیری سرمایه و محدودیت‌های حساب را قابل مشاهده نگه می‌دارد و در کنار Position Sizing و Prop Firm Tracker کمک می‌کند قوانین ریسک همیشه در جریان کار بمانند.",
+          tag: "ریسک",
         },
         {
-          question: "با Pro ماهانه چه چیزهایی فعال می‌شود؟",
+          question: "آیا می‌توانم داخل داشبورد تمرین و بک‌تست‌ها را مرور کنم؟",
           answer:
-            "Pro معاملات و اسکرین‌شات‌های نامحدود، پلی‌بوک و چک‌لیست نامحدود، بررسی معامله با AI، تحلیل پیشرفته، خروجی گزارش و جریان کامل ماهانه داشبورد را فعال می‌کند.",
-          tag: "دسترسی Pro",
+            "بله. Market Replay امکان تمرین تصمیم‌گیری دور از بازار زنده را می‌دهد و Backtest Reports نتایج تاریخی را منظم می‌کند تا ستاپ‌ها را مقایسه و قوانین را دقیق‌تر کنید.",
+          tag: "تمرین",
         },
         {
-          question: "آیا می‌توانم ژورنال و گزارش‌ها را خروجی بگیرم؟",
+          question: "در Analytics و Reports چه اطلاعاتی از عملکرد می‌بینم؟",
           answer:
-            "بله. کاربران Pro می‌توانند گزارش‌ها و تاریخچه عملکرد را خروجی بگیرند؛ برای حساب‌های پراپ، مرور ماهانه و نگهداری سابقه تمیز پیشرفت مفید است.",
-          tag: "گزارش‌ها",
+            "سود و زیان خالص، نرخ برد، Profit Factor، افت سرمایه، عملکرد سشن‌ها و نمادها، نتیجه استراتژی‌ها، عادت‌ها و تاریخچه حساب را در نماهای تحلیلی و گزارش‌های متمرکز دنبال کنید.",
+          tag: "تحلیل",
+        },
+        {
+          question: "چه ابزارهایی برای آماده‌سازی قبل از معامله وجود دارد؟",
+          answer:
+            "از Market Scanner، Economic Calendar، Position Sizing و ابزارهای بازار داشبورد برای پیدا کردن زمینه بازار، آمادگی در برابر نوسان و برنامه‌ریزی ریسک پیش از ورود استفاده کنید.",
+          tag: "ابزار بازار",
         },
       ],
     },
@@ -535,6 +565,8 @@ export default function Home() {
   const trialDays = (10).toLocaleString(language === "fa" ? "fa-IR" : "en-US");
   const [dashboardPlans, setDashboardPlans] = useState<DashboardPlan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
+  const faqSectionRef = useRef<HTMLElement>(null);
+  const [faqScrollProgress, setFaqScrollProgress] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -567,6 +599,40 @@ export default function Home() {
 
     return () => {
       mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const updateFaqProgress = () => {
+      const section = faqSectionRef.current;
+
+      if (!section) return;
+
+      const rect = section.getBoundingClientRect();
+      const travel = window.innerHeight + rect.height;
+      const progress = Math.min(
+        1,
+        Math.max(0, (window.innerHeight - rect.top) / travel)
+      );
+
+      setFaqScrollProgress(progress);
+    };
+
+    const requestUpdate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateFaqProgress);
+    };
+
+    updateFaqProgress();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
     };
   }, []);
 
@@ -1244,36 +1310,148 @@ export default function Home() {
 
       {/* FAQ */}
       <section
+        ref={faqSectionRef}
         id="faq"
         dir={dir}
-        className={`bg-[#f7f9fc] py-16 ${textAlignClass} text-slate-950 lg:py-20`}
+        className={`relative isolate overflow-hidden border-y border-slate-200/80 bg-[#f7f9fc] py-20 ${textAlignClass} text-slate-950 lg:py-28`}
       >
-        <div className="mx-auto w-full max-w-[900px] px-5 sm:px-8">
-          <h2 className="mb-5 text-[1.75rem] font-bold leading-tight tracking-normal text-[#071f41] sm:mb-6 sm:text-[2rem]">
-            {copy.faq.title}
-          </h2>
+        <div className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(circle_at_8%_12%,rgba(59,130,246,0.15),transparent_28%),radial-gradient(circle_at_92%_20%,rgba(217,70,239,0.12),transparent_27%),radial-gradient(circle_at_52%_92%,rgba(20,184,166,0.10),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f6f8ff_48%,#ffffff_100%)]" />
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-35 [background-image:radial-gradient(rgba(100,116,139,0.35)_1px,transparent_1px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_92%)]" />
 
-          <div className="space-y-3">
-            {faqItems.map((item) => (
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 hidden h-full w-full lg:block"
+          viewBox="0 0 1440 1040"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="faq-circuit-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#3b82f6" />
+              <stop offset="0.5" stopColor="#8b5cf6" />
+              <stop offset="1" stopColor="#d946ef" />
+            </linearGradient>
+            <filter id="faq-circuit-glow">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <path d="M0 146 H170 Q204 146 204 180 V286 Q204 320 238 320 H314" fill="none" stroke="#cbd5e1" strokeWidth="1.2" strokeDasharray="5 10" />
+          <path d="M1440 186 H1282 Q1248 186 1248 220 V356 Q1248 390 1214 390 H1148" fill="none" stroke="#cbd5e1" strokeWidth="1.2" strokeDasharray="5 10" />
+          <path d="M0 836 H126 Q160 836 160 802 V714 Q160 680 194 680 H296" fill="none" stroke="#d8b4fe" strokeWidth="1.2" strokeDasharray="5 10" />
+          <path d="M1440 806 H1310 Q1276 806 1276 772 V690 Q1276 656 1242 656 H1152" fill="none" stroke="#bfdbfe" strokeWidth="1.2" strokeDasharray="5 10" />
+          <path
+            d="M18 146 H170 Q204 146 204 180 V286 Q204 320 238 320 H314"
+            fill="none"
+            stroke="url(#faq-circuit-gradient)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            pathLength="1"
+            style={{
+              strokeDasharray: 1,
+              strokeDashoffset: 1 - Math.min(1, faqScrollProgress * 2.1),
+              filter: "url(#faq-circuit-glow)",
+            }}
+          />
+          <path
+            d="M1422 186 H1282 Q1248 186 1248 220 V356 Q1248 390 1214 390 H1148"
+            fill="none"
+            stroke="url(#faq-circuit-gradient)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            pathLength="1"
+            style={{
+              strokeDasharray: 1,
+              strokeDashoffset: 1 - Math.min(1, Math.max(0, faqScrollProgress * 2.1 - 0.18)),
+              filter: "url(#faq-circuit-glow)",
+            }}
+          />
+          <path
+            d="M18 836 H126 Q160 836 160 802 V714 Q160 680 194 680 H296"
+            fill="none"
+            stroke="url(#faq-circuit-gradient)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            pathLength="1"
+            style={{
+              strokeDasharray: 1,
+              strokeDashoffset: 1 - Math.min(1, Math.max(0, faqScrollProgress * 2.1 - 0.54)),
+              filter: "url(#faq-circuit-glow)",
+            }}
+          />
+          <path
+            d="M1422 806 H1310 Q1276 806 1276 772 V690 Q1276 656 1242 656 H1152"
+            fill="none"
+            stroke="url(#faq-circuit-gradient)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            pathLength="1"
+            style={{
+              strokeDasharray: 1,
+              strokeDashoffset: 1 - Math.min(1, Math.max(0, faqScrollProgress * 2.1 - 0.72)),
+              filter: "url(#faq-circuit-glow)",
+            }}
+          />
+        </svg>
+
+        <div className="mx-auto w-full max-w-[1120px] px-5 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white/85 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-violet-700 shadow-[0_12px_30px_rgba(109,40,217,0.10)] backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" />
+              {copy.faq.eyebrow}
+            </div>
+            <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.03em] text-[#071f41] sm:text-4xl lg:text-[3.15rem]">
+              {copy.faq.title}
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600">
+              {copy.faq.description}
+            </p>
+          </div>
+
+          <div className="relative mt-12 lg:mt-16">
+            <div className={`pointer-events-none absolute bottom-7 top-7 hidden w-px bg-slate-200 md:block ${isRtl ? "right-[27px]" : "left-[27px]"}`}>
+              <span
+                className="absolute inset-x-[-1px] top-0 origin-top rounded-full bg-gradient-to-b from-blue-500 via-violet-500 to-fuchsia-500 shadow-[0_0_16px_rgba(124,58,237,0.42)]"
+                style={{ height: `${Math.min(100, faqScrollProgress * 145)}%` }}
+              />
+            </div>
+
+            <div className="space-y-4">
+              {faqItems.map((item, index) => (
+              <div key={item.question} className="relative md:ps-[76px]">
+                <span className={`absolute top-7 hidden h-3 w-3 -translate-y-1/2 rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-violet-600 shadow-[0_0_0_5px_rgba(139,92,246,0.10),0_0_18px_rgba(99,102,241,0.40)] md:block ${isRtl ? "right-[22px]" : "left-[22px]"}`} />
               <details
-                key={item.question}
-                className="group rounded-[10px] border border-[#dce5f1] bg-white shadow-none transition-colors duration-200 open:border-[#cfdced] hover:border-[#cdd9ea]"
+                className={`group overflow-hidden rounded-2xl border border-slate-200/90 bg-white/90 shadow-[0_14px_42px_rgba(15,23,42,0.06)] backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-[0_20px_52px_rgba(79,70,229,0.10)] ${item.openClass}`}
               >
-                <summary className="flex min-h-[64px] cursor-pointer list-none items-center gap-4 px-5 py-4 marker:hidden sm:min-h-[64px]">
-                  <span className={`min-w-0 flex-1 ${textAlignClass} text-[0.95rem] font-bold leading-6 text-[#001b3d]`}>
-                    {item.question}
+                <summary className="flex min-h-[84px] cursor-pointer list-none items-center gap-4 px-5 py-4 marker:hidden sm:px-6">
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ${item.iconClass}`}>
+                    <item.icon className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className={`mb-1 inline-flex rounded-full px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-[0.12em] ${item.tagClass}`}>
+                      {String(index + 1).padStart(2, "0")} · {item.tag}
+                    </span>
+                    <span className={`block ${textAlignClass} text-[0.98rem] font-extrabold leading-7 text-[#001b3d] sm:text-base`}>
+                      {item.question}
+                    </span>
                   </span>
                   <ChevronDown
-                    className="h-4 w-4 shrink-0 text-[#5b5cf6] transition-transform duration-200 group-open:rotate-180"
+                    className="h-5 w-5 shrink-0 text-violet-500 transition-transform duration-300 group-open:rotate-180"
                     strokeWidth={2.2}
                   />
                 </summary>
 
-                <p className={`border-t border-[#edf2f8] px-5 pb-5 pt-3 ${textAlignClass} text-sm font-normal leading-7 text-slate-600`}>
-                  {item.answer}
-                </p>
+                <div className="px-5 pb-6 sm:px-6">
+                  <p className={`border-t border-slate-100 pt-4 ${textAlignClass} text-sm font-medium leading-8 text-slate-600 sm:ps-[60px]`}>
+                    {item.answer}
+                  </p>
+                </div>
               </details>
-            ))}
+              </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

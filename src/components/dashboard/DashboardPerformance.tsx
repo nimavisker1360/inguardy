@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -90,6 +90,8 @@ const MONTHS_FA = [
   "ژانویه", "فوریه", "مارس", "آوریل", "مه", "ژوئن",
   "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر", "دسامبر",
 ];
+
+const ACCOUNT_REFRESH_INTERVAL_MS = 5_000;
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEKDAYS_FA = ["یک", "دو", "سه", "چهار", "پنج", "جمعه", "شنبه"];
@@ -289,10 +291,9 @@ export function DashboardPerformance({
   const activeAccount = accounts.find((account) => account.id === activeAccountId) || accounts[0] || null;
   const currency = activeAccount?.currency || "USD";
 
-  const changeAccount = useCallback(async (accountId: string) => {
-    setActiveAccountId(accountId);
+  const loadAccount = useCallback(async (accountId: string, showLoading = false) => {
     if (!userId) return;
-    setLoading(true);
+    if (showLoading) setLoading(true);
     try {
       const response = await fetch(`/api/dashboard/overview?accountId=${encodeURIComponent(accountId)}`, { cache: "no-store" });
       const payload = (await response.json()) as ApiResult<DashboardOverviewData>;
@@ -302,9 +303,33 @@ export function DashboardPerformance({
         setPerformanceTrades(payload.data.performanceTrades);
       }
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, [userId]);
+
+  const changeAccount = useCallback(async (accountId: string) => {
+    setActiveAccountId(accountId);
+    const url = new URL(window.location.href);
+    url.searchParams.set("accountId", accountId);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    await loadAccount(accountId, true);
+  }, [loadAccount]);
+
+  useEffect(() => {
+    if (!userId || !activeAccountId) return;
+    const refresh = () => {
+      if (document.visibilityState === "visible") {
+        void loadAccount(activeAccountId);
+      }
+    };
+    refresh();
+    const intervalId = window.setInterval(refresh, ACCOUNT_REFRESH_INTERVAL_MS);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [activeAccountId, loadAccount, userId]);
 
   const filtered = useMemo(() => {
     const now = new Date();

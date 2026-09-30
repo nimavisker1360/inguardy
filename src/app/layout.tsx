@@ -13,6 +13,8 @@ import {
   DEFAULT_LANGUAGE,
   LANGUAGE_COOKIE_KEY,
   LANGUAGE_STORAGE_KEY,
+  PERSIAN_LANGUAGE_ENABLED,
+  resolveAvailableLanguage,
   type Language,
 } from "@/lib/language-preferences";
 import {
@@ -20,7 +22,7 @@ import {
 } from "@/lib/language-context";
 
 export const metadata: Metadata = {
-  title: "Tradivix - AI Trading Journal",
+  title: "Inguardy - AI Trading Journal",
   description:
     "AI-powered trading journal for MT5 sync, trade review, playbooks, analytics, and reports",
 };
@@ -51,9 +53,9 @@ const languagePreferenceScript = `
   try {
     var storedLanguage = window.localStorage.getItem("${LANGUAGE_STORAGE_KEY}");
     var cookieMatch = document.cookie.match(/(?:^|; )${LANGUAGE_COOKIE_KEY}=(en|fa)(?:;|$)/);
-    var language = storedLanguage === "en" || storedLanguage === "fa"
+    var language = ${PERSIAN_LANGUAGE_ENABLED} && (storedLanguage === "en" || storedLanguage === "fa")
       ? storedLanguage
-      : cookieMatch
+      : ${PERSIAN_LANGUAGE_ENABLED} && cookieMatch
         ? cookieMatch[1]
         : "${DEFAULT_LANGUAGE}";
 
@@ -73,10 +75,11 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const languageCookie = cookieStore.get(LANGUAGE_COOKIE_KEY)?.value;
-  const initialLanguage: Language =
+  const requestedLanguage: Language =
     languageCookie === "en" || languageCookie === "fa"
       ? languageCookie
       : DEFAULT_LANGUAGE;
+  const initialLanguage = resolveAvailableLanguage(requestedLanguage);
 
   return (
     <html

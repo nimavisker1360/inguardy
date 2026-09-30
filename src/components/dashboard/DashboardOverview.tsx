@@ -41,6 +41,7 @@ import {
   type TradingAccountDto,
 } from "@/components/dashboard/types";
 import { cn } from "@/lib/utils";
+import type { SubscriptionDashboardState } from "@/lib/subscription";
 
 const DASHBOARD_REFRESH_INTERVAL_MS = 2_000;
 const DASHBOARD_DATE_TIME_ZONE = "UTC";
@@ -1413,6 +1414,7 @@ export function DashboardOverview({
   initialPageStats,
   canUseAutoSync = false,
   showAccountConnectionWizardInitially = false,
+  subscription,
 }: {
   userId?: string;
   userName?: string | null;
@@ -1423,6 +1425,7 @@ export function DashboardOverview({
   initialPageStats: DashboardPageStatDto[];
   canUseAutoSync?: boolean;
   showAccountConnectionWizardInitially?: boolean;
+  subscription?: SubscriptionDashboardState | null;
 }) {
   const [accounts, setAccounts] = useState(initialAccounts);
   const [activeAccountId, setActiveAccountId] = useState(
@@ -1693,6 +1696,7 @@ export function DashboardOverview({
         activeAccountId={activeAccountId}
         activeAccountName={activeAccount ? accountDisplayName(activeAccount) : null}
         journalCompleted={journalCompleted}
+        subscription={subscription}
       />
 
       <AccountConnectionWizard

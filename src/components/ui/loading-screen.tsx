@@ -29,7 +29,7 @@ export function LoadingScreen({ onLoadingComplete }: LoadingScreenProps) {
         <h1
           className={`text-2xl font-bold text-white mb-2 ${language === "fa" ? "font-[IRANSans]" : ""}`}
         >
-          {language === "fa" ? "تریدیویکس" : "Tradivix"}
+          {language === "fa" ? "اینگاردی" : "Inguardy"}
         </h1>
 
         <p

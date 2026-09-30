@@ -7,7 +7,9 @@ import {
   BarChart3,
   BookOpenCheck,
   Brain,
+  CalendarDays,
   ClipboardCheck,
+  Crown,
   RotateCcw,
   ShieldCheck,
   SlidersHorizontal,
@@ -16,6 +18,7 @@ import {
 } from "lucide-react";
 import { DashboardAiAssistant } from "@/components/dashboard/DashboardAiAssistant";
 import { formatMoney, type DashboardOverviewStats } from "@/components/dashboard/types";
+import type { SubscriptionDashboardState } from "@/lib/subscription";
 import { cn } from "@/lib/utils";
 
 type DashboardHomeProps = {
@@ -26,6 +29,7 @@ type DashboardHomeProps = {
   activeAccountId?: string | null;
   activeAccountName?: string | null;
   journalCompleted: boolean;
+  subscription?: SubscriptionDashboardState | null;
   onStartDay?: () => void;
 };
 
@@ -45,6 +49,7 @@ export function DashboardHome({
   activeAccountId,
   activeAccountName,
   journalCompleted,
+  subscription,
 }: DashboardHomeProps) {
   const isRtl = language === "fa";
   const displayName = userName?.trim().split(/\s+/)[0] || (isRtl ? "تریدر" : "Trader");
@@ -150,7 +155,11 @@ export function DashboardHome({
         />
       </section>
 
-      <section className="mt-14 sm:mt-16" data-dashboard-tour="products">
+      {subscription ? (
+        <SubscriptionOverviewCard subscription={subscription} language={language} />
+      ) : null}
+
+      <section className={cn(subscription ? "mt-8" : "mt-14 sm:mt-16")} data-dashboard-tour="products">
         <h2 className="mb-3 text-base font-bold text-slate-950 dark:text-white">
           {isRtl ? "ابزارهای شما" : "Explore tools"}
         </h2>
@@ -227,6 +236,122 @@ export function DashboardHome({
         </section>
       </div>
     </div>
+  );
+}
+
+function SubscriptionOverviewCard({
+  subscription,
+  language,
+}: {
+  subscription: SubscriptionDashboardState;
+  language: "en" | "fa";
+}) {
+  const isRtl = language === "fa";
+  const formatter = new Intl.NumberFormat(isRtl ? "fa-IR" : "en-US");
+  const days = formatter.format(subscription.daysRemaining);
+  const endDate = new Intl.DateTimeFormat(isRtl ? "fa-IR-u-ca-gregory" : "en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(subscription.expiresAt));
+  const isTrial = subscription.isTrial;
+  const isFree = subscription.isFree && !isTrial;
+  const heading = isTrial
+    ? isRtl ? "دوره آزمایشی شما" : "Your free trial"
+    : isFree
+      ? isRtl ? "پلن رایگان" : "Free plan"
+      : isRtl ? "اشتراک پریمیوم" : "Premium subscription";
+  const detail = isFree
+    ? isRtl
+      ? "با ارتقا به پریمیوم به همه ابزارهای حرفه‌ای دسترسی داشته باشید."
+      : "Upgrade to Premium to unlock every professional tool."
+    : isTrial
+      ? isRtl
+        ? `${days} روز از دوره آزمایشی شما باقی مانده است.`
+        : `${days} ${subscription.daysRemaining === 1 ? "day" : "days"} left in your trial.`
+      : isRtl
+        ? `${days} روز تا تمدید اشتراک شما باقی مانده است.`
+        : `${days} ${subscription.daysRemaining === 1 ? "day" : "days"} until your subscription renews.`;
+  const dateLabel = isTrial
+    ? isRtl ? "پایان دوره" : "Trial ends"
+    : isRtl ? "تاریخ تمدید" : "Renewal date";
+  const buttonLabel = isTrial || isFree
+    ? isRtl ? "ارتقا به پریمیوم" : "Upgrade to Premium"
+    : isRtl ? "تمدید پریمیوم" : "Renew Premium";
+
+  return (
+    <section
+      className={cn(
+        "relative mt-7 overflow-hidden rounded-2xl border px-4 py-4 shadow-[0_14px_40px_rgba(14,116,144,0.08)] sm:px-5",
+        isTrial
+          ? "border-sky-200 bg-gradient-to-r from-sky-50 via-white to-cyan-50 dark:border-sky-400/25 dark:from-sky-500/10 dark:via-slate-900 dark:to-cyan-500/10"
+          : "border-violet-200 bg-gradient-to-r from-violet-50 via-white to-indigo-50 dark:border-violet-400/25 dark:from-violet-500/10 dark:via-slate-900 dark:to-indigo-500/10"
+      )}
+      aria-label={heading}
+    >
+      <div className="pointer-events-none absolute -right-10 -top-14 h-36 w-36 rounded-full bg-sky-300/20 blur-2xl dark:bg-sky-400/10" />
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-3.5">
+          <span
+            className={cn(
+              "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white shadow-lg",
+              isTrial
+                ? "bg-gradient-to-br from-sky-500 to-cyan-600 shadow-sky-500/20"
+                : "bg-gradient-to-br from-violet-500 to-indigo-600 shadow-violet-500/20"
+            )}
+          >
+            {isTrial ? <CalendarDays className="h-5 w-5" /> : <Crown className="h-5 w-5" />}
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-sm font-extrabold text-slate-950 dark:text-white sm:text-base">{heading}</h2>
+              <span className={cn(
+                "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                isTrial
+                  ? "bg-sky-100 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300"
+                  : "bg-violet-100 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300"
+              )}>
+                {subscription.planName}
+              </span>
+            </div>
+            <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">{detail}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          {!isFree ? (
+            <div className="rounded-xl border border-white/80 bg-white/75 px-3 py-2 text-start shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
+              <span className="block text-[10px] font-medium text-slate-400">{dateLabel}</span>
+              <strong className="mt-0.5 block whitespace-nowrap text-xs text-slate-700 dark:text-slate-200">{endDate}</strong>
+            </div>
+          ) : null}
+          <Link
+            href="/premium"
+            className={cn(
+              "inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+              isTrial
+                ? "bg-gradient-to-r from-sky-600 to-cyan-600 shadow-sky-500/20 focus-visible:ring-sky-500"
+                : "bg-gradient-to-r from-violet-600 to-indigo-600 shadow-violet-500/20 focus-visible:ring-violet-500"
+            )}
+          >
+            <Crown className="h-4 w-4" />
+            {buttonLabel}
+          </Link>
+        </div>
+      </div>
+
+      {!isFree ? (
+        <div className="relative mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200/80 dark:bg-white/10">
+          <div
+            className={cn(
+              "h-full rounded-full",
+              isTrial ? "bg-gradient-to-r from-sky-500 to-cyan-500" : "bg-gradient-to-r from-violet-500 to-indigo-500"
+            )}
+            style={{ width: `${subscription.percentRemaining}%` }}
+          />
+        </div>
+      ) : null}
+    </section>
   );
 }
 

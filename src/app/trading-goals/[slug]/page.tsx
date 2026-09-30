@@ -22,12 +22,12 @@ export async function generateMetadata({
 
   if (!goal) {
     return {
-      title: "Trading Goal - Tradivix",
+      title: "Trading Goal - Inguardy",
     };
   }
 
   return {
-    title: `${goal.title} - Tradivix`,
+    title: `${goal.title} - Inguardy`,
     description: goal.summary,
   };
 }

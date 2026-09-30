@@ -398,7 +398,7 @@ export async function ensureManualTradingAccount(userId: string) {
       userId,
       name: "Manual Journal",
       broker: "Manual",
-      platform: "Tradivix",
+      platform: "Inguardy",
       currency: "USD",
     },
   });

@@ -165,6 +165,7 @@ class TerminalSession:
     def __init__(self):
         self.initialized = False
         self.terminal_path = None
+        self.last_auth_error = None
 
     def refresh_process_state(self):
         if self.initialized and self.terminal_path and not terminal_process_is_running(self.terminal_path):
@@ -212,17 +213,22 @@ class TerminalSession:
             time.sleep(0.5)
         return None
 
-    def authorize(self, terminal_path, numeric_login, password, server):
+    def authorize(self, terminal_path, numeric_login, password, server, allow_account_switch=False):
+        self.last_auth_error = None
         account = self.connected_account(numeric_login, server)
-        if account is not None:
+        if not allow_account_switch:
             return account
 
-        mt5.login(
+        logged_in = mt5.login(
             numeric_login,
             password=password,
             server=server,
             timeout=15000,
         )
+        if not logged_in:
+            self.last_auth_error = mt5.last_error()
+            return None
+
         account = self.wait_for_connection(numeric_login, server, timeout=5)
         if account is not None:
             return account
@@ -254,9 +260,27 @@ class TerminalSession:
             error = mt5.last_error()
             return failure("MT5_INITIALIZE_FAILED", f"MetaTrader initialization failed ({error[0]}): {error[1]}")
 
-        account = self.authorize(terminal_path, numeric_login, password, server)
+        account = self.authorize(
+            terminal_path,
+            numeric_login,
+            password,
+            server,
+            allow_account_switch=operation == "snapshot",
+        )
         if account is None:
-            error = mt5.last_error()
+            error = self.last_auth_error or mt5.last_error()
+            if self.last_auth_error:
+                return failure(
+                    "MT5_AUTH_FAILED",
+                    f"MT5 rejected the login, password, or broker server ({error[0]}): {error[1]}",
+                )
+            active_account = mt5.account_info()
+            if operation != "snapshot" and active_account is not None:
+                return failure(
+                    "MT5_ACCOUNT_NOT_ACTIVE",
+                    f"MT5 account {login} is not active in the desktop terminal. "
+                    f"The terminal is currently signed in as {active_account.login}.",
+                )
             return failure(
                 "MT5_NOT_CONNECTED",
                 f"MetaTrader could not establish a broker connection ({error[0]}): {error[1]}",

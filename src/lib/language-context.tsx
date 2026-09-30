@@ -13,6 +13,7 @@ import {
   DEFAULT_LANGUAGE,
   LANGUAGE_COOKIE_KEY,
   LANGUAGE_STORAGE_KEY,
+  resolveAvailableLanguage,
   type Language,
 } from "@/lib/language-preferences";
 
@@ -73,7 +74,7 @@ function readPersistedLanguage(): Language | null {
   } catch {}
 
   if (isSupportedLanguage(storedLanguage)) {
-    return storedLanguage;
+    return resolveAvailableLanguage(storedLanguage);
   }
 
   let cookieMatch: RegExpMatchArray | null = null;
@@ -84,11 +85,13 @@ function readPersistedLanguage(): Language | null {
     );
   } catch {}
 
-  return isSupportedLanguage(cookieMatch?.[1]) ? cookieMatch[1] : null;
+  return isSupportedLanguage(cookieMatch?.[1])
+    ? resolveAvailableLanguage(cookieMatch[1])
+    : null;
 }
 
 function getInitialLanguage(fallback: Language) {
-  return readPersistedLanguage() ?? fallback;
+  return readPersistedLanguage() ?? resolveAvailableLanguage(fallback);
 }
 
 function asTranslationRecord(value: unknown): Record<string, unknown> {
@@ -125,10 +128,11 @@ export function LanguageProvider({
   );
 
   const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
-    setTranslations(bundledTranslations[lang]);
-    persistLanguage(lang);
-    applyDocumentLanguage(lang);
+    const availableLanguage = resolveAvailableLanguage(lang);
+    setLanguageState(availableLanguage);
+    setTranslations(bundledTranslations[availableLanguage]);
+    persistLanguage(availableLanguage);
+    applyDocumentLanguage(availableLanguage);
   }, []);
 
   useEffect(() => {

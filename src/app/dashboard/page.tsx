@@ -2,10 +2,23 @@ import { DashboardPerformance } from "@/components/dashboard/DashboardPerformanc
 import { getDashboardOverviewData } from "@/lib/dashboard-data";
 import { getSession } from "@/lib/server-auth";
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const session = await getSession();
+  const params = await (
+    searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>)
+  );
   const data = session?.user.id
-    ? await getDashboardOverviewData(session.user.id)
+    ? await getDashboardOverviewData(session.user.id, {
+        accountId: first(params.accountId),
+      })
     : {
         activeAccountId: null,
         accounts: [],

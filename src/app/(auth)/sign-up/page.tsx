@@ -7,7 +7,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { signIn, signOut, signUp } from "@/lib/auth-client";
+import { authClient, signIn, signUp } from "@/lib/auth-client";
 import { getSignUpAuthErrorFallbackMessage, getSignUpAuthErrorMessage } from "@/lib/auth-errors";
 import { useLanguage } from "@/lib/language-context";
 
@@ -63,11 +63,14 @@ function SignUpForm() {
     [searchParams]
   );
   const loginHref = `/login?redirect=${encodeURIComponent(redirectPath)}`;
-  const loginAfterSignUpHref = `/login?redirect=${encodeURIComponent(redirectPath)}&registered=1`;
+  const loginAfterSignUpHref = `/login?redirect=${encodeURIComponent(redirectPath)}&verified=1`;
   const authError = searchParams.get("error");
   const errorCallbackURL = `/sign-up?redirect=${encodeURIComponent(redirectPath)}`;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const trimmedEmail = email.trim();
@@ -81,6 +84,18 @@ function SignUpForm() {
     }
   }, [authError]);
 
+  useEffect(() => {
+    if (resendSeconds <= 0) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setResendSeconds((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [resendSeconds]);
+
   async function handleEmailSignUp(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -93,7 +108,7 @@ function SignUpForm() {
     setLoading(true);
 
     try {
-      const generatedName = trimmedEmail.split("@")[0] || "Tradivix Trader";
+      const generatedName = trimmedEmail.split("@")[0] || "Inguardy Trader";
       const res = await signUp.email({
         name: generatedName,
         email: trimmedEmail,
@@ -106,12 +121,70 @@ function SignUpForm() {
         return;
       }
 
-      await signOut();
+      setVerificationPending(true);
+      setVerificationCode("");
+      setResendSeconds(60);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign up failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerifyEmail(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    if (!/^\d{6}$/.test(verificationCode)) {
+      setError("Enter the 6-digit code sent to your email.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await authClient.emailOtp.verifyEmail({
+        email: trimmedEmail,
+        otp: verificationCode,
+      });
+
+      if (res.error) {
+        setError(getSignUpAuthErrorMessage(res.error.code) || res.error.message || "Verification failed");
+        return;
+      }
+
       setLanguage("en");
       router.replace(loginAfterSignUpHref);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign up failed");
+      setError(err instanceof Error ? err.message : "Verification failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResendCode() {
+    if (loading || resendSeconds > 0) {
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await authClient.emailOtp.sendVerificationOtp({
+        email: trimmedEmail,
+        type: "email-verification",
+      });
+
+      if (res.error) {
+        setError(res.error.message || "Could not resend the code. Please try again.");
+        return;
+      }
+
+      setResendSeconds(60);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not resend the code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -160,10 +233,10 @@ function SignUpForm() {
         </Link>
 
         <div className="mb-9 text-center">
-          <Link href="/" aria-label="Tradivix home" className="mx-auto mb-5 block w-fit">
+          <Link href="/" aria-label="Inguardy home" className="mx-auto mb-5 block w-fit">
             <Image
-              src="/images/tradivix_logo_dark.png"
-              alt="Tradivix"
+              src="/images/logo.png"
+              alt="Inguardy"
               width={160}
               height={54}
               className="h-[54px] w-auto object-contain"
@@ -171,14 +244,14 @@ function SignUpForm() {
             />
           </Link>
           <h1 className="mb-4 text-[30px] font-bold leading-tight text-black sm:text-[38px]">
-            Welcome to Tradivix
+            Welcome to Inguardy
           </h1>
           <p className="text-base leading-7 text-black sm:text-xl">
             We help traders become profitable!
           </p>
         </div>
 
-        <div className="space-y-6">
+        {!verificationPending && <div className="space-y-6">
           <Button
             type="button"
             variant="outline"
@@ -195,8 +268,9 @@ function SignUpForm() {
             <span>or</span>
             <span className="h-px flex-1 bg-gradient-to-r from-[#5f47ff] via-[#d8d5ff] to-transparent" />
           </div>
-        </div>
+        </div>}
 
+        {!verificationPending ? (
         <form className="mt-6 space-y-[26px]" onSubmit={handleEmailSignUp}>
           <div>
             <label htmlFor="email" className="sr-only">
@@ -253,15 +327,86 @@ function SignUpForm() {
             </Link>
           </p>
         </form>
+        ) : (
+          <form className="mt-6 space-y-6" onSubmit={handleVerifyEmail}>
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-slate-950">Check your email</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                We sent a 6-digit verification code to <span className="font-semibold text-slate-900">{trimmedEmail}</span>.
+                The code expires in 10 minutes.
+              </p>
+            </div>
 
-        <div className="mt-6 text-center text-sm">
+            <div>
+              <label htmlFor="verification-code" className="sr-only">
+                Verification code
+              </label>
+              <input
+                id="verification-code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                required
+                autoFocus
+                value={verificationCode}
+                onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                className="h-[58px] w-full rounded-lg border border-[#d1d1d1] bg-white px-4 text-center font-mono text-2xl font-bold tracking-[0.45em] text-slate-950 outline-none transition focus:border-[#6f55bf] focus:ring-4 focus:ring-[#6f55bf]/15"
+                placeholder="000000"
+                aria-describedby="verification-help"
+              />
+              <p id="verification-help" className="mt-2 text-center text-xs text-slate-500">
+                Didn&apos;t receive it? Check your spam folder or request a new code.
+              </p>
+            </div>
+
+            {error && (
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+                {error}
+              </p>
+            )}
+
+            <Button
+              className="h-[50px] w-full rounded-lg bg-[#6f55bf] text-base font-bold text-white shadow-none hover:bg-[#6049ad] disabled:cursor-not-allowed disabled:bg-[#a99bd4]"
+              disabled={loading || verificationCode.length !== 6}
+            >
+              {loading ? "Verifying..." : "Verify email"}
+            </Button>
+
+            <div className="flex items-center justify-center gap-3 text-sm">
+              <button
+                type="button"
+                onClick={handleResendCode}
+                disabled={loading || resendSeconds > 0}
+                className="font-semibold text-[#6f55bf] hover:text-[#6049ad] hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline"
+              >
+                {resendSeconds > 0 ? `Resend code in ${resendSeconds}s` : "Resend code"}
+              </button>
+              <span className="text-slate-300">|</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setVerificationPending(false);
+                  setVerificationCode("");
+                  setError("");
+                }}
+                className="font-medium text-slate-600 hover:text-slate-900 hover:underline"
+              >
+                Change email
+              </button>
+            </div>
+          </form>
+        )}
+
+        {!verificationPending && <div className="mt-6 text-center text-sm">
           <span className="text-slate-500">
             Already have an account?
           </span>
           <Link href={loginHref} className="ml-1 font-semibold text-[#6f55bf] hover:text-[#6049ad] hover:underline">
             Sign In
           </Link>
-        </div>
+        </div>}
       </div>
     </div>
   );

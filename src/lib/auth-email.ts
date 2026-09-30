@@ -1,5 +1,6 @@
 import { sendTransactionalEmail } from "@/lib/mail";
 import {
+  buildEmailVerificationCodeEmail,
   buildEmailVerificationEmail,
   buildPasswordResetEmail,
 } from "@/lib/mail-templates";
@@ -24,6 +25,12 @@ type SendEmailVerificationInput = {
   verificationUrl: string;
 };
 
+type SendEmailVerificationCodeInput = {
+  to: string;
+  name?: string | null;
+  code: string;
+};
+
 export async function sendEmail({ to, subject, html, text, replyTo }: SendEmailInput) {
   await sendTransactionalEmail({
     to,
@@ -39,7 +46,7 @@ export async function sendPasswordResetEmail({
   name,
   resetUrl,
 }: SendPasswordResetEmailInput) {
-  const subject = "Reset your Tradivix password";
+  const subject = "Reset your Inguardy password";
   const { html, text } = buildPasswordResetEmail({ name, resetUrl });
 
   await sendEmail({
@@ -55,8 +62,24 @@ export async function sendEmailVerificationEmail({
   name,
   verificationUrl,
 }: SendEmailVerificationInput) {
-  const subject = "Confirm your Tradivix email";
+  const subject = "Confirm your Inguardy email";
   const { html, text } = buildEmailVerificationEmail({ name, verificationUrl });
+
+  await sendEmail({
+    to,
+    subject,
+    html,
+    text,
+  });
+}
+
+export async function sendEmailVerificationCodeEmail({
+  to,
+  name,
+  code,
+}: SendEmailVerificationCodeInput) {
+  const subject = `${code} is your Inguardy verification code`;
+  const { html, text } = buildEmailVerificationCodeEmail({ name, code });
 
   await sendEmail({
     to,

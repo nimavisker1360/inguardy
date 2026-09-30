@@ -40,10 +40,24 @@ test("authenticates with credentials in a JSON body and validates tokens", async
 });
 
 test("maps rejected credentials to a sanitized error", async () => {
-  global.fetch = async () => new Response("bad credentials", { status: 400 });
+  global.fetch = async () => new Response(JSON.stringify({ message: "bad credentials" }), { status: 400 });
   await assert.rejects(
     authenticateTradeLocker({ environment: "LIVE", email: "user@example.com", password: "wrong", server: "Broker" }),
-    (error) => error instanceof TradeLockerApiError && safeTradeLockerMessage(error) === "Invalid TradeLocker credentials."
+    (error) => error instanceof TradeLockerApiError && safeTradeLockerMessage(error) === "The TradeLocker email or password is incorrect."
+  );
+});
+
+test("distinguishes TradeLocker's server-not-found 401 response from a bad password", async () => {
+  global.fetch = async () => new Response(
+    JSON.stringify({ message: "Failed to fetch token, check if server exists" }),
+    { status: 401 }
+  );
+  await assert.rejects(
+    authenticateTradeLocker({ environment: "DEMO", email: "user@example.com", password: "secret", server: "Wrong" }),
+    (error) =>
+      error instanceof TradeLockerApiError &&
+      error.code === "SERVER_NOT_FOUND" &&
+      safeTradeLockerMessage(error).startsWith("TradeLocker server was not found")
   );
 });
 

@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     }
     if (!password || password.length > 512) {
       return NextResponse.json(
-        { success: false, message: "The MT5 investor password is required" },
+        { success: false, message: "The MT5 account or investor password is required" },
         { status: 400 }
       );
     }
@@ -107,6 +107,7 @@ export async function POST(request: Request) {
     const connectedAt = new Date();
     const account = await prisma.$transaction(async (tx) => {
       let accountId = existingConnection?.accountId || requestedAccount?.id;
+      let connectionId = existingConnection?.id;
 
       if (!accountId) {
         const created = await tx.tradingAccount.create({
@@ -164,7 +165,7 @@ export async function POST(request: Request) {
           },
         });
       } else {
-        await tx.mt5DirectConnection.create({
+        const createdConnection = await tx.mt5DirectConnection.create({
           data: {
             userId: user.id,
             accountId,
@@ -175,8 +176,27 @@ export async function POST(request: Request) {
             historyStartAt: startAt,
             lastConnectedAt: connectedAt,
           },
+          select: { id: true },
         });
+        connectionId = createdConnection.id;
       }
+
+      // A desktop MT5 terminal can keep only one broker account active at a
+      // time. Leaving older direct connections enabled makes the background
+      // worker repeatedly switch the visible terminal between accounts.
+      await tx.mt5DirectConnection.updateMany({
+        where: {
+          userId: user.id,
+          id: { not: connectionId },
+          enabled: true,
+        },
+        data: {
+          enabled: false,
+          status: Mt5DirectConnectionStatus.DISCONNECTED,
+          leaseOwner: null,
+          leaseUntil: null,
+        },
+      });
 
       return tx.tradingAccount.findUniqueOrThrow({
         where: { id: accountId },

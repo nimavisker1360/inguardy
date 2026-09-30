@@ -13,7 +13,7 @@ export async function GET() {
 
   return new NextResponse(buildJournalExcelTemplate(), {
     headers: {
-      "Content-Disposition": 'attachment; filename="tradivix-journal-template.xls"',
+      "Content-Disposition": 'attachment; filename="inguardy-journal-template.xls"',
       "Content-Type": "application/vnd.ms-excel; charset=utf-8",
       "Cache-Control": "no-store",
     },

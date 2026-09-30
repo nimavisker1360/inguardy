@@ -94,7 +94,7 @@ export function AdminShell({
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
-                <div className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>Tradivix</div>
+                <div className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>Inguardy</div>
                 <div className={cn("text-xs", isDark ? "text-slate-400" : "text-slate-500")}>Admin Panel</div>
               </div>
             </div>

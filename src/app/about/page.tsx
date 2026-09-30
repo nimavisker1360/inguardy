@@ -113,7 +113,7 @@ export default function AboutPage() {
         <div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 shadow-[0_12px_30px_rgba(37,99,235,0.09)] backdrop-blur">
             <Sparkles className="h-4 w-4" />
-            Tradivix
+            Inguardy
           </div>
 
           <h1 className="max-w-4xl text-[2.7rem] font-semibold leading-[1.08] tracking-normal text-[#071034] sm:text-[3.35rem] lg:text-[3.55rem]">
@@ -126,7 +126,7 @@ export default function AboutPage() {
           <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
             {translate(
               "aboutPage.heroText",
-              "Tradivix brings your trade journal, MT5 sync, AI trade reviews, checklists, playbooks, analytics, reports, prop firm tracking, market tools, and latest signals into one organized workspace."
+              "Inguardy brings your trade journal, account sync, AI trade reviews, checklists, playbooks, analytics, reports, prop firm tracking, market tools, and latest signals into one organized workspace."
             )}
           </p>
 

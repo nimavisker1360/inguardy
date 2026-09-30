@@ -5,6 +5,7 @@ import { getCtraderConfig } from "@/server/ctrader/config";
 const JSON_PORT = 5036;
 const MAX_MESSAGE_BYTES = 16 * 1024 * 1024;
 const REQUEST_TIMEOUT_MS = 20_000;
+const CONNECTION_TIMEOUT_MS = 20_000;
 
 export const CtraderPayload = {
   APPLICATION_AUTH_REQ: 2100,
@@ -165,13 +166,35 @@ export class CtraderOpenApiClient {
     if (this.socket) return;
     const host = `${this.environment}.ctraderapi.com`;
     await new Promise<void>((resolve, reject) => {
+      let settled = false;
       const socket = tls.connect({ host, port: JSON_PORT, servername: host }, () => {
+        settled = true;
+        clearTimeout(connectionTimer);
+        socket.off("error", handleConnectionError);
         this.socket = socket;
         socket.setNoDelay(true);
         this.heartbeat = setInterval(() => this.send(CtraderPayload.HEARTBEAT, {}), 10_000);
         resolve();
       });
-      socket.once("error", reject);
+      const handleConnectionError = (error: Error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(connectionTimer);
+        reject(error);
+      };
+      const connectionTimer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        socket.off("error", handleConnectionError);
+        socket.destroy();
+        reject(
+          new CtraderOpenApiError(
+            "cTrader connection timed out",
+            "CTRADER_CONNECTION_TIMEOUT"
+          )
+        );
+      }, CONNECTION_TIMEOUT_MS);
+      socket.once("error", handleConnectionError);
       socket.on("data", (chunk) => this.onData(chunk));
       socket.on("error", (error) => this.failAll(error));
       socket.on("close", () => this.failAll(new Error("cTrader connection closed")));

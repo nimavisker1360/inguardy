@@ -1,6 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   distDir: process.env.NEXT_BUILD_DIR || ".next",
+  async headers() {
+    return [
+      {
+        source: "/clips/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=2592000",
+          },
+        ],
+      },
+    ];
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

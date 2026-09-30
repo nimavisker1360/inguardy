@@ -116,7 +116,7 @@ function ResetPasswordForm() {
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-3xl font-bold text-slate-950">Reset Password</h1>
           <p className="text-sm leading-6 text-slate-500">
-            Choose a new password for your Tradivix account.
+            Choose a new password for your Inguardy account.
           </p>
         </div>
 

@@ -31,7 +31,7 @@ function getRedirectParam(searchParams: URLSearchParams) {
 }
 
 function getPostSignInRedirectPath(redirectPath: string) {
-  const url = new URL(redirectPath, "https://tradivix.local");
+  const url = new URL(redirectPath, "https://inguardy.local");
 
   if (url.pathname === "/dashboard") {
     url.searchParams.set("addAccount", "1");
@@ -91,6 +91,7 @@ function LoginForm() {
   const forgotPasswordHref = `/forgot-password?redirect=${encodeURIComponent(redirectPath)}`;
   const authError = searchParams.get("error");
   const registered = searchParams.get("registered") === "1";
+  const verified = searchParams.get("verified") === "1";
   const errorCallbackURL = `/login?redirect=${encodeURIComponent(redirectPath)}`;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -189,10 +190,10 @@ function LoginForm() {
         </Link>
 
         <div className="mb-8 text-center">
-          <Link href="/" aria-label="Tradivix home" className="mx-auto mb-6 block w-fit">
+          <Link href="/" aria-label="Inguardy home" className="mx-auto mb-6 block w-fit">
             <Image
-              src="/images/tradivix_logo_dark.png"
-              alt="Tradivix"
+              src="/images/logo.png"
+              alt="Inguardy"
               width={180}
               height={48}
               className="h-12 w-auto"
@@ -283,6 +284,12 @@ function LoginForm() {
           {registered && !error && (
             <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
               Account created. Please sign in with your email and password.
+            </p>
+          )}
+
+          {verified && !error && (
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+              Email verified successfully. You can now sign in.
             </p>
           )}
 

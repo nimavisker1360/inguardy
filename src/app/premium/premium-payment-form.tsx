@@ -37,7 +37,7 @@ const networks = ["TRC20", "ERC20", "BEP20"] as const;
 
 const localizedCopy = {
   en: {
-    headerTitle: "Tradivix",
+    headerTitle: "Inguardy",
     headerSubtitle: "Subscription renewal",
     signOut: "Sign out",
     signingOut: "Signing out...",

@@ -42,10 +42,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/lib/language-context";
+import {
+  LANGUAGE_FLAGS_ENABLED,
+  LANGUAGE_SWITCHER_ENABLED,
+  PERSIAN_LANGUAGE_ENABLED,
+} from "@/lib/language-preferences";
 
 type MenuItem = {
   title: string;
   description: string;
+  titleFa?: string;
+  descriptionFa?: string;
   href: string;
   icon: LucideIcon;
   accent?: string;
@@ -133,34 +140,58 @@ const productTools: MenuItem[] = [
 
 const solutionItems: MenuItem[] = [
   {
-    title: "Automate My Journal",
-    description: "Import MT5 trades automatically and spend less time entering data.",
-    href: "/trading-goals/automate-my-journal",
+    title: "Connect My Trading Accounts",
+    description: "Sync MT4, MT5, cTrader, and TradeLocker without repetitive data entry.",
+    titleFa: "حساب‌های معاملاتی‌ام را متصل کن",
+    descriptionFa:
+      "MT4، MT5، cTrader و TradeLocker را بدون ورود تکراری داده همگام کنید.",
+    href: "/dashboard/accounts",
     icon: RefreshCw,
   },
   {
-    title: "Analyze My Performance",
-    description: "Find the sessions, symbols, setups, and habits shaping your results.",
-    href: "/trading-goals/analyze-my-performance",
-    icon: BarChart3,
+    title: "Protect My Trading Account",
+    description: "Monitor loss, drawdown, exposure, and risk limits with Risk Guardian.",
+    titleFa: "از حساب معاملاتی‌ام محافظت کن",
+    descriptionFa:
+      "زیان، افت سرمایه، اکسپوژر و محدودیت‌های ریسک را با نگهبان ریسک پایش کنید.",
+    href: "/dashboard/risk-guardian",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Review My Strategy",
+    description: "Compare every trade with its playbook and record plan compliance.",
+    titleFa: "استراتژی‌ام را بررسی کن",
+    descriptionFa:
+      "هر معامله را با پلی‌بوک آن مقایسه و میزان پایبندی به پلن را ثبت کنید.",
+    href: "/journal",
+    icon: BookOpen,
   },
   {
     title: "Improve My Discipline",
-    description: "Use playbooks, checklists, and daily reviews to trade your plan.",
-    href: "/trading-goals/improve-my-discipline",
+    description: "Use checklists, daily reviews, and psychology tracking to follow your plan.",
+    titleFa: "نظم معاملاتی‌ام را بهتر کن",
+    descriptionFa:
+      "با چک‌لیست، مرور روزانه و ثبت روان‌شناسی به پلن خود پایبند بمانید.",
+    href: "/journal/checklists",
     icon: Target,
   },
   {
-    title: "Review Trades With AI",
-    description: "Turn each closed trade into specific, practical feedback.",
-    href: "/trading-goals/review-trades-with-ai",
+    title: "Ask Inguardy AI",
+    description: "Get answers grounded in your journal, performance, risk, and psychology data.",
+    titleFa: "از هوش مصنوعی Inguardy بپرس",
+    descriptionFa:
+      "بر پایه داده‌های ژورنال، عملکرد، ریسک و روان‌شناسی خود پاسخ بگیرید.",
+    href: "/dashboard/ai-reader",
     icon: Sparkles,
   },
   {
-    title: "Track Prop Firm Rules",
-    description: "Stay aware of profit targets, daily loss, and drawdown limits.",
-    href: "/trading-goals/track-prop-firm-rules",
-    icon: Trophy,
+    title: "Analyze My Performance",
+    description: "Find patterns across sessions, symbols, setups, and trading behavior.",
+    titleFa: "عملکردم را تحلیل کن",
+    descriptionFa:
+      "الگوهای سشن‌ها، نمادها، ستاپ‌ها و رفتار معاملاتی خود را پیدا کنید.",
+    href: "/journal/analytics",
+    icon: BarChart3,
   },
 ];
 
@@ -178,26 +209,26 @@ const resourceItems: MenuItem[] = [
     icon: BookOpen,
   },
   {
-    title: "MT5 Setup",
-    description: "Connect an account and generate your secure quick-connect details.",
+    title: "Trading Account Setup",
+    description: "Connect MT4, MT5, cTrader, or TradeLocker from one guided flow.",
     href: "/dashboard/accounts",
     icon: RefreshCw,
   },
   {
-    title: "Download MT5 EA",
-    description: "Download the Tradivix recorder for MetaTrader 5.",
+    title: "Download MetaTrader Tools",
+    description: "Download the Inguardy Expert tools for MetaTrader 4 and 5.",
     href: "/api/downloads/trade-journal-recorder",
     icon: Download,
   },
   {
-    title: "About Tradivix",
+    title: "About Inguardy",
     description: "Learn what we are building for serious, process-driven traders.",
     href: "/about",
     icon: Zap,
   },
   {
     title: "Contact Us",
-    description: "Ask a question or get help from the Tradivix team.",
+    description: "Ask a question or get help from the Inguardy team.",
     href: "/contact",
     icon: CircleHelp,
   },
@@ -208,14 +239,14 @@ const navbarCopy = {
     products: "Products",
     solutions: "Solutions",
     resources: "Resources",
-    mt5Sync: "MT5 Sync",
+    mt5Sync: "Account Sync",
     pricing: "Pricing",
     login: "Log In",
     dashboard: "Dashboard",
     toggleNavigation: "Toggle navigation",
-    moreTools: "More Tradivix tools",
-    byGoal: "By trading goal",
-    chooseGoal: "Choose what you want to improve.",
+    moreTools: "More Inguardy tools",
+    byGoal: "Inguardy workflows",
+    chooseGoal: "What do you want Inguardy to help you improve?",
     resourcesEyebrow: "Resources",
     resourcesTitle: "Learn, connect, and get support.",
     contactHelp: "Need help? Contact us",
@@ -227,14 +258,14 @@ const navbarCopy = {
     products: "محصولات",
     solutions: "راهکارها",
     resources: "منابع",
-    mt5Sync: "همگام‌سازی MT5",
+    mt5Sync: "همگام‌سازی حساب",
     pricing: "قیمت‌گذاری",
     login: "ورود",
     dashboard: "داشبورد",
     toggleNavigation: "باز و بسته کردن منو",
-    moreTools: "ابزارهای بیشتر Tradivix",
-    byGoal: "بر اساس هدف معاملاتی",
-    chooseGoal: "انتخاب کنید چه چیزی را می‌خواهید بهتر کنید.",
+    moreTools: "ابزارهای بیشتر Inguardy",
+    byGoal: "جریان‌های کاری Inguardy",
+    chooseGoal: "می‌خواهید Inguardy کدام بخش از معامله‌گری‌تان را بهتر کند؟",
     resourcesEyebrow: "منابع",
     resourcesTitle: "یاد بگیرید، ارتباط بگیرید و پشتیبانی دریافت کنید.",
     contactHelp: "کمک می‌خواهید؟ تماس بگیرید",
@@ -317,21 +348,22 @@ const menuItemCopy = {
       description: "داشبورد را باز کنید و آموزش مرحله‌به‌مرحله محصول را دنبال کنید.",
     },
     "/dashboard/accounts": {
-      title: "راه‌اندازی MT5",
-      description: "یک حساب وصل کنید و اطلاعات اتصال امن خود را بسازید.",
+      title: "راه‌اندازی حساب معاملاتی",
+      description:
+        "MT4، MT5، cTrader یا TradeLocker را در یک مسیر راهنما متصل کنید.",
     },
     "/api/downloads/trade-journal-recorder": {
-      title: "دانلود EA متاتریدر 5",
-      description: "ضبط‌کننده Tradivix را برای MetaTrader 5 دانلود کنید.",
+      title: "دانلود ابزارهای متاتریدر",
+      description: "ابزارهای اکسپرت Inguardy را برای MetaTrader 4 و 5 دانلود کنید.",
     },
     "/about": {
-      title: "درباره Tradivix",
+      title: "درباره Inguardy",
       description:
         "ببینید برای معامله‌گران جدی و فرایندمحور چه چیزی می‌سازیم.",
     },
     "/contact": {
       title: "تماس با ما",
-      description: "سوال بپرسید یا از تیم Tradivix کمک بگیرید.",
+      description: "سوال بپرسید یا از تیم Inguardy کمک بگیرید.",
     },
   },
 } as const;
@@ -342,6 +374,14 @@ function localizeMenuItems(items: MenuItem[], language: "en" | "fa") {
   }
 
   return items.map((item) => {
+    if (item.titleFa) {
+      return {
+        ...item,
+        title: item.titleFa,
+        description: item.descriptionFa ?? item.description,
+      };
+    }
+
     const localized =
       menuItemCopy.fa[item.href as keyof typeof menuItemCopy.fa];
 
@@ -365,8 +405,6 @@ export function Navbar() {
   const { language, setLanguage } = useLanguage();
   const isRtl = language === "fa";
   const copy = navbarCopy[language];
-  const localizedPrimaryProducts = localizeMenuItems(primaryProducts, language);
-  const localizedProductTools = localizeMenuItems(productTools, language);
   const localizedSolutionItems = localizeMenuItems(solutionItems, language);
   const localizedResourceItems = localizeMenuItems(resourceItems, language);
   const [desktopMenu, setDesktopMenu] = useState<DesktopMenu | null>(null);
@@ -444,6 +482,8 @@ export function Navbar() {
     "inline-flex h-11 items-center gap-1 rounded-xl px-3 text-[15px] font-semibold text-[#090d25] outline-none transition-colors hover:bg-slate-100 hover:text-violet-700 focus-visible:ring-2 focus-visible:ring-violet-400";
   const ctaClass =
     "h-12 rounded-lg border-0 bg-gradient-to-r from-violet-600 to-pink-500 px-6 text-base font-bold text-white shadow-[0_12px_28px_rgba(168,85,247,0.28)] transition hover:-translate-y-0.5 hover:from-violet-500 hover:to-pink-500 hover:text-white";
+  const loginClass =
+    "h-12 rounded-lg border border-sky-200/80 bg-gradient-to-r from-sky-100 via-cyan-50 to-teal-100 px-6 text-base font-bold text-sky-800 shadow-[0_10px_24px_rgba(14,165,233,0.12)] transition hover:-translate-y-0.5 hover:from-sky-200 hover:via-cyan-100 hover:to-teal-200 hover:text-sky-900";
 
   return (
     <nav
@@ -473,15 +513,6 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-0.5 lg:flex">
-          <DesktopTrigger
-            label={copy.products}
-            menu="products"
-            isOpen={desktopMenu === "products"}
-            className={navLinkClass}
-            onOpen={openMenuWithIntent}
-            onFocusOpen={openMenuImmediately}
-            onClose={() => closeMenuWithIntent(120)}
-          />
           <DesktopTrigger
             label={copy.solutions}
             menu="solutions"
@@ -524,7 +555,7 @@ export function Navbar() {
             <LanguagePill language={language} onSelectLanguage={setLanguage} />
             <Link
               href="/sign-in"
-              className="inline-flex h-12 items-center rounded-lg px-3 text-[15px] font-semibold text-slate-900 transition hover:bg-slate-100"
+              className={`${loginClass} inline-flex items-center justify-center`}
             >
               {copy.login}
             </Link>
@@ -563,13 +594,6 @@ export function Navbar() {
           >
             <div className="max-h-[calc(100vh-5rem)] space-y-2 overflow-y-auto p-4">
               <MobileSection
-                title={copy.products}
-                section="products"
-                items={[...localizedPrimaryProducts, ...localizedProductTools]}
-                activeSection={mobileSection}
-                onToggle={setMobileSection}
-              />
-              <MobileSection
                 title={copy.solutions}
                 section="solutions"
                 items={localizedSolutionItems}
@@ -590,7 +614,7 @@ export function Navbar() {
                 onToggle={setMobileSection}
               />
               <div className="grid gap-3 border-t border-slate-200 pt-4">
-                <Link href="/sign-in" className="flex h-12 items-center justify-center rounded-xl border border-slate-200 font-bold">
+                <Link href="/sign-in" className={`${loginClass} flex items-center justify-center`}>
                   {copy.login}
                 </Link>
                 <Link href="/dashboard" className={`${ctaClass} flex items-center justify-center gap-2`}>
@@ -956,6 +980,10 @@ function LanguagePill({
   language: "en" | "fa";
   onSelectLanguage: (language: "en" | "fa") => void;
 }) {
+  if (!LANGUAGE_SWITCHER_ENABLED) {
+    return null;
+  }
+
   const isPersian = language === "fa";
   const copy = navbarCopy[language];
   const flagSrc = isPersian
@@ -970,9 +998,11 @@ function LanguagePill({
           type="button"
           className="inline-flex h-12 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-[#070b22] shadow-sm transition hover:border-violet-200 hover:bg-violet-50"
         >
-          <span className="relative h-5 w-7 overflow-hidden rounded-sm">
-            <Image src={flagSrc} alt="" fill sizes="28px" className="object-cover" />
-          </span>
+          {LANGUAGE_FLAGS_ENABLED && (
+            <span className="relative h-5 w-7 overflow-hidden rounded-sm">
+              <Image src={flagSrc} alt="" fill sizes="28px" className="object-cover" />
+            </span>
+          )}
           {label} <ChevronDown className="h-3.5 w-3.5" />
         </button>
       </DropdownMenuTrigger>
@@ -984,20 +1014,26 @@ function LanguagePill({
           className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold focus:bg-violet-50"
           onClick={() => onSelectLanguage("en")}
         >
-          <span className="relative h-4 w-6 overflow-hidden rounded-sm">
-            <Image src="/images/flags/usa-flag.svg" alt="" fill sizes="24px" className="object-cover" />
-          </span>
+          {LANGUAGE_FLAGS_ENABLED && (
+            <span className="relative h-4 w-6 overflow-hidden rounded-sm">
+              <Image src="/images/flags/usa-flag.svg" alt="" fill sizes="24px" className="object-cover" />
+            </span>
+          )}
           {copy.english}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold focus:bg-violet-50"
-          onClick={() => onSelectLanguage("fa")}
-        >
-          <span className="relative h-4 w-6 overflow-hidden rounded-sm">
-            <Image src="/images/flags/iran-flag.svg" alt="" fill sizes="24px" className="object-cover" />
-          </span>
-          {copy.persian}
-        </DropdownMenuItem>
+        {PERSIAN_LANGUAGE_ENABLED && (
+          <DropdownMenuItem
+            className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold focus:bg-violet-50"
+            onClick={() => onSelectLanguage("fa")}
+          >
+            {LANGUAGE_FLAGS_ENABLED && (
+              <span className="relative h-4 w-6 overflow-hidden rounded-sm">
+                <Image src="/images/flags/iran-flag.svg" alt="" fill sizes="24px" className="object-cover" />
+              </span>
+            )}
+            {copy.persian}
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

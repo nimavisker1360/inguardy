@@ -164,6 +164,17 @@ def main():
             and str(account.server).casefold() == server.casefold()
         )
 
+        if not account_matches and operation != "snapshot":
+            active_login = getattr(account, "login", "another account")
+            emit(
+                safe_error(
+                    "MT5_ACCOUNT_NOT_ACTIVE",
+                    f"MT5 account {login} is not active in the desktop terminal. "
+                    f"The terminal is currently signed in as {active_login}.",
+                )
+            )
+            return 5
+
         if not account_matches:
             authorized = bool(
                 mt5.login(

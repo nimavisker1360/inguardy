@@ -25,13 +25,13 @@ const socialLinks = [
 
 const footerCopy = {
   en: {
-    brand: "Tradivix",
+    brand: "Inguardy",
     quickLinks: "Quick Links",
     information: "Information",
     contactUs: "Contact Us",
     providerDescription:
-      "AI-powered trading journal for MT5 sync, trade review, playbooks, analytics, and reports.",
-    copyright: "© {year} Tradivix. All rights reserved.",
+      "Inguardy is your intelligent trading workspace for automated account sync, trade journaling, performance analytics, risk management, and AI-powered reviews.",
+    copyright: "© {year} Inguardy. All rights reserved.",
     address: "Address: Turkey",
     email: "Email: info@inguardy.com",
     links: {
@@ -43,13 +43,13 @@ const footerCopy = {
     },
   },
   fa: {
-    brand: "Tradivix",
+    brand: "Inguardy",
     quickLinks: "لینک‌های سریع",
     information: "اطلاعات",
     contactUs: "تماس با ما",
     providerDescription:
-      "ژورنال معاملاتی هوشمند برای همگام‌سازی MT5، بررسی معامله، پلی‌بوک، تحلیل و گزارش‌ها.",
-    copyright: "© {year} Tradivix. تمامی حقوق محفوظ است.",
+      "Inguardy فضای هوشمند مدیریت معاملات شماست؛ از اتصال خودکار حساب و ژورنال معاملاتی تا تحلیل عملکرد، مدیریت ریسک و بررسی معاملات با هوش مصنوعی.",
+    copyright: "© {year} Inguardy. تمامی حقوق محفوظ است.",
     address: "آدرس: ترکیه",
     email: "ایمیل: info@inguardy.com",
     links: {
@@ -109,11 +109,11 @@ export function Footer() {
           >
             <Link href="/" className="inline-flex">
               <Image
-                src="/images/tradivix_logo_alpha.png"
+                src="/images/logo.png"
                 alt={copy.brand}
-                width={170}
-                height={56}
-                className="h-auto w-40 object-contain"
+                width={190}
+                height={52}
+                className="h-auto w-48 object-contain brightness-0 invert"
                 priority={false}
               />
             </Link>

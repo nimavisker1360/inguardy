@@ -49,6 +49,7 @@ type QuickConnectResponse = {
 type DirectConnectResponse = {
   success: boolean;
   message?: string;
+  code?: string;
 };
 
 type TradeLockerCandidate = {
@@ -159,7 +160,7 @@ const englishText = {
   supported: "Supported workflow",
   encrypted: "Secure connection key",
   journalReady: "Automatic journal updates",
-  noPassword: "No broker password is stored",
+  noPassword: "Your cTrader password stays on cTrader and is never shared with us",
   connectionSetup: "Connection setup",
   history: "Trade history",
   allRecords: "Import all available records",
@@ -178,23 +179,28 @@ const englishText = {
   serverPlaceholder: "Example: ICMarketsSC-MT5-2",
   login: "MT5 login",
   loginPlaceholder: "Trading account number",
-  investorPassword: "Investor password",
-  investorPasswordHint: "Use the read-only investor password when your broker provides one.",
+  investorPassword: "MT5 password",
+  investorPasswordHint: "Enter the read-only investor password when available; otherwise use the account password.",
   showPassword: "Show password",
   hidePassword: "Hide password",
   connectAccount: "Connect account",
   connectingAccount: "Checking MT5 credentials...",
   connectedAccount: "Account connected. Initial synchronization has started.",
   connectionFailed: "Could not connect to the MT5 account.",
-  ctraderAuthorize: "Authorize with cTrader",
-  ctraderOAuthDetail: "You will be redirected to cTrader to grant read-only account access.",
+  mt5AuthFailed: "MT5 rejected the credentials. Verify the numeric login, password, and exact broker server.",
+  mt5NotConnected: "MT5 could not connect to the broker. Verify the server name and that the account is active.",
+  mt5ServiceUnavailable: "The MT5 connection service is temporarily unavailable. Please try again shortly.",
+  mt5Timeout: "The MT5 broker connection timed out. Please try again.",
+  ctraderAuthorize: "Continue to cTrader and enter password",
+  ctraderOAuthDetail: "You will enter your cTrader email and password on cTrader's secure page, then grant read-only account access. We never receive or store that password.",
   ctraderTokenSafe: "OAuth tokens are encrypted at rest",
   environment: "Environment",
   live: "Live",
   demo: "Demo",
   tradeLockerEmail: "TradeLocker email",
   tradeLockerPassword: "TradeLocker password",
-  tradeLockerServerPlaceholder: "Server name used in TradeLocker",
+  tradeLockerServerPlaceholder: "Server from your broker welcome email",
+  tradeLockerServerHint: "Copy the Server exactly as shown in the broker or prop-firm welcome email. Also select the matching LIVE or DEMO environment.",
   tradeLockerConnecting: "Connecting to TradeLocker...",
   tradeLockerConnect: "Connect TradeLocker",
   chooseTradeLockerAccount: "Choose TradeLocker Account",
@@ -202,6 +208,10 @@ const englishText = {
   selectAccount: "Connect",
   tradeLockerConnected: "TradeLocker account connected and initial synchronization started.",
   tradeLockerFailed: "Unable to connect to TradeLocker.",
+  tradeLockerInvalidCredentials: "The TradeLocker email or password is incorrect.",
+  tradeLockerServerNotFound: "Server not found. Copy the exact Server from your broker email and verify LIVE or DEMO.",
+  tradeLockerAuthFailed: "Login was rejected. Verify the email, password, exact Server, and LIVE or DEMO.",
+  tradeLockerRateLimited: "TradeLocker is receiving too many requests. Please try again shortly.",
 };
 
 const persianText: typeof englishText = {
@@ -247,7 +257,7 @@ const persianText: typeof englishText = {
   supported: "قابلیت‌های اتصال",
   encrypted: "کلید اتصال امن",
   journalReady: "به‌روزرسانی خودکار ژورنال",
-  noPassword: "رمز کارگزاری ذخیره نمی‌شود",
+  noPassword: "رمز cTrader فقط در سایت cTrader وارد می‌شود و با ما به‌اشتراک گذاشته نمی‌شود",
   connectionSetup: "تنظیم اتصال",
   history: "تاریخچه معاملات",
   allRecords: "ورود همه سوابق موجود",
@@ -266,23 +276,28 @@ const persianText: typeof englishText = {
   serverPlaceholder: "مثال: ICMarketsSC-MT5-2",
   login: "شماره ورود MT5",
   loginPlaceholder: "شماره حساب معاملاتی",
-  investorPassword: "رمز Investor",
-  investorPasswordHint: "در صورت وجود، رمز فقط‌خواندنی Investor را وارد کنید.",
+  investorPassword: "رمز حساب MT5",
+  investorPasswordHint: "اگر رمز فقط‌خواندنی Investor دارید آن را وارد کنید؛ در غیر این صورت رمز حساب را وارد کنید.",
   showPassword: "نمایش رمز",
   hidePassword: "پنهان کردن رمز",
   connectAccount: "اتصال حساب",
   connectingAccount: "در حال بررسی اطلاعات MT5...",
   connectedAccount: "حساب متصل شد و همگام‌سازی اولیه آغاز شد.",
   connectionFailed: "اتصال به حساب MT5 انجام نشد.",
-  ctraderAuthorize: "تأیید دسترسی در cTrader",
-  ctraderOAuthDetail: "برای دادن دسترسی فقط‌خواندنی حساب، به cTrader هدایت می‌شوید.",
+  mt5AuthFailed: "MT5 اطلاعات ورود را رد کرد. شماره حساب، رمز و نام دقیق سرور بروکر را بررسی کنید.",
+  mt5NotConnected: "MT5 نتوانست به بروکر متصل شود. نام Server و فعال بودن حساب را بررسی کنید.",
+  mt5ServiceUnavailable: "سرویس اتصال MT5 موقتاً در دسترس نیست؛ کمی بعد دوباره تلاش کنید.",
+  mt5Timeout: "زمان اتصال به بروکر MT5 تمام شد؛ دوباره تلاش کنید.",
+  ctraderAuthorize: "ادامه در cTrader و وارد کردن رمز",
+  ctraderOAuthDetail: "ایمیل و رمز cTrader را در صفحه امن خود cTrader وارد می‌کنید و سپس دسترسی فقط‌خواندنی می‌دهید. رمز شما به سایت ما ارسال یا در آن ذخیره نمی‌شود.",
   ctraderTokenSafe: "توکن‌های OAuth به‌صورت رمزنگاری‌شده ذخیره می‌شوند",
   environment: "محیط",
   live: "واقعی",
   demo: "آزمایشی",
   tradeLockerEmail: "ایمیل TradeLocker",
   tradeLockerPassword: "رمز عبور TradeLocker",
-  tradeLockerServerPlaceholder: "نام سرور مورد استفاده در TradeLocker",
+  tradeLockerServerPlaceholder: "Server درج‌شده در ایمیل بروکر",
+  tradeLockerServerHint: "مقدار Server را دقیقاً از ایمیل خوش‌آمدگویی بروکر یا پراپ‌فرم کپی کنید و محیط درست واقعی یا آزمایشی را انتخاب کنید.",
   tradeLockerConnecting: "در حال اتصال به TradeLocker...",
   tradeLockerConnect: "اتصال TradeLocker",
   chooseTradeLockerAccount: "انتخاب حساب TradeLocker",
@@ -290,6 +305,10 @@ const persianText: typeof englishText = {
   selectAccount: "اتصال",
   tradeLockerConnected: "حساب TradeLocker متصل شد و همگام‌سازی اولیه آغاز شد.",
   tradeLockerFailed: "اتصال به TradeLocker انجام نشد.",
+  tradeLockerInvalidCredentials: "ایمیل یا رمز عبور TradeLocker صحیح نیست.",
+  tradeLockerServerNotFound: "سرور پیدا نشد. مقدار Server را دقیقاً از ایمیل بروکر کپی کنید و واقعی یا آزمایشی بودن حساب را بررسی کنید.",
+  tradeLockerAuthFailed: "ورود رد شد. ایمیل، رمز، Server دقیق و محیط واقعی یا آزمایشی را بررسی کنید.",
+  tradeLockerRateLimited: "درخواست‌ها به TradeLocker بیش از حد مجاز است؛ کمی بعد دوباره تلاش کنید.",
 };
 
 function PlatformMark({ platform, large = false }: { platform: PlatformOption; large?: boolean }) {
@@ -604,7 +623,14 @@ function Mt5DirectConnectStep({
       const data = (await response.json()) as DirectConnectResponse;
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || labels.connectionFailed);
+        const errorByCode: Record<string, string> = {
+          MT5_AUTH_FAILED: labels.mt5AuthFailed,
+          MT5_NOT_CONNECTED: labels.mt5NotConnected,
+          MT5_TERMINAL_CLOSED: labels.mt5ServiceUnavailable,
+          MT5_INITIALIZE_FAILED: labels.mt5ServiceUnavailable,
+          MT5_TIMEOUT: labels.mt5Timeout,
+        };
+        throw new Error((data.code && errorByCode[data.code]) || data.message || labels.connectionFailed);
       }
 
       setPassword("");
@@ -833,7 +859,13 @@ function TradeLockerConnectStep({
       const result = (await response.json()) as TradeLockerConnectResponse;
       setPassword("");
       if (!response.ok || !result.success || !result.data?.sessionId || !result.data.accounts.length) {
-        throw new Error(result.message || labels.tradeLockerFailed);
+        const errorByCode: Record<string, string> = {
+          INVALID_CREDENTIALS: labels.tradeLockerInvalidCredentials,
+          SERVER_NOT_FOUND: labels.tradeLockerServerNotFound,
+          AUTH_FAILED: labels.tradeLockerAuthFailed,
+          RATE_LIMITED: labels.tradeLockerRateLimited,
+        };
+        throw new Error((result.code && errorByCode[result.code]) || result.message || labels.tradeLockerFailed);
       }
       setSessionId(result.data.sessionId);
       setAccounts(result.data.accounts);
@@ -905,6 +937,7 @@ function TradeLockerConnectStep({
             </fieldset>
             <label className="block text-xs font-semibold text-slate-600">{labels.server}
               <input required autoComplete="off" value={server} onChange={(event) => setServer(event.target.value)} placeholder={labels.tradeLockerServerPlaceholder} dir="ltr" className="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-900 outline-none focus:border-[#6547b7] focus:ring-2 focus:ring-[#6547b7]/15" />
+              <span className="mt-1 block text-[11px] font-normal leading-5 text-slate-500">{labels.tradeLockerServerHint}</span>
             </label>
             <label className="block text-xs font-semibold text-slate-600">{labels.tradeLockerEmail}
               <input required type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} dir="ltr" className="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-900 outline-none focus:border-[#6547b7] focus:ring-2 focus:ring-[#6547b7]/15" />

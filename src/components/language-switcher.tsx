@@ -2,6 +2,11 @@ import { useLanguage } from "@/lib/language-context";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import {
+  LANGUAGE_FLAGS_ENABLED,
+  LANGUAGE_SWITCHER_ENABLED,
+  PERSIAN_LANGUAGE_ENABLED,
+} from "@/lib/language-preferences";
 
 export function LanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
@@ -24,6 +29,10 @@ export function LanguageSwitcher() {
     };
   }, []);
 
+  if (!LANGUAGE_SWITCHER_ENABLED) {
+    return null;
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Main button showing current language */}
@@ -35,26 +44,30 @@ export function LanguageSwitcher() {
       >
         {language === "en" ? (
           <>
-            <div className="w-6 h-4 relative overflow-hidden rounded-sm flex-shrink-0">
-              <Image
-                src="/images/flags/usa-flag.svg"
-                alt="American Flag"
-                width={24}
-                height={16}
-              />
-            </div>
+            {LANGUAGE_FLAGS_ENABLED && (
+              <div className="w-6 h-4 relative overflow-hidden rounded-sm flex-shrink-0">
+                <Image
+                  src="/images/flags/usa-flag.svg"
+                  alt="American Flag"
+                  width={24}
+                  height={16}
+                />
+              </div>
+            )}
             <span>EN</span>
           </>
         ) : (
           <>
-            <div className="w-6 h-4 relative overflow-hidden rounded-sm flex-shrink-0">
-              <Image
-                src="/images/flags/iran-flag.svg"
-                alt="Iranian Flag"
-                width={24}
-                height={16}
-              />
-            </div>
+            {LANGUAGE_FLAGS_ENABLED && (
+              <div className="w-6 h-4 relative overflow-hidden rounded-sm flex-shrink-0">
+                <Image
+                  src="/images/flags/iran-flag.svg"
+                  alt="Iranian Flag"
+                  width={24}
+                  height={16}
+                />
+              </div>
+            )}
             <span className="text-xs">فارسی</span>
           </>
         )}
@@ -74,37 +87,42 @@ export function LanguageSwitcher() {
                 language === "en" ? "bg-blue-600/20" : "hover:bg-gray-800"
               }`}
             >
-              <div className="w-6 h-4 relative overflow-hidden rounded-sm flex-shrink-0">
-                <Image
-                  src="/images/flags/usa-flag.svg"
-                  alt="American Flag"
-                  width={24}
-                  height={16}
-                />
-              </div>
+              {LANGUAGE_FLAGS_ENABLED && (
+                <div className="w-6 h-4 relative overflow-hidden rounded-sm flex-shrink-0">
+                  <Image
+                    src="/images/flags/usa-flag.svg"
+                    alt="American Flag"
+                    width={24}
+                    height={16}
+                  />
+                </div>
+              )}
               <span className="text-white">English</span>
             </button>
 
-            {/* Farsi Option */}
-            <button
-              onClick={() => {
-                setLanguage("fa");
-                setIsOpen(false);
-              }}
-              className={`flex items-center gap-2 px-3 py-2 w-full text-left text-sm ${
-                language === "fa" ? "bg-blue-600/20" : "hover:bg-gray-800"
-              }`}
-            >
-              <div className="w-6 h-4 relative overflow-hidden rounded-sm flex-shrink-0">
-                <Image
-                  src="/images/flags/iran-flag.svg"
-                  alt="Iranian Flag"
-                  width={24}
-                  height={16}
-                />
-              </div>
-              <span className="text-white">فارسی</span>
-            </button>
+            {PERSIAN_LANGUAGE_ENABLED && (
+              <button
+                onClick={() => {
+                  setLanguage("fa");
+                  setIsOpen(false);
+                }}
+                className={`flex items-center gap-2 px-3 py-2 w-full text-left text-sm ${
+                  language === "fa" ? "bg-blue-600/20" : "hover:bg-gray-800"
+                }`}
+              >
+                {LANGUAGE_FLAGS_ENABLED && (
+                  <div className="w-6 h-4 relative overflow-hidden rounded-sm flex-shrink-0">
+                    <Image
+                      src="/images/flags/iran-flag.svg"
+                      alt="Iranian Flag"
+                      width={24}
+                      height={16}
+                    />
+                  </div>
+                )}
+                <span className="text-white">فارسی</span>
+              </button>
+            )}
           </div>
         </div>
       )}
