@@ -109,7 +109,9 @@ type TwelveDataTimeSeriesResponse = {
 
 export function normalizeMarketSymbol(symbol: string) {
   const normalized = symbol.trim().toUpperCase();
-  return SYMBOL_ALIASES[normalized] ?? normalized.replace(/^[A-Z]+:/, "");
+  const withoutProvider = normalized.replace(/^[A-Z]+:/, "");
+  const withoutBrokerSuffix = withoutProvider.replace(/!+$/, "");
+  return SYMBOL_ALIASES[normalized] ?? SYMBOL_ALIASES[withoutBrokerSuffix] ?? withoutBrokerSuffix;
 }
 
 export function normalizeMarketTimeframe(timeframe: string) {
@@ -225,6 +227,59 @@ async function fetchTwelveDataCandles({
   return parseTwelveDataCandles(data.values);
 }
 
+export function synthesizeRatioCandles(numerator: Candle[], denominator: Candle[]) {
+  const denominatorByTime = new Map(denominator.map((candle) => [candle.time, candle]));
+
+  return numerator.flatMap((numeratorCandle) => {
+    const denominatorCandle = denominatorByTime.get(numeratorCandle.time);
+
+    if (
+      !denominatorCandle ||
+      denominatorCandle.open <= 0 ||
+      denominatorCandle.high <= 0 ||
+      denominatorCandle.low <= 0 ||
+      denominatorCandle.close <= 0
+    ) {
+      return [];
+    }
+
+    return [{
+      time: numeratorCandle.time,
+      open: numeratorCandle.open / denominatorCandle.open,
+      high: numeratorCandle.high / denominatorCandle.low,
+      low: numeratorCandle.low / denominatorCandle.high,
+      close: numeratorCandle.close / denominatorCandle.close,
+    }];
+  });
+}
+
+async function fetchMarketCandles({
+  symbol,
+  timeframe,
+  limit,
+  startDate,
+  endDate,
+}: {
+  symbol: string;
+  timeframe: MarketTimeframe;
+  limit: number;
+  startDate?: string;
+  endDate?: string;
+}) {
+  // Twelve Data reserves XAU/EUR for paid plans. Build the same cross from
+  // two broadly available USD legs so MT5 trades can still render a chart.
+  if (symbol === "XAUEUR") {
+    const [goldUsd, eurUsd] = await Promise.all([
+      fetchTwelveDataCandles({ symbol: "XAUUSD", timeframe, limit, startDate, endDate }),
+      fetchTwelveDataCandles({ symbol: "EURUSD", timeframe, limit, startDate, endDate }),
+    ]);
+
+    return synthesizeRatioCandles(goldUsd, eurUsd);
+  }
+
+  return fetchTwelveDataCandles({ symbol, timeframe, limit, startDate, endDate });
+}
+
 export async function getLatestCandles({
   symbol,
   timeframe,
@@ -234,7 +289,7 @@ export async function getLatestCandles({
   timeframe: MarketTimeframe;
   limit?: number;
 }): Promise<Candle[]> {
-  return fetchTwelveDataCandles({ symbol, timeframe, limit });
+  return fetchMarketCandles({ symbol, timeframe, limit });
 }
 
 export async function getHistoricalCandles({
@@ -252,7 +307,7 @@ export async function getHistoricalCandles({
     ? limit
     : Math.min(Math.ceil(limit * 1.5) + 24, 5000);
   const candles = normalizeProviderCandles(
-    await fetchTwelveDataCandles({ symbol, timeframe, limit: providerLimit, endDate })
+    await fetchMarketCandles({ symbol, timeframe, limit: providerLimit, endDate })
   );
 
   return filterClosedSessionCandles(candles, symbol).slice(-limit);

@@ -16,7 +16,7 @@ const REPLAY_WARMUP_CANDLES = 200;
 const FALLBACK_VISIBLE_CANDLES = 80;
 
 const querySchema = z.object({
-  symbol: z.string().trim().min(1).max(48).regex(/^[A-Za-z0-9:._\/-]+$/),
+  symbol: z.string().trim().min(1).max(48).regex(/^[A-Za-z0-9:._\/!#-]+$/),
   timeframe: z.string().trim().min(1).max(12),
   endDate: z
     .string()
